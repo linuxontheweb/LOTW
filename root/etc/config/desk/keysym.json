@@ -1,0 +1,9 @@
+{
+	"t_A":{"n":"open_terminal"},
+	"`_A":{"n":"window_cycle"},
+	"x_A":{"n":"close_window"},
+	"m_A":{"n":"maximize_window"},
+	"c_CA":{"n":"toggle_desktop"},
+	"n_A":{"n":"minimize_window"},
+	"f_CAS":{"n":"toggle_fullscreen"}
+}
