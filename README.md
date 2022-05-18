@@ -1,4 +1,4 @@
-# lotw
+# Linux on the Web
 
 First, start the server with nodejs:
 
