@@ -117,7 +117,6 @@ const MAX_MS_FOR_SECRET_VAR=5*60*1000;
 
 export const mod = function(Core, termobj) {
 
-
 const ALL_LIBS = [//«
 
 "admin",
@@ -4112,8 +4111,11 @@ cerr("Dropping", ret);
 });//»
 
 },//»
-
-
+'audio':(args)=>{
+	if (globals.audio) return cberr("Audio is already up!");
+	capi.mkAudio();
+	cbok();
+},
 'exists':async(args)=>{let opts=failopts(args,{SHORT:{a:1,o:1},LONG:{all:1,one:1}});if(!opts)return;let if_one=opts.one || opts.o;let if_all=opts.all || opts.a;if(if_one && if_all)return cberr("Cannot simultaneously specify both 'one' and 'all' options");if(!if_one)if_all=true;if(!args.length){if(if_one)return cberr();else return cbok();}let gotone=false;for(let path of args){if(!await pathToNode(path)){if(if_all)return cberr(normpath(path)+":\x20not found");}else gotone=true;}if(if_one && !gotone)return cberr("option 'one' specified,\x20but none found");cbok();},
 'mkappicon': args => {//«
 	let appargs = getopts(args,{ALL:true})[0];

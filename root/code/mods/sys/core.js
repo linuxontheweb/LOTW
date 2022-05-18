@@ -264,7 +264,7 @@ this.kc = kc;
 
 //»
 //Audio/Mixer«
-///*
+/*
 
 const AUDIO = (()=>{
 let ctx = new AudioContext();
@@ -305,10 +305,10 @@ mixer: new Mixer(),
 ctx: ctx
 }
 })();
-//*/
+*/
 //»
 const globals = {//«
-	audio:AUDIO,
+//	audio:AUDIO,
 	emulators:{},
 	FOLDER_APP: FOLDER_APP,
 	TEXT_APP: TEXT_APP,
@@ -523,6 +523,51 @@ getStore:(name,opts={})=>{
         mod.init(name);
         Y(mod.tx());
     });
+},
+mkAudio:()=>{
+
+if (globals.audio) return;
+
+globals.audio = (()=>{
+let ctx = new AudioContext();
+const Mixer = function() {
+    let plugs = [];
+    const master = ctx.createGain();
+    master.connect(ctx.destination);
+    const Plug = function(elm) {
+        let gain = ctx.createGain();
+        elm.connect(gain);
+        gain.connect(master);
+        this.elm = elm;
+        this.set_volume = val => {
+            gain.gain.value = val;
+        };
+        this.disconnect = _ => {
+            gain.disconnect();
+            let num = plugs.indexOf(this);
+            if (num < 0) {
+                cerr("Could not find the plug in plugs", this);
+                return;
+            }
+            plugs.splice(num, 1);
+        };
+    };
+    this.set_volume = val => {
+        master.gain.value = val;
+    };
+    this.plugs = plugs;
+    this.plug_in = elm => {
+        let plug = new Plug(elm);
+        plugs.push(plug);
+        return plug;
+    };
+};
+return {
+mixer: new Mixer(),
+ctx: ctx
+}
+})();
+
 },
 compress:compress,
 decompress:decompress,

@@ -2835,7 +2835,7 @@ const toggle_window_tiling = () => {//«
 	};
 	for (let w of windows) {
 		if (!w.is_minimized) {
-			if (w.is_layout) do_toggle_win_layout(w);
+			if (w.is_layout) toggle_win_layout(w);
 			let r = w.gbcr();
 			arr.push({
 				win: w,
@@ -3001,16 +3001,16 @@ const toggle_win_layout_mode = () => {//«
 	let wins = filter_windows();
 	if (!layout_mode) {
 		for (let w of wins) {
-			if (!w.is_layout) do_toggle_win_layout(w);
+			if (!w.is_layout) toggle_win_layout(w);
 		}
 	} else {
 		for (let w of wins) {
-			if (w.is_layout) do_toggle_win_layout(w);
+			if (w.is_layout) toggle_win_layout(w);
 		}
 	}
 	layout_mode = !layout_mode;
 };//»
-const do_toggle_win_layout = (winarg) => {//«
+const toggle_win_layout = (winarg) => {//«
 	let w = winarg || Desk.CWIN;
 	if (!w) return;
 	if (w.is_maxed || w.is_minimized) return;
@@ -5723,7 +5723,7 @@ up everything (even plain Escapes).
 		}
 		if (cwin.is_fullscreen) return fullscreen_window();
 		if (cwin.is_maxed) return maximize_window();
-		if (!layout_mode && cwin.is_layout) return do_toggle_win_layout();
+		if (!layout_mode && cwin.is_layout) return toggle_win_layout();
 		window_off(cwin);
 		CUR.todesk();
 		return;
@@ -5745,6 +5745,7 @@ up everything (even plain Escapes).
 	/*System hotkeys, defined in /etc/config/desk/keysym.json or ~/.config/desk/keysym.json */
 	let mapobj = keysym_map[kstr];
 	if (mapobj) {
+//log("GOTSYM", kstr);
 		let args = mapobj.args||mapobj.a;
 		if (!args) args = [];
 		let nm = mapobj.name||mapobj.n;
@@ -5787,7 +5788,7 @@ for the titlebar and the little square at the bottom right.
 In this mode, the keyboard has a lot more leeway for being used for layout purposes..
 */
 	if (cwin && cwin.is_layout){
-		if (kstr=="l_CA") return do_toggle_win_layout();
+		if (kstr=="l_CA") return toggle_win_layout();
 		if (chr.match(/^[wasd]$/)) return move_window(wasd[chr],e.shiftKey);
 		let ch0 = kstr[0];
 		let ch2 = kstr[2];
@@ -5943,9 +5944,9 @@ x=0;y=0;
 		}
 	}
 
-	if (kstr=="`_A") return window_cycle();
-	if (kstr=="c_CA") return toggle_show_windows(); 
-	if (kstr=="b_CAS") return toggle_taskbar();
+//	if (kstr=="`_A") return window_cycle();
+//	if (kstr=="c_CA") return toggle_show_windows(); 
+
 	if (kstr=="l_CAS") return console.clear();
 	if (kstr=="t_CAS") return keysym_funcs.test_function();
 	if (kstr=="r_CAS") return reload_desk_icons_cb();
@@ -5966,11 +5967,11 @@ maxed/fullscreened wins).
 
 */
 		if (!(cobj.overrides && cobj.overrides[kstr])){
-			if (kstr=="f_A") return fullscreen_window();
-			if (kstr=="n_A") return minimize_window();
-			if (kstr=="x_A") return close_window();
-			if (kstr=="m_A") return maximize_window();
-			if (kstr=="l_CA") return do_toggle_win_layout();
+//			if (kstr=="f_A") return fullscreen_window();
+//			if (kstr=="n_A") return minimize_window();
+//			if (kstr=="x_A") return close_window();
+//			if (kstr=="m_A") return maximize_window();
+//			if (kstr=="l_CA") return toggle_win_layout();
 //			if (kstr=="w_CA") return toggle_win_chrome();
 			if (kstr==="p_CAS") return win_reload();
 			if (!is_full) {
@@ -6081,8 +6082,6 @@ const dokeyup = function(e) {//«
 this.keyup=dokeyup;
 //»
 
-
-
 const setsyskeys=use_map=>{//«
 //XXXXXXXXXXXXXX
 keysym_funcs = {
@@ -6093,13 +6092,14 @@ test_function:()=>{
 job_killer();
 
 },
+toggle_taskbar:toggle_taskbar,
 move_to_desktop:()=>{move_icons(desk_path,null,{clientX:0,clientY:0});},
 toggle_window_tiling:toggle_window_tiling,
 toggle_fullscreen:toggle_fullscreen,
 clear_system_cache:clear_system_cache,
 toggle_win_chrome:toggle_win_chrome,
 toggle_win_layout_mode:toggle_win_layout_mode,
-toggle_win_layout:()=>{if(!layout_mode)do_toggle_win_layout();},
+toggle_win_layout:()=>{if(!layout_mode)toggle_win_layout();},
 save_window:()=>{let w=Desk.CWIN;if(!w||w.is_minimized)return true;w.obj.onsave();return true;},
 delete_icons: ()=>{return delete_icons();},
 create_new_folder:()=>{return create_new_folder()},
@@ -6135,7 +6135,6 @@ open_app:(name,if_force)=>{open_app(name||"None",null,if_force);}
 }
 
 Desk.keysym_funcs = keysym_funcs;
-
 if (use_map) keysym_map = use_map;
 else keysym_map = std_keysym_map;
 

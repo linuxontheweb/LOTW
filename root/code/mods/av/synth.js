@@ -183,7 +183,6 @@ const cwarn=wrn;
 const err=(...args)=>console.error(...args);
 const cerr=err;
 const {util,dev_mode,dev_env}=globals;
-const {mixer, ctx}=globals.audio;
 const {fs}=NS.api;
 const NUM = Number.isFinite;
 const INT=n=>{return((NUM(n)&&(n+"").match(/^-?[0-9]+$/)));};
@@ -193,6 +192,10 @@ const POSMAX=(n,max)=>{return((NUM(n)&&n>0&&NUM(max)&&max>0&&n<=max));};
 const NONNEG=n=>{return((NUM(n)&&n>=0));};
 const NONNEGINT=n=>{return((NUM(n)&&n>=0&&(n+"").match(/^[0-9]+$/)));};
 const EOF = {EOF: true};
+
+if (!globals.audio) Core.api.mkAudio();
+
+const {mixer, ctx}=globals.audio;
 
 //»
 
