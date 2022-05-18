@@ -1,5 +1,7 @@
 # Linux on the Web (LOTW)
 
+![Picture of Tux the penguin sitting on the earth](https://github.com/linuxontheweb/os/blob/main/www/img/lotw256.png)
+
 ## YMMV
 
 LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton), which involves ChromeOS put into developer mode. 
