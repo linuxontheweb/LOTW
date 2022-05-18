@@ -10,18 +10,17 @@ that degrade the user experience in other operating systems and/or other browser
 
 ## Getting Started
 
-First, start the server with nodejs:
+First, start the server with nodejs (defaults to port 8080):
 
-$ node server.js
+`$ node server.js`
 
-This uses the default port, 8080.
-Then, in your browser, go to: localhost:8080
+Then, in your browser, go to: http://localhost:8080
 
 
 If you want to use another port (e.g. 12345), start it like so:
 
-$ node server.js 12345
+`$ node server.js 12345`
 
-Then, in your browser, go to: localhost:12345
+Then, in your browser, go to: http://localhost:12345
 
 
