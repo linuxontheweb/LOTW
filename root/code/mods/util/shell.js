@@ -1393,7 +1393,8 @@ const sys_write = arg => {
 	if (writer) {
 		if (writer.write) {
 			if (force_nl && str === "\n") str = "";
-			if (!if_com_sub && typeof(str) == "string" && str.match(/\n/)) {
+//			if (!if_com_sub && typeof(str) == "string" && str.match(/\n/)) {
+			if (!if_com_sub && isstr(str) && str.match(/\n/)) {
 				let arr = str.split("\n");
 				if (arr[arr.length - 1] == "") arr.pop();
 				str = {
@@ -4655,7 +4656,6 @@ cerr("Dropping", ret);
 		wout(EOF);
 		cbok();
 	} else {
-//log(args);
 		let str;
 		if (!args.length) str = "";
 		else if (args.length==1) str = args[0];
