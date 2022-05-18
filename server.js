@@ -13,6 +13,24 @@ The server is live!<br>You might want to go to <a href="/desk">the desktop</a> o
 
 //Var«
 
+const OS_HTML=`
+<html>
+<head>
+<title>
+</title>
+<meta name="description" content="This is an operating system that runs inside of most modern web browsers">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="www/css/os.css" rel="stylesheet">
+</head>
+<body>
+<div style="z-index:100000000;position:absolute;left:0;top:0;overflow:hidden;">
+<table style="font-family:monospace;font-size:18;" id="initlog"></table>
+</div>
+<script src="root/code/mods/sys/core.js" type="module"></script>
+<a name="_"></a>
+</body>
+</html>
+`;
 
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
@@ -105,7 +123,8 @@ const handle_request=async(req, res, url, args)=>{//«
 	let marr;
 	if (meth == "GET") {//«
 		if (url=="/") {okay(res, "text/html");return res.end(BASE_PAGE);}
-		if (url.match(/^\/(desk|shell)$/)) return res.end(fs.readFileSync('./os.html', 'utf8'));
+//		if (url.match(/^\/(desk|shell)$/)) return res.end(fs.readFileSync('./os.html', 'utf8'));
+		if (url.match(/^\/(desk|shell)$/)) return res.end(OS_HTML);
 		if (url.match(/^\/_/)){
 			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
 			else nogo(res, "Bad command");
