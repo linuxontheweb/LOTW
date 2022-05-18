@@ -1,6 +1,9 @@
 # Linux on the Web (LOTW)
 
-![Picture of Tux the penguin sitting on the earth](https://github.com/linuxontheweb/os/blob/main/www/img/lotw256.png)
+<p align="center">
+  <img src="https://github.com/linuxontheweb/os/blob/main/www/img/lotw256.png">
+</p>
+
 
 ## YMMV
 
