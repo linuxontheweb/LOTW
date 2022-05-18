@@ -127,6 +127,12 @@ const handle_request=async(req, res, url, args)=>{//«
 		if (url.match(/^\/(desk|shell)$/)) return res.end(OS_HTML);
 		if (url.match(/^\/_/)){
 			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
+			else if (url == "/_ip") {
+				let rv = await fetch("https://ifconfig.me/ip");
+				if (!(rv && rv.ok)) return nogo(res, "Could not get ip address");
+				res.end(await rv.text());
+			}
+//res.end(JSON.stringify(await readdir(BINPATH)));
 			else nogo(res, "Bad command");
 			return;
 		}

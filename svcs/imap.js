@@ -131,8 +131,8 @@ const client = new ImapFlow({
 	secure: true,
 	logger:false,
 	auth: {
-		user: process.env.VARHUUNT,
-		pass: process.env.SKRUMPTH
+		user: atob(process.env.VARHUUNT),
+		pass: atob(process.env.SKRUMPTH)
 	}
 });
 

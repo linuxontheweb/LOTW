@@ -3974,6 +3974,11 @@ const do_ls = (args)=>{
 //XXXXXXXXXXXX
 
 builtins = {//«
+'ip':async(args)=>{
+	let rv = await fetch("https://ifconfig.me/ip")
+	if (!(rv && rv.ok)) return cberr("Could not get ip address");
+	cbok(await rv.text());
+},
 'id':()=>{
 	wout(termobj.winid);
 	cbok();

@@ -1,4 +1,10 @@
 
+export const app = function (arg) {
+
+const {Core, Main, NS}=arg;
+
+const{log,cerr,cwarn,globals}=Core;
+
 //let testing_mode = true;
 let testing_mode = false;
 //Imports«
@@ -8,7 +14,6 @@ const widgets=NS.api.widgets;
 const {popup,popok,poperr,popyesno}=widgets;
 const {util,dev_mode,dev_env}=globals;
 const {gbid,mk,mkdv,mksp,mkbut}=util;
-const{log,cerr,cwarn}=Core;
 const act=()=>document.activeElement;
 const topwin = Main.top;
 const winid = topwin.id;
@@ -20,6 +25,7 @@ if (!dev_env) testing_mode = false;
 //»
 
 //Var«
+let ip_addr;
 let ms_off;
 let error_message;
 let waiters={};
@@ -1045,7 +1051,15 @@ return new Promise(async(y,n)=>{
 
 };//»
 
+
 const init_room=()=>{//«
+
+	dbref.ref("/.info/serverTimeOffset").on('value', offset=>{
+		let offsetVal = offset.val() || 0;
+log("MS_OFFSET", offsetVal);
+//		let serverTime = Date.now() + offsetVal;
+	});
+
 	let rv;
 	room_message_ref = dbref.ref(room_message_path);
 	room_message_ref.limitToLast(GET_NUM_CHATS).on('child_added',dat=>{//«
@@ -1308,6 +1322,17 @@ cerr(err);
 const init= async()=>{//«
 
 let rv;
+
+rv = await fetch("https://ifconfig.me/ip")
+if (!(rv && rv.ok)) {
+	initdiv.set("Could not fetch external ip!");
+	return;
+}
+ip_addr = await rv.text();
+log(`IP: ${ip_addr}`);
+//return cberr("Could not get ip address");
+//cbok(await rv.text());
+/*
 rv = await fetch('/_timestamp');
 if (!(rv&&rv.status==200)){
 	initdiv.set("Could not fetch server timestamp!");
@@ -1315,6 +1340,8 @@ if (!(rv&&rv.status==200)){
 }
 rv = await rv.text();
 ms_off = Date.now()-parseInt(rv);
+*/
+ms_off = 0;
 
 init_gui();
 //setTimeout(resize,1000);
@@ -1343,8 +1370,10 @@ if (rv!==true) {
 	initdiv.set("There was a problem initializing the video");
 	return;
 }
-rv = await do_login();
-if (rv!==true) return;
+
+username = "Whatever";
+//rv = await do_login();
+//if (rv!==true) return;
 
 rv = await get_public_avatar();
 if (rv!==true) return;
@@ -1436,6 +1465,7 @@ cerr(e);
 //»
 
 
+}
 
 
 /*

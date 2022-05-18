@@ -1840,8 +1840,6 @@ if (icon.parwin===desk){
 		oldarr[ind] = undefined;
 	} else console.error("The icon was not in the icons array!", icon);
 }//»
-const ICON_SLOTS=[];
-
 const place_in_icon_slot = (icon, pos, if_create, if_load) => {//«
 	let startx = desk_grid_start_x;
 	let starty = desk_grid_start_y;

@@ -971,7 +971,26 @@ api.loadCom=(name,opts={})=>{opts.TYPE="coms";return loadModule(name,opts);};
 
 this.load_lib = (name, cb)=>{load_mod(name,cb,{TYPE:"libs"});}
 
-const make_script=(path,load,err,ifrand,win)=>{let scr=make('script');document.head.appendChild(scr);if(win)win.scr=scr;if(load){scr.onload=_=>{load(scr);};}if(err){scr.onerror=e=>{err(e,scr);};scr._onerror=e=>{err(e,scr);};}scr._src=path;return scr;};
+const make_script = (path, load, err, ifrand, win) => {
+	let scr = make('script');
+	document.head.appendChild(scr);
+	if (win) win.scr = scr;
+	if (load) {
+		scr.onload = _ => {
+			load(scr);
+		};
+	}
+	if (err) {
+		scr.onerror = e => {
+			err(e, scr);
+		};
+		scr._onerror = e => {
+			err(e, scr);
+		};
+	}
+	scr.src = path;
+	return scr;
+};
 this.make_script = make_script;
 const makeScript=path=>{return new Promise((Y,N)=>{make_script(path,Y,N);});};
 api.makeScript=makeScript;

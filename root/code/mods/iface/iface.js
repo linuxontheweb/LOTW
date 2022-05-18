@@ -1,15 +1,17 @@
-const authObj = {};
 
-/*
+export const mod = function(Core) {
+
+//const authObj = {};
+
 const authObj = {
-	apiKey: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	authDomain: "<yourId>.firebaseapp.com",
-	databaseURL: "https://<yourId>.firebaseio.com",
-	projectId: "<yourId>",
-	storageBucket: "<yourId>.appspot.com",
-	messagingSenderId: "XXXXXXXXXXXX"
+	apiKey: "AIzaSyCHIu1dr-a5FCeOogjQyMPxrzSq3kK9Hek",
+	authDomain: "linuxontheweb.firebaseapp.com",
+	databaseURL: "https://linuxontheweb.firebaseio.com",
+	projectId: "linuxontheweb",
+	storageBucket: "linuxontheweb.appspot.com"
+//	messagingSenderId: "XXXXXXXXXXXX"
 };
-*/
+
 
 //Imports«
 const NS = window[__OS_NS__];
@@ -314,8 +316,8 @@ const api={//«
 			firebase.database().ref(".info/connected").on("value", fbase_connection_change);
 			did_init=true;
 			Y(true);
-			if (typeof rv1 === "string") Core.do_update(`mods.iface.fbase_app`, rv1);
-			if (typeof rv2 === "string") Core.do_update(`mods.iface.fbase_db`, rv2);
+//			if (typeof rv1 === "string") Core.do_update(`mods.iface.fbase_app`, rv1);
+//			if (typeof rv2 === "string") Core.do_update(`mods.iface.fbase_db`, rv2);
 		});
 	},//»
 	close:()=>{
@@ -334,5 +336,5 @@ NS.api.iface=api;
 
 //»
 
-
+}
 
