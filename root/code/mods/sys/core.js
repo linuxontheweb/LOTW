@@ -264,7 +264,7 @@ this.kc = kc;
 
 //»
 //Audio/Mixer«
-/*
+///*
 
 const AUDIO = (()=>{
 let ctx = new AudioContext();
@@ -305,10 +305,10 @@ mixer: new Mixer(),
 ctx: ctx
 }
 })();
-*/
+//*/
 //»
 const globals = {//«
-//	audio:AUDIO,
+	audio:AUDIO,
 	emulators:{},
 	FOLDER_APP: FOLDER_APP,
 	TEXT_APP: TEXT_APP,

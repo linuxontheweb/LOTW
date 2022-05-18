@@ -172,6 +172,9 @@ g > s;
 
 »*/
 
+export const mod = function(Core) {
+
+
 //«Decs
 const {NS,globals}=Core;
 const log=(...args)=>console.log(...args);
@@ -818,17 +821,18 @@ console.error(s);
 				return y();
 			}
 			let path = args[0];
-			if (!path.match(/^\//)) return err("Not a fullpath: "+path);
+			if (!path.match(/^\x2f/)) return err("Not a fullpath: "+path);
 			
 			let arr = await fs.readFile(path);
 			if (!arr) return err("File not found: "+path);
 			let serv;
 			try{
-				serv = await globals.fs.start_service('synth', args[1]);
+				serv = NS.mods["av.synth"](Core).get_synth();
 			}
 			catch(e){
 				return err(e);
 			}
+			serv.id=args[1];
 			serv._parent = servobj;
 			serv._top = servobj._top;
 			serv.is_app = true;
@@ -1104,6 +1108,9 @@ cerr(`staterr called without 'lno' (${s})`);
 					}
 
 					create_error=null;
+if (_typ==="Module"){
+args.push(n);
+}
 					let gotnode = await func(...args);
 					if (!servobj._top._create_error) servobj._top._create_error = create_error;
 					if (!gotnode) {
@@ -1113,7 +1120,6 @@ cerr(`staterr called without 'lno' (${s})`);
 					NODES[n] = gotnode;
 					gotnode._type = _typ;
 					gotnode._name = n;
-
 					if (_typ=="Sym"){
 						gotnode._modname = gotnode.ref._modname;
 						delete gotnode.ref._modname;
@@ -1127,7 +1133,6 @@ cerr(`staterr called without 'lno' (${s})`);
 				}
 				return y(true);
 			}//»
-
 
 			if (ln.match(/=/)){//«
 				let arr = ln.split("=");
@@ -1353,9 +1358,9 @@ log(e);
 this.parse = parse;
 
 this.onkill=()=>{
-	for (let mod of MODULES){
-		globals.fs.stop_service(mod.id);
-	}
+//	for (let mod of MODULES){
+//		globals.fs.stop_service(mod.id);
+//	}
 	killed = true;
 	if (mixer_plug) mixer_plug.disconnect();
 };
@@ -1364,8 +1369,13 @@ this.onkill=()=>{
 
 }
 
-this.get_synth = function(){
-	return new Synth();
+//this.get_synth = function(){
+//	return new Synth();
+//}
+
+return {
+	get_synth: function(){return new Synth()}
 }
 
+}
 

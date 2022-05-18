@@ -1,18 +1,26 @@
 
+export const app = function (arg) {
+
+
 //Decs«
 
-const log=(...args)=>console.log(...args);
-const wrn=(...args)=>console.warn(...args);
-const cwarn=wrn;
-const err=(...args)=>console.error(...args);
-const cerr=err;
+//const log=(...args)=>console.log(...args);
+//const wrn=(...args)=>console.warn(...args);
+//const cwarn=wrn;
+//const err=(...args)=>console.error(...args);
+//const cerr=err;
+
+const {Core, Main, NS}=arg;
+//log(Core);
+const{api:capi,KC,kc,log,cwarn,cerr,globals,Desk}=Core;
 const {util,dev_mode,dev_env}=globals;
 const {gbid,mk,mkdv,mksp}=util;
-//const {mixer, ctx}=globals.audio;
 const {fs}=NS.api;
 const {poperr}=globals.widgets;
 
 const NUM = Number.isFinite;
+
+//const {mixer, ctx}=globals.audio;
 
 let service_obj;
 let speaker_gain;
@@ -256,7 +264,8 @@ const get_node_div = mod =>{
 
 const kill_service = ()=>{
 	if (service_obj){
-		globals.fs.stop_service(service_obj.id);
+//		globals.fs.stop_service(service_obj.id);
+		service_obj.onkill();
 		service_obj=null;
 	}
 };
@@ -274,12 +283,21 @@ const staterr=(s,lno)=>{//«
 
 const init = async str => {//«
 	muted = false;
-	let obj = await globals.fs.start_service('synth');
+	if (!await capi.loadMod("av.synth")){
+Main.innerHTML = "Could not load module 'av.synth'!";
+	}
+//log(obj);
+
+//	let obj = await globals.fs.start_service('synth');
+//	let avmod  = new NS.mods["av.synth"](Core);
+	let obj = NS.mods["av.synth"](Core).get_synth();
+//log(mod);
 	obj.is_app = true;
 	obj.errout = staterr;
 	obj.make_node = make_node;
 	obj.make_br = make_br;
 	obj._top = obj;
+	obj.id="main";
 	service_obj = obj;
 	init_interface();
 	let rv = await service_obj.parse(str);
@@ -474,7 +492,7 @@ else if (s=="-_") voldn();
 
 //»
 
-
+}
 
 
 
