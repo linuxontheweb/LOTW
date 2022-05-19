@@ -7,11 +7,13 @@
 
 ## YMMV
 
-LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton), which involves ChromeOS put into developer mode. 
-All development and testing is therefore currently done in Chrome on a Chromebook.
+LOTW is developed in [the croutonenvironment](https://github.com/dnschneid/crouton),
+which involves ChromeOS in developer mode.  All development and testing is currently done
+on a Chromebook.
 
-The system should "basically" work in any browser, but there are probably tons of tiny glitches 
-that degrade the user experience in other operating systems and/or other browsers.
+The system should basically work in any modern browser, but there are likely
+many tiny glitches that degrade the user experience in other operating systems
+and/or other browsers.
 
 ## Getting Started
 
@@ -30,9 +32,11 @@ Then, in your browser, go to: http://localhost:12345
 
 ## The Whole Idea
 
-LOTW is all about porting the Linux/Unix textual configuration ethos into the modern web
-environment. Furthermore, the desktop environment is minimal and therefore highly configurable. 
-Out of the box, the only visible UI element (other than the desktop) is the window minimizer bar.
-It is essential that all tasks (such as resizing windows and changing icon locations) 
-can be accomplished via the keyboard.
+LOTW is all about porting the Linux/Unix text-based command and configuration ethos into the
+modern web environment. The desktop environment is minimal and very
+configurable.  Out of the box, the only visible UI element (other than the
+desktop) is the bar where minimized windows go.  It is essential that all tasks
+can be accomplished via the keyboard (e.g.  resizing windows and changing icon
+locations).
+
 
