@@ -28,4 +28,11 @@ If you want to use another port (e.g. 12345), start it like so:
 
 Then, in your browser, go to: http://localhost:12345
 
+## The Whole Idea
+
+LOTW is all about porting the Linux/Unix textual configuration ethos into the modern web
+environment. Furthermore, the desktop environment is minimal and therefore highly configurable. 
+Out of the box, the only visible UI element (other than the desktop) is the window minimizer bar.
+It is essential that all tasks (such as resizing windows and changing icon locations) 
+can be accomplished via the keyboard.
 
