@@ -89,4 +89,25 @@ I also have this line in .vimrc:
 
 	nmap <enter> za
 
+In order to quickly insert folds into the code file, I also use the following mappings.
+
+This inserts an open and close fold marker, with a space in between them, invoked with Alt+f:
+
+	execute "set <M-f>=\ef"
+	nnoremap <M-f> a//«<enter><enter>//»<esc>
+	inoremap <M-f> //«<enter><enter>//»
+
+This inserts an open fold marker, invoked with Alt+o:
+
+	execute "set <M-o>=\eo"
+	nnoremap <M-o> a//«<esc>
+	inoremap <M-o> //«
+
+
+This inserts a close fold marker, invoked with Alt+c:
+
+	execute "set <M-c>=\ec"
+	nnoremap <M-c> a//»<esc>
+	inoremap <M-c> //»
+
 
