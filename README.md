@@ -45,8 +45,6 @@ vim is the recommended text editor.
 
 To see the folded rows, put these lines in your .vimrc:
 
-<code>
-set foldmethod=marker<br>
-set foldmarker=«,»<br>
-set foldlevelstart=0
-</code>
+	set foldmethod=marker
+	set foldmarker=«,»
+	set foldlevelstart=0
