@@ -49,9 +49,11 @@ The visibility of the taskbar at the bottom of the screen can only be toggled
 via the keyboard shortcut, **Toggle taskbar visibility**. The taskbar currently
 only exists as a place to hold minimized windows. If the taskbar is showing,
 then the windows held in it are kept in the window stack. This just means that
-they can be accessed by the **Cycle through the window stack** keyboard
-shortcut. However, if the taskbar is not showing, then the windows held by it
-are considered to be in a "backgrounded" state.
+they can be accessed by the **Cycle window stack** keyboard shortcut. However,
+if the taskbar is not showing, then the windows held by it are considered to be
+in a "backgrounded" state. That is, they are no longer in the window stack, and 
+cannot be accessed by the keyboard shortcut. The taskbar *must* be brought back
+into view in order to regain access to them.
 
 ### Keyboard shortcuts
 
@@ -61,8 +63,8 @@ End. Chromebooks don't have those keys, though the functions can be emulated
 using combinations of Control, Alt and the Arrow keys.
 
 **Desktop**
-- Open a terminal: Alt+t
-- Invoke the context menu: Alt+c
+- Open terminal: Alt+t
+- Invoke context menu: Alt+c
 - Toggle taskbar visibility: Ctrl+Alt+Shift+b
 
 **Windows**
@@ -74,16 +76,24 @@ using combinations of Control, Alt and the Arrow keys.
 - Resize window: Ctrl+Shift+[arrow]
 - Toggle layout mode: Ctrl+Shift+l
 - Toggle window chrome: Ctrl+Shift+w
-- Cycle through the window stack: Alt+\`
+- Cycle window stack: Alt+\`
 
 **Icons**
 - Toggle icon cursor visibility: Ctrl+Alt+Shift+c
-- Toggle icon selection status under the cursor: Space
+- Toggle icon selection status under cursor: Space
 - Select then open icon under the cursor: Enter
-- "Auto open" icon under the cursor (like double clicking): Alt+Enter
-- "Drag select" icons under the cursor: Ctrl+arrow
+- "Auto open" icon under cursor (like double clicking): Alt+Enter
+- "Drag select" icons under cursor: Ctrl+arrow
 - Move selected icons to cursor: Ctrl+m
 - Delete selected icons: Ctrl+Backspace
+
+
+## Command line usage
+
+Other than high level control flow structures (like if..then and for..in), the
+syntax of standard \*nix-compatible shells should mostly work. It is easiest to
+provide working examples that showcase the particular capabilities of the LOTW
+system. Those are forthcoming.
 
 
 ## Development

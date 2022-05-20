@@ -1,7 +1,10 @@
 
+export const mod = function(Core) {
+
+
 //Imports«
-var log = Core.log;
-var util = Core.globals.util;
+const {log} = Core;
+//var util = Core.globals.util;
 let jlog=obj=>{log(JSON.stringify(obj, null, "  "));};
 //»
 
@@ -128,7 +131,9 @@ log(useop);
 //error = 'syntax error in expression (error token is "hi")';
 						error = true;
 //log(next);
-						error_str = synerr(util.tok_to_string(next));
+//						error_str = synerr(util.tok_to_string(next));
+						error_str = synerr("?");
+console.warn("FIX THIS!!!")
 						return null;
 					}
 				}
@@ -723,4 +728,6 @@ log("ERROR ASSIGNMENT ARRAY LENGTH");
 	if (ret == null) math_resolve_cb(null, error_str);
 	else math_resolve_cb({'t': "number", 'number': ret});
 }//»
+
+}
 
