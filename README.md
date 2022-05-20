@@ -30,7 +30,7 @@ If you want to use another port (e.g. 12345), start it like so:
 
 Then, in your browser, go to: http://localhost:12345
 
-## The Whole Idea
+## The Gist
 
 LOTW is all about porting the Linux/Unix text-based command and configuration ethos into the
 modern web environment. The desktop environment is minimal and very
@@ -39,4 +39,14 @@ desktop) is the bar where minimized windows go.  It is essential that all tasks
 can be accomplished via the keyboard (e.g.  resizing windows and changing icon
 locations).
 
+## Development
 
+vim is the recommended text editor.
+
+To see the folded rows, put these lines in your .vimrc:
+
+`
+set foldmethod=marker
+set foldmarker=«,»
+set foldlevelstart=0
+`
