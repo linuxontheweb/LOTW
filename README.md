@@ -59,10 +59,10 @@ Then, go to: http://localhost:12345
 The visibility of the taskbar at the bottom of the screen can only be toggled
 via the keyboard shortcut, **Toggle taskbar visibility**. The taskbar currently
 only exists as a place to hold minimized windows. If the taskbar is showing,
-then the windows held in it are kept in the window stack. This just means that
+then the windows held in it are kept in the window stack. This means that
 they can be accessed by the **Cycle window stack** keyboard shortcut. However,
 if the taskbar is not showing, then the windows held by it are considered to be
-in a "backgrounded" state. That is, they are no longer in the window stack, and 
+in a "backgrounded" state, i.e., they are no longer in the window stack, and 
 cannot be accessed by the keyboard shortcut. The taskbar *must* be brought back
 into view in order to regain access to them.
 
