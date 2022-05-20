@@ -44,12 +44,14 @@ locations).
 vim is the recommended text editor.
 
 To see the folded rows, put these lines in your .vimrc:
+
 	set foldmethod=marker
 	set foldmarker=«,»
 	set foldlevelstart=0
 
 I personally like to use the enter key to toggle folded rows (while in "normal" mode), so
 I also have this line in .vimrc:
+
 	nmap <enter> za
 
 
