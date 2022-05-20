@@ -80,9 +80,9 @@ using combinations of Control, Alt and the Arrow keys.
 
 server.js is for serving the system files to the client.
 
-All other kinds of services to extend the system's functionality (such as  
-sending and receiving email) are kept in the svcs subfolder, and are each run as 
-node servers on available ports.
+All other kinds of services to extend the system's functionality (such as
+sending and receiving email) are kept in the svcs subfolder, and are each run
+as node servers on available ports.
 
 The essential client-side files are kept in the root subfolder.
 
