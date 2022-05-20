@@ -5,6 +5,15 @@
 </p>
 
 
+## The Gist
+
+LOTW is all about porting the Linux/Unix text-based command and configuration ethos into the
+modern web environment. The desktop environment is minimal and very
+configurable.  Out of the box, the only visible UI element (other than the
+desktop) is the bar where minimized windows go.  It is essential that all tasks
+can be accomplished via the keyboard (e.g.  resizing windows and changing icon
+locations).
+
 ## YMMV
 
 LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton),
@@ -17,39 +26,41 @@ and/or other browsers.
 
 ## Getting Started
 
-First, start the server with nodejs (defaults to port 8080):
+First, clone this repo (duh)!
+
+Then, start the server with nodejs (uses the default port, 8080):
 
 `$ node server.js`
 
-Then, in your browser, go to: http://localhost:8080
+Finally, in your browser, go to: http://localhost:8080
 
 
-If you want to use another port (e.g. 12345), start it like so:
+Or if you want to use another port (e.g. 12345), start it like so:
 
 `$ node server.js 12345`
 
-Then, in your browser, go to: http://localhost:12345
+Then, go to: http://localhost:12345
 
-## The Gist
+## Using the keyboard
 
-LOTW is all about porting the Linux/Unix text-based command and configuration ethos into the
-modern web environment. The desktop environment is minimal and very
-configurable.  Out of the box, the only visible UI element (other than the
-desktop) is the bar where minimized windows go.  It is essential that all tasks
-can be accomplished via the keyboard (e.g.  resizing windows and changing icon
-locations).
+This section particularly applies to the Chromebook keyboard layout. The main
+differences with other layouts involve keys like Page Up, Page Down, Home and
+End. Chromebooks don't have those keys, though the functions can be emulated
+using combinations of Contrl, Alt and the Arrow keys.
+
+** Open a terminal ** Alt+t
 
 ## Development
 
 vim is the recommended text editor.
 
-To see the folded rows, put these lines in your .vimrc:
+To see the folded rows in the source code, put these lines in your .vimrc:
 
 	set foldmethod=marker
 	set foldmarker=«,»
 	set foldlevelstart=0
 
-I personally like to use the enter key to toggle folded rows (while in "normal" mode), so
+I like to use the Enter key to toggle folded rows (while in "normal" mode), so
 I also have this line in .vimrc:
 
 	nmap <enter> za
