@@ -65,7 +65,7 @@ using combinations of Contrl, Alt and the Arrow keys.
 ### Icons
 - **Toggle icon selection status under the cursor**: Space
 - **Select then open icon under the cursor**: Enter
-- **Open icon under the cursor (without selecting)**: Alt+Enter
+- **"Auto open" icon under the cursor (like double clicking)**: Alt+Enter
 - **"Drag select" icons under the cursor**: Ctrl+arrow
 - **Move selected icons to cursor**: Ctrl+m
 - **Delete selected icons**: Ctrl+Backspace
