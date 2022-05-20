@@ -86,7 +86,7 @@ Instructions related to the development and maintenance of the LOTW project are 
 
 Images to be shown in the project documentation go in **img**.
 
-The essential client-side files are kept in the **root** subfolder.
+The essential client-side files of the LOTW system are kept in the **root** subfolder.
 
 All kinds of services to extend the system's functionality (such as sending and
 receiving email) are kept in the **svcs** subfolder, and are each run as node
