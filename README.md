@@ -41,37 +41,39 @@ Or if you want to use another port (e.g. 12345), start it like so:
 
 Then, go to: http://localhost:12345
 
-## Using the keyboard
+## Usage
+
+### Keyboard shortcuts
 
 This section particularly applies to the Chromebook keyboard layout. The main
 differences with other layouts involve keys like Page Up, Page Down, Home and
 End. Chromebooks don't have those keys, though the functions can be emulated
 using combinations of Control, Alt and the Arrow keys.
 
-### Desktop
-- **Open a terminal**: Alt+t
-- **Invoke the context menu**: Alt+c
-- **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
+**Desktop**
+- Open a terminal: Alt+t
+- Invoke the context menu: Alt+c
+- Toggle taskbar visibility: Ctrl+Alt+Shift+b
 
-### Windows
-- **Maximize window**: Alt+m
-- **Minimize window**: Alt+n
-- **Close window**: Alt+x
-- **Fullscreen window**: Alt+f
-- **Move window**: Shift+[arrow]
-- **Resize window**: Ctrl+Shift+[arrow]
-- **Toggle layout mode**: Ctrl+Shift+l
-- **Toggle window chrome**: Ctrl+Shift+w
-- **Cycle through open windows**: Alt+\`
+**Windows**
+- Maximize window: Alt+m
+- Minimize window: Alt+n
+- Close window: Alt+x
+- Fullscreen window: Alt+f
+- Move window: Shift+[arrow]
+- Resize window: Ctrl+Shift+[arrow]
+- Toggle layout mode: Ctrl+Shift+l
+- Toggle window chrome: Ctrl+Shift+w
+- Cycle through open windows: Alt+\`
 
-### Icons
-- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
-- **Toggle icon selection status under the cursor**: Space
-- **Select then open icon under the cursor**: Enter
-- **"Auto open" icon under the cursor (like double clicking)**: Alt+Enter
-- **"Drag select" icons under the cursor**: Ctrl+arrow
-- **Move selected icons to cursor**: Ctrl+m
-- **Delete selected icons**: Ctrl+Backspace
+**Icons**
+- Toggle icon cursor visibility: Ctrl+Alt+Shift+c
+- Toggle icon selection status under the cursor: Space
+- Select then open icon under the cursor: Enter
+- "Auto open" icon under the cursor (like double clicking): Alt+Enter
+- "Drag select" icons under the cursor: Ctrl+arrow
+- Move selected icons to cursor: Ctrl+m
+- Delete selected icons: Ctrl+Backspace
 
 
 ## Development
