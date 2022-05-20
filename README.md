@@ -11,7 +11,7 @@ LOTW is all about porting the Linux/Unix text-based command and configuration et
 modern web environment. The desktop environment is minimal and very
 configurable.  Out of the box, the only visible UI element (other than the
 desktop) is the bar where minimized windows go.  It is essential that all tasks
-can be accomplished via the keyboard (e.g.  resizing windows and changing icon
+can be accomplished via the keyboard (e.g. resizing windows and changing icon
 locations).
 
 ## YMMV
@@ -46,12 +46,11 @@ Then, go to: http://localhost:12345
 This section particularly applies to the Chromebook keyboard layout. The main
 differences with other layouts involve keys like Page Up, Page Down, Home and
 End. Chromebooks don't have those keys, though the functions can be emulated
-using combinations of Contrl, Alt and the Arrow keys.
+using combinations of Control, Alt and the Arrow keys.
 
 ### Desktop
 - **Invoke the context menu**: Alt+c
 - **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
-- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
 - **Open a terminal**: Alt+t
 
 ### Windows
@@ -65,6 +64,7 @@ using combinations of Contrl, Alt and the Arrow keys.
 - **Toggle window chrome**: Ctrl+Shift+w
 
 ### Icons
+- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
 - **Toggle icon selection status under the cursor**: Space
 - **Select then open icon under the cursor**: Enter
 - **"Auto open" icon under the cursor (like double clicking)**: Alt+Enter
