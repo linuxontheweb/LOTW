@@ -63,10 +63,10 @@ using combinations of Contrl, Alt and the Arrow keys.
 - **Resize window**: Ctrl+Shift+[arrow]
 
 ### Icons
-- **Toggle icon selection under the cursor**: Space
-- **Select/Open icon under the cursor**: Enter
+- **Toggle icon selection status under the cursor**: Space
+- **Select then open icon under the cursor**: Enter
 - **Open icon under the cursor (without selecting)**: Alt+Enter
-- **Drag select icons**: Ctrl+arrow
+- **"Drag select" icons under the cursor**: Ctrl+arrow
 - **Move selected icons to cursor**: Ctrl+m
 - **Delete selected icons**: Ctrl+Backspace
 
