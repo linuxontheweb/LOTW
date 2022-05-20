@@ -48,7 +48,7 @@ differences with other layouts involve keys like Page Up, Page Down, Home and
 End. Chromebooks don't have those keys, though the functions can be emulated
 using combinations of Contrl, Alt and the Arrow keys.
 
-** Open a terminal ** Alt+t
+**Open a terminal**: Alt+t
 
 ## Development
 
