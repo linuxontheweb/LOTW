@@ -41,7 +41,17 @@ Or if you want to use another port (e.g. 12345), start it like so:
 
 Then, go to: http://localhost:12345
 
-## Usage
+## Desktop usage
+
+### The taskbar
+
+The visibility of the taskbar at the bottom of the screen can only be toggled
+via the keyboard shortcut, **Toggle taskbar visibility**. The taskbar currently
+only exists as a place to hold minimized windows. If the taskbar is showing,
+then the windows held in it are kept in the window stack. This just means that
+they can be accessed by the **Cycle through the window stack** keyboard
+shortcut. However, if the taskbar is not showing, then the windows held by it
+are considered to be in a "backgrounded" state.
 
 ### Keyboard shortcuts
 
@@ -64,7 +74,7 @@ using combinations of Control, Alt and the Arrow keys.
 - Resize window: Ctrl+Shift+[arrow]
 - Toggle layout mode: Ctrl+Shift+l
 - Toggle window chrome: Ctrl+Shift+w
-- Cycle through open windows: Alt+\`
+- Cycle through the window stack: Alt+\`
 
 **Icons**
 - Toggle icon cursor visibility: Ctrl+Alt+Shift+c
