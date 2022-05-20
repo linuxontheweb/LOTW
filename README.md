@@ -78,21 +78,23 @@ using combinations of Control, Alt and the Arrow keys.
 
 ### Project structure
 
-**server.js** is for serving the system files to the client.
+**README.md**: This file.
 
-Shell scripts related to the development and maintenance of the LOTW project are kept in **bin**.
+**server.js**: The main service for sending core LOTW system files to the client.
 
-Instructions related to the development and maintenance of the LOTW project are kept in **howto**.
+**bin**: For shell scripts related to the development and maintenance of the LOTW project.
 
-Images to be shown in the project documentation go in **img**.
+**howto**: For Instructions related to the development and maintenance of the LOTW project.
 
-The essential client-side files of the LOTW system are kept in the **root** subfolder.
+**img**: For images to be shown in the project documentation.
 
-All kinds of services to extend the system's functionality (such as sending and
-receiving email) are kept in the **svcs** subfolder, and are each run as node
-servers on available ports.
+**root**: The essential client-side files of the LOTW system are kept there.
 
-Static assets to be used in the website (external to the LOTW system) are kept in **www**.
+**svcs**: All kinds of services to extend the system's functionality (such as
+sending and receiving email) are kept there, and are each run as nodejs servers
+on available ports.
+
+**www**: For static assets to be used in the website (external to the LOTW system).
 
 ### Viewing and editing files
 
