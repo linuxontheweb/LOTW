@@ -126,7 +126,7 @@ const simpleParser = require('mailparser').simpleParser;
 const log=(...args)=>{console.log(...args)};
 
 const client = new ImapFlow({
-	host: 'imap.gmail.com',
+	host: 'imap.mail.yahoo.com',
 	port: 993,
 	secure: true,
 	logger:false,

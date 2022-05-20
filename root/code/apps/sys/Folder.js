@@ -32,7 +32,7 @@ dd.w = 0;
 dd.h = 0;
 Main.add(dd);
 
-Main.bgcol="#332323";
+//Main.bgcol="#332323";
 //Main.bgcol="#544";
 Main.overy="auto";
 Main.overx="hidden";

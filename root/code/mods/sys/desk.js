@@ -219,11 +219,9 @@ good choice for scientists and hobbyists.
 
 let desk_path;
 
-const USER_BG_IMG_PATH = `${home_path}/.config/desk/bgimg`;
 const USER_BG_IMG_OP_PATH = `${home_path}/.config/desk/bgimg_op`;
 const USER_BG_COL_PATH = `${home_path}/.config/desk/bgcol`;
-const SYS_BG_IMG_PATH = `/etc/config/desk/bgimg`;
-const DEF_BG_IMG_PATH = '/var/bgimg';
+const USER_APP_BG_COL_PATH = `${home_path}/.config/desk/app_bgcol`;
 const DEF_KEYSYM_STR = '{"t_A":{"ON":1,"NAME":"open_terminal"}}';
 
 const SP = " ";
@@ -246,6 +244,9 @@ let std_keysym_map={};
 //Style/CSS Values«
 
 //const TASK_BAR_COL_RGB="16,16,16";
+let DEF_APP_BG_COL = "#fff";
+let APP_BG_COL;
+
 const TASK_BAR_COL_RGB="0,0,0";
 //let DESK_COL = "#303040";
 //let DEF_DESK_GRADIENT = "linear-gradient(135deg,#000 0%,#003 35%,#006 50%,#000077 75%,#33c 90%,#77a 95%,#aa7 100%)";
@@ -1184,6 +1185,7 @@ drag_timeout = setTimeout(()=>{
 //»
 
 return new Promise(async (y,n)=>{//«
+/*
 	const set_bg_img=async(path)=>{
 		return new Promise(async(y,n)=>{
 			if (globals.is_ff){
@@ -1196,6 +1198,7 @@ return new Promise(async (y,n)=>{//«
 			y();
 		});
 	};
+*/
 	const set_bg_col=async(path)=>{
 		return new Promise(async(y,n)=>{
 			let bytes = await fsapi.readHtml5File(path, {BLOB:true});
@@ -1210,13 +1213,15 @@ return new Promise(async (y,n)=>{//«
 	};
 
 	if (lotw_mode) return y();
-
+/*
 	if (await fsapi.pathToNode(USER_BG_IMG_PATH)) {
 		await set_bg_img(USER_BG_IMG_PATH);
 	}
 	else if (await fsapi.pathToNode(DEF_BG_IMG_PATH,{ROOT:true})){
 		await set_bg_img(DEF_BG_IMG_PATH);
 	}
+*/
+	desk_imgdiv.style.backgroundImage='url("/www/img/lotw256.png")';
 
 	let bgimg_op = DEF_BG_IMG_OP;
 	if (await fsapi.pathToNode(USER_BG_IMG_OP_PATH)) bgimg_op=await fsapi.readHtml5File(USER_BG_IMG_OP_PATH);
@@ -1228,6 +1233,11 @@ return new Promise(async (y,n)=>{//«
 		else desk_coldiv.bgcol = text;
 	}
 	else desk_coldiv.style.backgroundImage=DEF_DESK_GRADIENT;
+
+	if (await fsapi.pathToNode(USER_APP_BG_COL_PATH)) APP_BG_COL = await fsapi.readHtml5File(USER_APP_BG_COL_PATH);
+	else APP_BG_COL = DEF_APP_BG_COL;
+
+
 	y();
 
 });//»
@@ -2079,7 +2089,8 @@ const make_window = (arg) => {//«
 	if (isint(arg.Z)) win.z = arg.Z;
 	else win.z=2;
 	no_select(main);
-	main.bgcol = mainwin_bgcol;
+//	main.bgcol = mainwin_bgcol;
+	main.bgcol = APP_BG_COL;
 	main.tcol = "#000";
 	main.bor = "0px solid transparent";
 	main.pos = "relative";

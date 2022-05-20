@@ -1,7 +1,7 @@
 # Linux on the Web (LOTW)
 
 <p align="center">
-  <img src="https://github.com/linuxontheweb/os/blob/main/www/img/lotw256.png">
+  <img src="https://github.com/linuxontheweb/os/blob/main/img/screenshot.png">
 </p>
 
 
