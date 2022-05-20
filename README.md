@@ -4,8 +4,9 @@
   <img src="https://github.com/linuxontheweb/os/blob/main/img/screenshot.png">
 </p>
 
+## Concepts
 
-## The Gist
+### The Gist
 
 LOTW is all about porting the Linux/Unix text-based command and configuration
 ethos into the modern web environment. The desktop environment is minimal and
@@ -14,7 +15,17 @@ desktop) is the bar where minimized windows go.  It is essential that all tasks
 can be accomplished via the keyboard (e.g. resizing windows and changing icon
 locations).
 
-## YMMV
+### Your files are locally stored
+
+Everything that I've ever seen that called itself a "web-based operating system" never seemed 
+to have any real concept of *local state*. With LOTW, however, *local state* is really the name
+of the game. For example, performing the following simple operation does indeed create an entry
+called file.txt in the browser's local storage.
+
+	~$ echo "A bunch of interesting thoughts" > file.txt
+
+
+## Disclaimer (YMMV)
 
 LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton),
 which involves ChromeOS in developer mode.  All development and testing is currently done
