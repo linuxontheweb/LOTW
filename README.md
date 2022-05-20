@@ -59,7 +59,7 @@ Then, go to: http://localhost:12345
 ### The taskbar
 
 The visibility of the taskbar at the bottom of the screen can only be toggled
-via the keyboard shortcut (shown below), **Toggle taskbar visibility**. The
+via the keyboard shortcut, **Toggle taskbar visibility** (shown below). The
 taskbar currently only exists as a place to hold minimized windows. If the
 taskbar is showing, then the windows held in it are kept in the window stack.
 This means that they can be accessed by the **Cycle window stack** keyboard
