@@ -9,11 +9,12 @@ files in developer tools.
 
 ## bin
 
-The bin subfolder is where developers can write command line utilities that 
-are automatically mounted in LOTW's /bin folder. The name of the command available 
-to the LOTW CLI is just the filename, with the .js extension removed. For example, 
-the contents of the file at bin/dummy.js can be viewed in LOTW by opening a terminal (Alt+t)
-and running the command:
+The bin subfolder is where developers can put command line utilities that are
+automatically mounted in LOTW's /bin folder upon system startup (i.e. loading
+the web page). The name of the command available to the LOTW CLI is just the
+filename, with the *.js* extension removed. For example, the contents of the file
+at bin/dummy.js can be viewed in LOTW by opening a terminal (Alt+t) and running
+the command:
 
 	$ cat /bin/dummy
 
