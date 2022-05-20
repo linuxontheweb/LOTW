@@ -82,19 +82,19 @@ using combinations of Control, Alt and the Arrow keys.
 
 **server.js**: The main service for sending core LOTW system files to the client.
 
-**bin**: For shell scripts related to the development and maintenance of the LOTW project.
+**bin**: Where shell scripts related to the development and maintenance of the LOTW project are kept.
 
-**howto**: For Instructions related to the development and maintenance of the LOTW project.
+**howto**: Where Instructions related to the development and maintenance of the LOTW project are kept.
 
-**img**: For images to be shown in the project documentation.
+**img**: Where images to be shown in the project documentation are kept.
 
-**root**: The essential client-side files of the LOTW system are kept there.
+**root**: Where essential client-side files of the LOTW system are kept.
 
-**svcs**: All kinds of services to extend the system's functionality (such as
-sending and receiving email) are kept there, and are each run as nodejs servers
+**svcs**: Where any kind of service to extend the system's functionality (such as
+sending and receiving email) are kept. They are each run as nodejs servers
 on available ports.
 
-**www**: For static assets to be used in the website (external to the LOTW system).
+**www**: Where static assets to be used in the website (external to the LOTW system) are kept.
 
 ### Viewing and editing files
 
