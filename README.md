@@ -7,9 +7,9 @@
 
 ## The Gist
 
-LOTW is all about porting the Linux/Unix text-based command and configuration ethos into the
-modern web environment. The desktop environment is minimal and very
-configurable.  Out of the box, the only visible UI element (other than the
+LOTW is all about porting the Linux/Unix text-based command and configuration
+ethos into the modern web environment. The desktop environment is minimal and
+very configurable.  Out of the box, the only visible UI element (other than the
 desktop) is the bar where minimized windows go.  It is essential that all tasks
 can be accomplished via the keyboard (e.g. resizing windows and changing icon
 locations).
@@ -82,19 +82,19 @@ using combinations of Control, Alt and the Arrow keys.
 
 **server.js**: The main service for sending core LOTW system files to the client.
 
-**bin**: Where scripts related to the development and maintenance of the LOTW project are kept.
+**bin**: Folder where scripts related to the development and maintenance of the LOTW project are kept.
 
-**howto**: Where Instructions related to the development and maintenance of the LOTW project are kept.
+**howto**: Folder where instructions related to the development and maintenance of the LOTW project are kept.
 
-**img**: Where images to be shown in the project documentation are kept.
+**img**: Folder where images to be shown in the project documentation are kept.
 
-**root**: Where essential client-side files of the LOTW system are kept.
+**root**: Folder where essential client-side files of the LOTW system are kept.
 
-**svcs**: Where any kind of service to extend the system's functionality (such as
-sending and receiving email) are kept. They are each run as nodejs servers
-on available ports.
+**svcs**: Folder where any kind of service to extend the system's functionality (such as
+sending and receiving email) are kept. Each service is to be run as an independent nodejs server
+on a available port.
 
-**www**: Where static assets to be used in the website (external to the LOTW system) are kept.
+**www**: Folder where static assets to be used in the website (external to the LOTW system) are kept.
 
 ### Viewing and editing files
 
