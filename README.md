@@ -82,7 +82,7 @@ using combinations of Control, Alt and the Arrow keys.
 
 **server.js**: The main service for sending core LOTW system files to the client.
 
-**bin**: Where shell scripts related to the development and maintenance of the LOTW project are kept.
+**bin**: Where scripts related to the development and maintenance of the LOTW project are kept.
 
 **howto**: Where Instructions related to the development and maintenance of the LOTW project are kept.
 
