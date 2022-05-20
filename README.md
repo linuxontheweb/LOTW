@@ -7,7 +7,7 @@
 
 ## YMMV
 
-LOTW is developed in [the croutonenvironment](https://github.com/dnschneid/crouton),
+LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton),
 which involves ChromeOS in developer mode.  All development and testing is currently done
 on a Chromebook.
 
