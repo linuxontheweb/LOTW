@@ -49,9 +49,9 @@ End. Chromebooks don't have those keys, though the functions can be emulated
 using combinations of Control, Alt and the Arrow keys.
 
 ### Desktop
+- **Open a terminal**: Alt+t
 - **Invoke the context menu**: Alt+c
 - **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
-- **Open a terminal**: Alt+t
 
 ### Windows
 - **Maximize window**: Alt+m
@@ -62,6 +62,7 @@ using combinations of Control, Alt and the Arrow keys.
 - **Resize window**: Ctrl+Shift+[arrow]
 - **Toggle layout mode**: Ctrl+Shift+l
 - **Toggle window chrome**: Ctrl+Shift+w
+- **Cycle through open windows**: Alt+\`
 
 ### Icons
 - **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
