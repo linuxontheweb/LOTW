@@ -49,26 +49,26 @@ End. Chromebooks don't have those keys, though the functions can be emulated
 using combinations of Contrl, Alt and the Arrow keys.
 
 ### Desktop
--**Invoke the context menu**: Alt+c
-**Toggle taskbar visibility**: Ctrl+Alt+Shift+b
-**Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
--**Open a terminal**: Alt+t
+- **Invoke the context menu**: Alt+c
+- **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
+- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
+- **Open a terminal**: Alt+t
 
 ### Windows
--**Maximize window**: Alt+m
--**Minimize window**: Alt+n
--**Close window**: Alt+x
--**Fullscreen window**: Alt+f
--**Move window**: Shift+[arrow]
--**Resize window**: Ctrl+Shift+[arrow]
+- **Maximize window**: Alt+m
+- **Minimize window**: Alt+n
+- **Close window**: Alt+x
+- **Fullscreen window**: Alt+f
+- **Move window**: Shift+[arrow]
+- **Resize window**: Ctrl+Shift+[arrow]
 
 ### Icons
--**Toggle icon selection under the cursor**: Space
--**Select/Open icon under the cursor**: Enter
--**Open icon under the cursor (without selecting)**: Alt+Enter
--**Drag select icons**: Ctrl+arrow
--**Move selected icons to cursor**: Ctrl+m
--**Delete selected icons**: Ctrl+Backspace
+- **Toggle icon selection under the cursor**: Space
+- **Select/Open icon under the cursor**: Enter
+- **Open icon under the cursor (without selecting)**: Alt+Enter
+- **Drag select icons**: Ctrl+arrow
+- **Move selected icons to cursor**: Ctrl+m
+- **Delete selected icons**: Ctrl+Backspace
 
 
 ## Development
