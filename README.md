@@ -92,7 +92,7 @@ using combinations of Control, Alt and the Arrow keys.
 
 **svcs**: Folder where any kind of service to extend the system's functionality (such as
 sending and receiving email) are kept. Each service is to be run as an independent nodejs server
-on a available port.
+on an available port.
 
 **www**: Folder where static assets to be used in the website (external to the LOTW system) are kept.
 
