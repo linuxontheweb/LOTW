@@ -61,6 +61,8 @@ using combinations of Contrl, Alt and the Arrow keys.
 - **Fullscreen window**: Alt+f
 - **Move window**: Shift+[arrow]
 - **Resize window**: Ctrl+Shift+[arrow]
+- **Toggle layout mode**: Ctrl+Shift+l
+- **Toggle window chrome**: Ctrl+Shift+w
 
 ### Icons
 - **Toggle icon selection status under the cursor**: Space
