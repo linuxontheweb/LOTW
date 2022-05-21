@@ -6,7 +6,7 @@
 
 ### It's like Linux... on the web!
 
-LOTW is all about porting the Linux/Unix text-based command and configuration
+LOTW is all about porting the Linux/Unix (\*nix) text-based command and configuration
 ethos into the modern web environment. The desktop environment is minimal and
 very configurable.  Out of the box, the only visible UI element (other than the
 desktop) is the bar where minimized windows go.  It is essential that all tasks
