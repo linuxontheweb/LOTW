@@ -53,7 +53,7 @@ Then, go to: http://localhost:12345
 
 ## Desktop usage
 
-### The taskbar
+### Taskbar
 
 The visibility of the taskbar at the bottom of the screen can only be toggled
 via the keyboard shortcut, **Toggle taskbar visibility** (shortcuts are shown
@@ -64,6 +64,17 @@ keyboard shortcut. If the taskbar is not visible, then the windows held by it
 are considered to be in a "background" state, i.e., they are no longer in the
 window stack, and cannot be accessed by the keyboard shortcut. In this case,
 the taskbar *must* be brought back into view in order to regain access to them.
+
+### Icon cursor
+
+The manipulation of icons is one of the main reasons why computer users are
+forced to take their hands off of the keyboard.  To give power users another
+option, the LOTW desktop features a cursor that allows for the toggling of
+selection status, opening, and moving of icons. With the **Move selected icons
+to cursor** shortcut, icons on the desktop can be moved to different desktop
+locations, and also between the desktop and folders (changing their paths in
+the LOTW filesystem).
+
 
 ### Keyboard shortcuts
 
