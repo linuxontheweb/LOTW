@@ -111,7 +111,7 @@ system. Those are forthcoming.
 
 ### Project structure
 
-**site.js**: The main nodejs service for sending core system files (in [root](https://github.com/linuxontheweb/lotw/tree/main/root)) to the client.
+[site.js](https://github.com/linuxontheweb/lotw/tree/main/site.js): The main nodejs service for sending core system files (in [root](https://github.com/linuxontheweb/lotw/tree/main/root)) to the client.
 
 [bin](https://github.com/linuxontheweb/lotw/tree/main/bin): Folder where scripts related to the development and maintenance of the project are kept.
 
