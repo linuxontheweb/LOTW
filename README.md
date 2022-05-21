@@ -73,7 +73,7 @@ option, the LOTW desktop features a cursor that allows for the toggling of
 selection status, opening, and moving of icons. With the **Move selected icons
 to cursor** shortcut, icons on the desktop can be moved to different desktop
 locations, and also between the desktop and folders (changing their paths in
-the LOTW filesystem).
+the LOTW file system).
 
 
 ### Keyboard shortcuts
