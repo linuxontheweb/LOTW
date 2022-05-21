@@ -16,11 +16,11 @@ locations).
 ### Your files are locally stored
 
 Everything that I've ever seen that called itself a "web-based operating
-system" never seemed to have any real concept of *local state*. With LOTW,
-however, *local state* is really the name of the game. For example, performing
-the following simple operation in the terminal application indeed creates
-an entry at `~/file.txt`, held in the browser's sandboxed local storage, accessible 
-regardless of network status.
+system" never seemed to have any real concept of *persistent local state*. With
+LOTW, however, *persistent local state* is really the name of the game. For
+example, performing the following simple operation in the terminal application
+indeed creates an entry at `~/file.txt`, held in the browser's sandboxed local
+storage, accessible regardless of network status.
 
 	~$ echo "A bunch of interesting thoughts" > file.txt
 
