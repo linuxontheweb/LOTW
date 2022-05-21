@@ -140,13 +140,11 @@ To see the folded rows in the source code, put these lines in your .vimrc:
 	set foldmarker=«,»
 	set foldlevelstart=0
 
-I like to use the Enter key to toggle folded rows (while in normal mode), so
-I also have this line in .vimrc:
+To quickly toggle row folds with the Enter key, add this line:
 
 	nmap <enter> za
 
-In order to quickly insert fold markers into the code file, I also use the following mappings
-(for normal and insert modes).
+These are for easily inserting fold markers into the code file (from both normal and insert mode).
 
 This inserts an open fold marker, invoked with Alt+o:
 
@@ -165,6 +163,4 @@ This inserts an open and close fold marker, with a space in between, invoked wit
 	execute "set <M-f>=\ef"
 	nnoremap <M-f> a//«<enter><enter>//»<esc>
 	inoremap <M-f> //«<enter><enter>//»
-
-
 
