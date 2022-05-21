@@ -43,14 +43,14 @@ First, clone this repo (duh)!
 
 Then, start the server with nodejs (uses the default port, 8080):
 
-`$ node server.js`
+`$ node site.js`
 
 Finally, in your browser, go to: http://localhost:8080
 
 
 Or if you want to use another port (e.g. 12345), start it like so:
 
-`$ node server.js 12345`
+`$ node site.js 12345`
 
 Then, go to: http://localhost:12345
 
@@ -113,9 +113,7 @@ system. Those are forthcoming.
 
 ### Project structure
 
-**README.md**: This file.
-
-**server.js**: The main service for sending core LOTW system files to the client.
+**site.js**: The main service for sending core system files to the client.
 
 **bin**: Folder where scripts related to the development and maintenance of the project are kept.
 
