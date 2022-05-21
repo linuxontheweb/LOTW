@@ -4,7 +4,7 @@
 
 ## Concepts
 
-### The Gist
+### It's like Linux... on the web!
 
 LOTW is all about porting the Linux/Unix text-based command and configuration
 ethos into the modern web environment. The desktop environment is minimal and
