@@ -5531,6 +5531,72 @@ this.check_open_files = check_open_files;
 //»
 //Key Handlers/Syskeys/Message Handlers«
 
+let keydiv;
+const toggle_key_viewer = () =>{
+if (!keydiv) {
+	let d = mkdv();
+	d.pos = "absolute";
+	d.dis = "flex";
+	d.style.justifyContent="space-between";
+	d.style.alignItems="center";
+	d.b=0;
+	d.r=0;
+	d.w = 600;
+	d.h = 100;
+	d.fs=40;
+	d.tcol="#000";
+	d.bgcol="#fff";
+	d.pad=3;
+	d.z=CGZ+1;
+	desk.add(d);
+	keydiv = d;	
+	let d1 = mkdv();d1.w="38%";
+	d1.bor = "1px dotted #000";
+	d1.ta="center";
+	let timer = null;
+	keydiv.on=(s)=>{
+		if (timer){
+			clearTimeout(timer);
+			timer = null;
+		}
+		if (s.length===1) d1.fs=50;
+		else d1.fs=30;
+		d1.innerHTML=s;
+		timer = setTimeout(()=>{
+			d1.innerHTML="";
+		}, 350);
+	};
+	keydiv.add(d1)
+
+	let d2 = mkdv();d2.w="19%";
+	d2.bor = "1px dotted #000";
+	d2.ta="center";
+	keydiv.shiftOn=()=>{d2.innerHTML="Shift";}
+	keydiv.shiftOff=()=>{d2.innerHTML="";}
+	keydiv.add(d2)
+
+	let d3 = mkdv();d3.w="19%";
+	d3.bor = "1px dotted #000";
+	d3.ta="center";
+	keydiv.ctrlOn=()=>{d3.innerHTML="Ctrl";}
+	keydiv.ctrlOff=()=>{d3.innerHTML="";}
+	keydiv.add(d3)
+
+	let d4 = mkdv();d4.w="19%";
+	d4.bor = "1px dotted #000";
+	d4.ta="center";
+	keydiv.altOn=()=>{d4.innerHTML="Alt";}
+	keydiv.altOff=()=>{d4.innerHTML="";}
+	keydiv.add(d4)
+
+}
+else {
+	keydiv.del();
+	keydiv = null;
+}
+
+};
+
 const dokeydown = function(e, usecode) {//«
 	const check_prompt=cpr=>{//«
 
@@ -5630,6 +5696,14 @@ const dokeydown = function(e, usecode) {//«
 	kstr = chr + "_" + mod_str;
 	e._sym = kstr;
 	if (debug_keydown) log(kstr);
+
+if (keydiv){
+if (code===16) keydiv.shiftOn();
+else if (code===17) keydiv.ctrlOn();
+else if (code===18) keydiv.altOn();
+else keydiv.on(chr);
+}
+
 	let act = document.activeElement;
 	let act_type = null;
 	if (act) act_type = act.type;
@@ -5959,7 +6033,11 @@ x=0;y=0;
 	if (kstr=="l_CAS") return console.clear();
 	if (kstr=="t_CAS") return keysym_funcs.test_function();
 	if (kstr=="r_CAS") return reload_desk_icons_cb();
-	if (kstr=="k_CAS") return (debug_keydown = !debug_keydown);
+	if (kstr=="k_CAS") {
+//		return (debug_keydown = !debug_keydown);
+		toggle_key_viewer();
+		return;
+	}
 	if (kstr == "d_CAS") {
 		PREV_DEF_ALL_KEYS = !PREV_DEF_ALL_KEYS;
 		show_overlay(`Prevent default for all keys: ${PREV_DEF_ALL_KEYS}`);
@@ -6029,7 +6107,16 @@ const dokeyup = function(e) {//«
 	let getcpr = () => {
 		return Desk.CPR;
 	};
+//log(e);
+//log(`<${e.key}>`, e.code);
 	let code = e.keyCode; /* Macros are things that allow sequences of key chords to be entered,in order to call some function or run some program. A new chord is begun when all the keys from the previous chord are released.  */
+if (keydiv){
+if (code===16) keydiv.shiftOff();
+else if (code===17) keydiv.ctrlOff();
+else if (code===18) keydiv.altOff();
+//else keydiv.off();
+}
+//log(code);
 /*
 	let macro_cb = Core.get_macro_update_cb();
 	if (macro_cb) { //Macronator
@@ -6061,6 +6148,7 @@ const dokeyup = function(e) {//«
 		return;
 	}
 */
+
 	if (code == KC['ALT']) {
 		alt_tab_presses = 1;
 		alt_is_up = true;
