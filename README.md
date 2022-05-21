@@ -102,9 +102,9 @@ using combinations of Control, Alt and the Arrow keys.
 **Icons**
 - Toggle icon cursor visibility: Ctrl+Alt+Shift+c
 - Toggle icon selection status under cursor: Space
-- Select then open icon under the cursor: Enter
-- "Auto open" icon under cursor (like double clicking): Alt+Enter
-- "Drag select" icons under cursor: Ctrl+arrow
+- Select/open icon under the cursor: Enter
+- Open icon under cursor (like double clicking): Alt+Enter
+- Continuously select icons under cursor: Ctrl+arrow
 - Move selected icons to cursor: Ctrl+m
 - Delete selected icons: Ctrl+Backspace
 
