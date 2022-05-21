@@ -29,11 +29,10 @@ storage, accessible regardless of network status.
 
 LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton),
 which involves ChromeOS in developer mode.  All development and testing is currently done
-on a Chromebook.
+on a Chromebook, using an up-to-date Chrome browser.
 
-The system should basically work in any modern browser, but there are likely
-many tiny glitches that degrade the user experience in other operating systems
-and/or other browsers.
+The system should basically work in any modern browser and host OS, but there are likely
+many tiny glitches that degrade the user experience in other browsers and/or operating systems.
 
 ## Getting Started
 
