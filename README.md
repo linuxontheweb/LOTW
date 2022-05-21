@@ -2,7 +2,7 @@
 
 ![Screenshot of LOTW destop](https://github.com/linuxontheweb/os/blob/main/www/img/screenshot.png)
 
-## Concepts
+## Overview
 
 ### It's like Linux... on the web!
 
