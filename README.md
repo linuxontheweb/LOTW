@@ -115,7 +115,7 @@ capabilities of the LOTW system. Those are forthcoming.
 
 [bin](https://github.com/linuxontheweb/lotw/tree/main/bin): Folder where scripts related to the development and maintenance of the project are kept.
 
-[howto](https://github.com/linuxontheweb/lotw/tree/main/howto): Folder where detailed instructions related to the usage of the system and the development and maintenance of the project are kept.
+[docs](https://github.com/linuxontheweb/lotw/tree/main/docs): Folder where detailed instructions related to the usage of the system and the development and maintenance of the project are kept.
 
 [root](https://github.com/linuxontheweb/lotw/tree/main/root): Folder where essential client-side files of the core system are kept.
 
