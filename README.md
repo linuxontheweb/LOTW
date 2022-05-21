@@ -38,7 +38,7 @@ many tiny glitches that degrade the user experience in other browsers and/or ope
 
 First, clone this repo (duh)!
 
-Then, start the server with nodejs (uses the default port, 8080):
+Then, start the site server with nodejs (uses the default port, 8080):
 
 `$ node site.js`
 
