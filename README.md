@@ -78,11 +78,6 @@ the LOTW file system).
 
 ### Keyboard shortcuts
 
-This section particularly applies to the Chromebook keyboard layout. The main
-differences with other layouts involve keys like Page Up, Page Down, Home and
-End. Chromebooks don't have those keys, though the functions can be emulated
-using combinations of Control, Alt and the Arrow keys.
-
 **Desktop**
 - Open terminal: Alt+t
 - Invoke context menu: Alt+c
