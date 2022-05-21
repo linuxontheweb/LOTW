@@ -113,21 +113,21 @@ system. Those are forthcoming.
 
 ### Project structure
 
-**site.js**: The main service for sending core system files to the client.
+**site.js**: The main nodejs service for sending core system files (in **root/**) to the client.
 
-**bin**: Folder where scripts related to the development and maintenance of the project are kept.
+**bin/**: Folder where scripts related to the development and maintenance of the project are kept.
 
-**howto**: Folder where instructions related to the development and maintenance of the project are kept.
+**howto/**: Folder where instructions related to the development and maintenance of the project are kept.
 
-**img**: Folder where images to be shown in the project documentation are kept.
+**img/**: Folder where images to be shown in the project documentation are kept.
 
-**root**: Folder where essential client-side files of the LOTW system are kept.
+**root/**: Folder where essential client-side files of the LOTW system are kept.
 
-**svcs**: Folder where any kind of service to extend the system's functionality (such as
+**svcs/**: Folder where any kind of service to extend the system's functionality (such as
 sending and receiving email) are kept. Each service is to be run as an independent nodejs server
 on an available port.
 
-**www**: Folder where static assets to be used in the website (external to the LOTW system) are kept.
+**www/**: Folder where static assets to be used in the website (external to the LOTW system) are kept.
 
 ### Viewing and editing files
 
