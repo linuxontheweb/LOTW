@@ -111,19 +111,19 @@ system. Those are forthcoming.
 
 ### Project structure
 
-**site.js**: The main nodejs service for sending core system files (in **root/**) to the client.
+**site.js**: The main nodejs service for sending core system files (in [root](https://github.com/linuxontheweb/lotw/tree/main/root)) to the client.
 
 [bin](https://github.com/linuxontheweb/lotw/tree/main/bin): Folder where scripts related to the development and maintenance of the project are kept.
 
-[howto](https://github.com/linuxontheweb/lotw/tree/main/howto): Folder where instructions related to the development and maintenance of the project are kept.
+[howto](https://github.com/linuxontheweb/lotw/tree/main/howto): Folder where detailed instructions related to the usage of the system and the development and maintenance of the project are kept.
 
-[root](https://github.com/linuxontheweb/lotw/tree/main/root): Folder where essential client-side files of the LOTW system are kept.
+[root](https://github.com/linuxontheweb/lotw/tree/main/root): Folder where essential client-side files of the core system are kept.
 
-[svcs](https://github.com/linuxontheweb/lotw/tree/main/svcs): Folder where any kind of service to extend the system's functionality (such as
+[svcs](https://github.com/linuxontheweb/lotw/tree/main/svcs): Folder where any service that extends the system's core functionality (such as
 sending and receiving email) are kept. Each service is to be run as an independent nodejs server
 on an available port.
 
-[www](https://github.com/linuxontheweb/lotw/tree/main/www): Folder where static assets to be used in the website (external to the LOTW system) are kept.
+[www](https://github.com/linuxontheweb/lotw/tree/main/www): Folder where static assets to be used in the website (external to the LOTW system) and documentation are kept.
 
 ### Viewing and editing files
 
