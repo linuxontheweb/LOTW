@@ -101,10 +101,10 @@ using combinations of Control, Alt and the Arrow keys.
 
 ## Command line usage
 
-Other than high level control flow structures (like if..then and for..in), the
-syntax of standard \*nix-compatible shells should mostly work. It is easiest to
-provide working examples that showcase the particular capabilities of the LOTW
-system. Those are forthcoming.
+Other than high level control flow structures (like if..then and for..in), the syntax of
+[the POSIX Shell Command Language](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html)
+should mostly work. It is easiest to provide working examples that showcase the particular
+capabilities of the LOTW system. Those are forthcoming.
 
 
 ## Development
@@ -135,12 +135,13 @@ To see the folded rows in the source code, put these lines in your .vimrc:
 	set foldmarker=«,»
 	set foldlevelstart=0
 
-I like to use the Enter key to toggle folded rows (while in "normal" mode), so
+I like to use the Enter key to toggle folded rows (while in normal mode), so
 I also have this line in .vimrc:
 
 	nmap <enter> za
 
-In order to quickly insert fold markers into the code file, I also use the following mappings.
+In order to quickly insert fold markers into the code file, I also use the following mappings
+(for normal and insert modes).
 
 This inserts an open fold marker, invoked with Alt+o:
 
