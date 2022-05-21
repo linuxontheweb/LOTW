@@ -5531,7 +5531,14 @@ this.check_open_files = check_open_files;
 //»
 //Key Handlers/Syskeys/Message Handlers«
 
+//Show key presses«
 let keydiv;
+const keydiv_blur_cb = ()=>{
+	keydiv.off();
+	keydiv.ctrlOff();
+	keydiv.altOff();
+	keydiv.shiftOff();
+};
 const toggle_key_viewer = () =>{
 if (!keydiv) {
 	let d = mkdv();
@@ -5588,14 +5595,16 @@ if (!keydiv) {
 	keydiv.altOn=()=>{d4.innerHTML="Alt";}
 	keydiv.altOff=()=>{d4.innerHTML="";}
 	keydiv.add(d4)
-
+	window.addEventListener('blur', keydiv_blur_cb);
 }
 else {
 	keydiv.del();
 	keydiv = null;
+	window.removeEventListener('blur', keydiv_blur_cb);
 }
 
 };
+//»
 
 const dokeydown = function(e, usecode) {//«
 	const check_prompt=cpr=>{//«
@@ -5698,10 +5707,14 @@ const dokeydown = function(e, usecode) {//«
 	if (debug_keydown) log(kstr);
 
 if (keydiv){
-if (code===16) keydiv.shiftOn();
-else if (code===17) keydiv.ctrlOn();
-else if (code===18) keydiv.altOn();
-else keydiv.on(chr);
+	if (code===16) keydiv.shiftOn();
+	else if (code===17) keydiv.ctrlOn();
+	else if (code===18) keydiv.altOn();
+	else {
+		if (["PGUP","HOME"].includes(chr))keydiv.on(`UP`);
+		else if (["PGDOWN","END"].includes(chr))keydiv.on(`DOWN`);
+		else keydiv.on(chr);
+	}
 }
 
 	let act = document.activeElement;
