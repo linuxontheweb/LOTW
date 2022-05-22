@@ -2011,6 +2011,12 @@ const make_window = (arg) => {//«
 	if (!appobj) appobj = {};
 	let win = make("div");
 //log(arg.FULLPATH);
+	win.toggle_chrome=()=>{
+		do_toggle_win_chrome(win);
+	};
+	win.center=()=>{
+		Core.api.center(win);
+	};
 	win._fullpath = arg.FULLPATH;
 	if (is_hidden) win.dis="none";
 	Object.defineProperty(win, "path", {
@@ -3442,7 +3448,7 @@ const window_on = (win, if_no_zup) => {//«
 	Desk.CWIN = win;
 	
 	win.zhold = null;
-	win.style.boxShadow = window_boxshadow;
+	if (!win.no_shadow) win.style.boxShadow = window_boxshadow;
 	document.activeElement.blur();
 	win.img_div.op = 0.75;
 	win.namespan.fw = "bold";
@@ -6044,7 +6050,8 @@ x=0;y=0;
 //	if (kstr=="c_CA") return toggle_show_windows(); 
 
 	if (kstr=="l_CAS") return console.clear();
-	if (kstr=="t_CAS") return keysym_funcs.test_function();
+//	if (kstr=="t_CAS") return keysym_funcs.test_function();
+	if (kstr=="t_CAS") return keysym_funcs.open_app("util.Titles");
 	if (kstr=="r_CAS") return reload_desk_icons_cb();
 	if (kstr=="k_CAS") {
 //		return (debug_keydown = !debug_keydown);
