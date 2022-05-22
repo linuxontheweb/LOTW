@@ -85,7 +85,8 @@ Win.center();
 }
 
 else if (k=="a"){
-do_set(42,`🡇 See Keystrokes Here! 🡇`,"","",110,20);
+do_set(42,`🡇 See Keystrokes Here! 🡇`
+,"","",60,20);
 }
 };
 this.onkill = function() {//«

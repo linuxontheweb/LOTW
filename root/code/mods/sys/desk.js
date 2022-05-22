@@ -5555,8 +5555,9 @@ if (!keydiv) {
 	d.b=0;
 	d.r=0;
 	d.w = 600;
-	d.h = 100;
+	d.h = 60;
 	d.fs=40;
+	d.fw=900;
 	d.tcol="#000";
 	d.bgcol="#fff";
 	d.pad=3;
@@ -5573,7 +5574,10 @@ if (!keydiv) {
 			timer = null;
 		}
 		if (s.length===1) d1.fs=50;
-		else d1.fs=30;
+		else {
+			s=`&lt;${s}&gt;`;
+			d1.fs=30;
+		}
 		d1.innerHTML=s;
 		timer = setTimeout(()=>{
 			d1.innerHTML="";
