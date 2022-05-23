@@ -132,18 +132,22 @@ on an available port.
 
 ## Viewing and editing files
 
-vim is the recommended text editor.
+vim is the recommended text editor. The instructions below are specific to vim's runtime 
+configuration file, .vimrc.
 
-To see the folded rows in the source code, put these lines in your .vimrc:
+### Enabling row folding
+To get row folding in the source code, put these lines in your .vimrc:
 
 	set foldmethod=marker
 	set foldmarker=«,»
 	set foldlevelstart=0
 
+### Toggling folds
 To quickly toggle row folds with the Enter key, add this line:
 
 	nmap <enter> za
 
+### Inserting fold markers
 These are for easily inserting fold markers into the code file (from both normal and insert mode).
 
 This inserts an open fold marker, invoked with Alt+o:
@@ -163,4 +167,5 @@ This inserts an open and close fold marker, with a space in between, invoked wit
 	execute "set <M-f>=\ef"
 	nnoremap <M-f> a//«<enter><enter>//»<esc>
 	inoremap <M-f> //«<enter><enter>//»
+
 
