@@ -98,9 +98,9 @@ the LOTW file system).
 
 ### Icons
 - **Toggle icon selection status under cursor**: Space
+- **Continuously toggle icon selection status under cursor**: Ctrl+[arrow]
 - **Select/open icon under the cursor**: Enter
 - **Open icon under cursor**: Alt+Enter
-- **Continuously select icons under cursor**: Ctrl+arrow
 - **Move selected icons to cursor**: Ctrl+m
 - **Delete selected icons**: Ctrl+Backspace
 
