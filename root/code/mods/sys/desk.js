@@ -117,7 +117,7 @@ const pathToNode=(path,opts={})=>{
 
 const{popup:_popup,poperr:_poperr,popok:_popok,make_popup:_make_popup}=WDG;
 //const popin = NS.api.widgets.popin;
-const wdgapi = NS.api.widgets
+const WDGAPI = NS.api.widgets
 const popup = (s, opts) => {
 	_popup(s, opts, DSK);
 };
@@ -4417,7 +4417,7 @@ const rm_icon = icon => {//«
 };
 this.rm_icon = rm_icon;
 //»
-const delete_icons = which => {//«
+const delete_icons = async which => {//«
 	let arr = [];
 	let usewin = desk;
 	if (Desk.CWIN && Desk.CWIN.app == FOLDER_APP) usewin = Desk.CWIN;
@@ -4428,20 +4428,19 @@ const delete_icons = which => {//«
 	}
 	arr = arr.uniq();
 	if (arr.length) {
-		WDG.popyesno("Delete " + arr.length + " icons?", ret => {
-			if (!ret) return;
-			let errprompt;
-			fs.do_fs_rm(arr, poperr, ret => {
-				icon_array_off();
-				if (usewin!==desk){
-					usewin.obj.reload();
-					if (CUR.main) delete CUR.main.lasticon;
-					CUR.set();
-				}
-			},{DSK:DSK});
+		let ret = await WDGAPI.popyesno("Delete " + arr.length + " icons?",{reverse:true});//, ret => {
+		if (!ret) return;
+		let errprompt;
+		fs.do_fs_rm(arr, poperr, ret => {
+			icon_array_off();
+			if (usewin!==desk){
+				usewin.obj.reload();
+				if (CUR.main) delete CUR.main.lasticon;
+				CUR.set();
+			}
 		});
 	}
-	return true;
+	return !!(arr.length);
 }//»
 const no_move_all_icons=()=>{for(let icn of IA)icon_off(icn);IA=[];CDICN=null;}
 
@@ -6318,7 +6317,7 @@ const get_desk_context=()=>{//«
 
 const FATAL=s=>{throw new Error(s)};
 const job_killer=async()=>{
-	let rv = await wdgapi.popin("Job id?",{title:"Job Killer"});
+	let rv = await WDGAPI.popin("Job id?",{title:"Job Killer"});
 	if (!rv) return;
 	let num = rv.pi();
 	if (!(isint(num) && num > 0)) return poperr("Need a positive integer!");

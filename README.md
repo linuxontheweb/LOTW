@@ -6,12 +6,11 @@
 
 ### It's like Linux... on the web!
 
-LOTW is all about porting the Linux/Unix (\*nix) text-based command and configuration
-ethos into the modern web platform. The desktop environment is minimal and
-very configurable.  Out of the box, the only visible UI element (other than the
-desktop) is the bar where minimized windows go.  It is essential that all tasks
-can be accomplished via the keyboard (e.g. resizing windows and changing icon
-locations).
+LOTW is all about porting the Linux/Unix (\*nix) text-based command and
+configuration ethos into the modern web platform. The desktop environment is
+minimal: the only visible UI element (other than the desktop) is the taskbar (where
+minimized windows go).  It is essential that everything can be accomplished via
+the keyboard (e.g. resizing windows and changing icon locations).
 
 ### Your files are locally stored
 

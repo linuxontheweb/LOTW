@@ -751,7 +751,8 @@ api.popyesno = (str, opts = {}) => {
 			CB: Y,
 			REV: opts.reverse,
 			TIT: opts.title,
-			WIN:opts.win
+			WIN:opts.win,
+			DEFNO: opts.defNo
 		});
 	});
 }
@@ -908,8 +909,7 @@ const make_popup = (arg, dsk) => {//«
 	}
 	const mkbut=(txt, if_active)=>{
 		let d = mkdv();
-//		if (if_active)
-		d.tabIndex="0";
+//		d.tabIndex=""+(cur_tab_index++);
 		d.onfocus=()=>{
 			d.fw="bold";
 			d.bgcol="#ccf";
@@ -954,6 +954,7 @@ const make_popup = (arg, dsk) => {//«
 	const noprop=(e)=>{
 		e.stopPropagation();
 	};
+	let cur_tab_index = 1;
 	let active_button;
 	let w = arg.WIN;
 	let _Desk;
@@ -986,7 +987,14 @@ const make_popup = (arg, dsk) => {//«
 	let oktxt, cantxt;
 	let comp_keydown;
 	let div = make('div');
-//	if (arg.CHOICES) div.choices = arg.CHOICES;
+	let butdiv = make('div');
+	let cancel_button_div;
+	let okbutdiv;
+	butdiv.pos="absolute";
+	butdiv.b=0;
+	butdiv.r=0;
+	butdiv.mar=5;
+	div.add(butdiv);
 	div.fs=18;
 	div.style.userSelect = "none";
 	div.style.boxShadow = "2px 3px 7px #444";
@@ -1136,13 +1144,14 @@ const make_popup = (arg, dsk) => {//«
 		});
 		_Desk.set_macros();
 	}
-	let okbutdiv;
+
 	okbutdiv = make('div');
+	okbutdiv.dis = "inline-block";
 	let input;
 	if (if_input||arg.USEINPUT) {
 		if (arg.USEINPUT) {
 			input = arg.USEINPUT;
-			div.add(okbutdiv);
+//			butdiv.add(okbutdiv);
 		}
 		else {
 			input = make('input');
@@ -1155,6 +1164,7 @@ const make_popup = (arg, dsk) => {//«
 			tdiv.add(make('br'));
 			tdiv.add(input);
 		}
+		input.tabIndex = ""+(cur_tab_index++);
 		input.ael('mousedown', e => {
 			e.stopPropagation();
 		});
@@ -1163,21 +1173,19 @@ const make_popup = (arg, dsk) => {//«
 			input.select();
 		}, 1);
 		div.res_input = input;
-		div.add(okbutdiv);
+//		butdiv.add(okbutdiv);
 	}
-	else if (!if_cancel) div.add(okbutdiv);
-	okbutdiv.pos = 'absolute';
+	else if (if_cancel) okbutdiv = null;
+//	else if (!if_cancel) butdiv.add(okbutdiv);
+//	else okbutdiv = null;
 	let useok = "OK";
 	if (oktxt) useok = oktxt;
 	else if (type == "yesno") {
-		if (if_rev) useok = "NO";
-		else useok = "YES";
+//		if (if_rev) useok = "NO";
+//		else useok = "YES";
+		useok = "YES";
 	}
-///*
-	okbutdiv.add(mkbut(useok,true));
-
-	okbutdiv.r = 19;
-	okbutdiv.b = 10;
+	if (okbutdiv) okbutdiv.add(mkbut(useok, true));
 	div.ok_button = okbutdiv;
 	if (keys || if_macro || no_buttons) {
 		okbutdiv.op = 0;
@@ -1270,27 +1278,26 @@ const make_popup = (arg, dsk) => {//«
 		}, parseInt(timer));
 	}
 	if (if_cancel || type == "form" || type == "yesno" || cantxt) {
-		let cancel_button_div = make('div');
-		cancel_button_div.pos = 'absolute';
+		cancel_button_div = make('div');
+		cancel_button_div.dis="inline-block";
+		cancel_button_div.marl=10;
 		let usecan = "CANCEL";
 		if (cantxt) usecan = cantxt;
 		else if (type == "yesno") {
-			if (if_rev) usecan = "YES";
-			else usecan = "NO";
+//			if (if_rev) usecan = "YES";
+//			else usecan = "NO";
+			usecan = "NO";
 		}
 		cancel_button_div.ael('click', () => {
 			do_cancel();
 		});
-		div.add(cancel_button_div);
+//		butdiv.add(cancel_button_div);
 		if (!if_input && !arg.USEINPUT && if_cancel) {
-			cancel_button_div.r = 19;
 			cancel_button_div.add(mkbut(usecan, true));
 			div.cancel_only = true;
 		} else {
-			cancel_button_div.add(mkbut(usecan));
-			cancel_button_div.r = 106;
+			cancel_button_div.add(mkbut(usecan, false));
 		}
-		cancel_button_div.b = 10;
 		div.cancel_button = cancel_button_div;
 	}
 	div.cancel = do_cancel;
@@ -1312,9 +1319,30 @@ const make_popup = (arg, dsk) => {//«
 		div.y = div.y - 17;
 	}
 
+let butdiv1, butdiv2;
+if (okbutdiv && cancel_button_div){
+	if (if_rev) {
+		butdiv1 = cancel_button_div;
+		butdiv2 = okbutdiv;
+	}
+	else{
+		butdiv1 = okbutdiv;
+		butdiv2 = cancel_button_div;
+	}
+}
+else if (okbutdiv) butdiv1 = okbutdiv;
+else if (cancel_button_div) butdiv1 = cancel_button_div;
+if (butdiv1) {
+	butdiv.add(butdiv1);
+	butdiv1.childNodes[0].tabIndex=""+(cur_tab_index++);
+}
+if (butdiv2) {
+	butdiv.add(butdiv2);
+	butdiv2.childNodes[0].tabIndex=""+(cur_tab_index++);
+}
 	if (input){}
 	else if (arg.FOCUS) arg.FOCUS.focus();
-	else if (active_button) setTimeout(()=>{active_button.focus();},10);
+	else if (butdiv1) setTimeout(()=>{butdiv1.childNodes[0].focus();},10);
 
 	if (!w) center(div);
 	else center(div, w);
