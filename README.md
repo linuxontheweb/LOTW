@@ -34,7 +34,7 @@ on a Chromebook, using an up-to-date Chrome browser.
 The system should basically work in any modern browser and host OS, but there are likely
 many tiny glitches that degrade the user experience in other browsers and/or operating systems.
 
-# Getting Started
+# Getting started
 
 First, clone this repo (duh)!
 
