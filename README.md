@@ -136,7 +136,7 @@ vim is the recommended text editor. The instructions below are specific to vim's
 configuration file, .vimrc.
 
 ### Enabling row folding
-To get row folding in the source code, put these lines in your .vimrc:
+To get row folding to work in the source code, put these lines in your .vimrc:
 
 	set foldmethod=marker
 	set foldmarker=«,»
