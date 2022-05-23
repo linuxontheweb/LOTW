@@ -78,29 +78,29 @@ the LOTW file system).
 ## Keyboard shortcuts
 
 ### Desktop
-- Open terminal: Alt+t
-- Invoke context menu: Alt+c
-- Toggle taskbar visibility: Ctrl+Alt+Shift+b
+- **Open terminal**: Alt+t
+- **Invoke context menu**: Alt+c
+- **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
 
 ### Windows
-- Maximize window: Alt+m
-- Minimize window: Alt+n
-- Close window: Alt+x
-- Fullscreen window: Alt+f
-- Move window: Shift+[arrow]
-- Resize window: Ctrl+Shift+[arrow]
-- Toggle layout mode: Ctrl+Shift+l
-- Toggle window chrome: Ctrl+Shift+w
-- Cycle window stack: Alt+\`
+- **Maximize window**: Alt+m
+- **Minimize window**: Alt+n
+- **Close window**: Alt+x
+- **Fullscreen window**: Alt+f
+- **Move window**: Shift+[arrow]
+- **Resize window**: Ctrl+Shift+[arrow]
+- **Toggle layout mode**: Ctrl+Shift+l
+- **Toggle window chrome**: Ctrl+Shift+w
+- **Cycle window stack**: Alt+\`
 
 ### Icons
-- Toggle icon cursor visibility: Ctrl+Alt+Shift+c
-- Toggle icon selection status under cursor: Space
-- Select/open icon under the cursor: Enter
-- Open icon under cursor (like double clicking): Alt+Enter
-- Continuously select icons under cursor: Ctrl+arrow
-- Move selected icons to cursor: Ctrl+m
-- Delete selected icons: Ctrl+Backspace
+- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
+- **Toggle icon selection status under cursor**: Space
+- **Select/open icon under the cursor**: Enter
+- **Open icon under cursor**: Alt+Enter
+- **Continuously select icons under cursor**: Ctrl+arrow
+- **Move selected icons to cursor**: Ctrl+m
+- **Delete selected icons**: Ctrl+Backspace
 
 
 # Command line usage
