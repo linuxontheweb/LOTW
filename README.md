@@ -143,7 +143,7 @@ To get row folding to work in the source code, put these lines in your .vimrc:
 	set foldlevelstart=0
 
 ### Toggling folds
-To quickly toggle row folds with the Enter key, add this line:
+To quickly toggle between opened and closed row folds with the Enter key, add this line:
 
 	nmap <enter> za
 
