@@ -2,9 +2,9 @@
 
 ![Screenshot of LOTW destop](https://github.com/linuxontheweb/os/blob/main/www/img/screenshot.png)
 
-## Overview
+# Overview
 
-### It's like Linux... on the web!
+## It's like Linux... on the web!
 
 LOTW is all about porting the Linux/Unix (\*nix) text-based command and
 configuration ethos into the modern web platform. The desktop environment is
@@ -12,7 +12,7 @@ minimal: the only visible UI element (other than the desktop) is the taskbar (wh
 minimized windows go).  It is essential that everything can be accomplished via
 the keyboard (e.g. resizing windows and changing icon locations).
 
-### Your files are locally stored
+## Your files are locally stored
 
 Everything that I've ever seen that called itself a "web-based operating
 system" never seemed to have any real concept of *persistent client-side state*. With
@@ -24,7 +24,7 @@ storage, accessible regardless of network status.
 	~$ echo "A bunch of interesting thoughts" > file.txt
 
 
-## Disclaimer (YMMV)
+# Disclaimer (YMMV)
 
 LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton),
 which involves ChromeOS in developer mode.  All development and testing is currently done
@@ -33,7 +33,7 @@ on a Chromebook, using an up-to-date Chrome browser.
 The system should basically work in any modern browser and host OS, but there are likely
 many tiny glitches that degrade the user experience in other browsers and/or operating systems.
 
-## Getting Started
+# Getting Started
 
 First, clone this repo (duh)!
 
@@ -50,9 +50,9 @@ Or if you want to use another port (e.g. 12345), start it like so:
 
 Then, go to: http://localhost:12345
 
-## Desktop usage
+# Desktop usage
 
-### Taskbar
+## Taskbar
 
 The visibility of the taskbar at the bottom of the screen can only be toggled
 via the keyboard shortcut, **Toggle taskbar visibility** (shortcuts are shown
@@ -64,7 +64,7 @@ to be in a "background" state, i.e., they are no longer in the window stack,
 and cannot be accessed. In this case, the taskbar *must* be brought back into
 view in order to regain access to minimized windows.
 
-### Icon cursor
+## Icon cursor
 
 The manipulation of icons is one of the main reasons why computer users are
 forced to take their hands off of the keyboard.  To give power users another
@@ -75,14 +75,14 @@ locations, and also between the desktop and folders (changing their paths in
 the LOTW file system).
 
 
-### Keyboard shortcuts
+## Keyboard shortcuts
 
-**Desktop**
+### Desktop
 - Open terminal: Alt+t
 - Invoke context menu: Alt+c
 - Toggle taskbar visibility: Ctrl+Alt+Shift+b
 
-**Windows**
+### Windows
 - Maximize window: Alt+m
 - Minimize window: Alt+n
 - Close window: Alt+x
@@ -93,7 +93,7 @@ the LOTW file system).
 - Toggle window chrome: Ctrl+Shift+w
 - Cycle window stack: Alt+\`
 
-**Icons**
+### Icons
 - Toggle icon cursor visibility: Ctrl+Alt+Shift+c
 - Toggle icon selection status under cursor: Space
 - Select/open icon under the cursor: Enter
@@ -103,7 +103,7 @@ the LOTW file system).
 - Delete selected icons: Ctrl+Backspace
 
 
-## Command line usage
+# Command line usage
 
 Other than high level control flow structures (like if..then and for..in), the syntax of
 [the POSIX Shell Command Language](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html)
@@ -111,9 +111,9 @@ should mostly work. It is easiest to provide working examples that showcase the 
 capabilities of the LOTW system. Those are forthcoming.
 
 
-## Development
+# Development
 
-### Project structure
+## Project structure
 
 [site.js](https://github.com/linuxontheweb/lotw/tree/main/site.js): The main nodejs service for sending core system files (in [root](https://github.com/linuxontheweb/lotw/tree/main/root)) to the client.
 
@@ -129,7 +129,7 @@ on an available port.
 
 [www](https://github.com/linuxontheweb/lotw/tree/main/www): Folder where static assets to be used in the website (external to the LOTW system) and documentation are kept.
 
-### Viewing and editing files
+## Viewing and editing files
 
 vim is the recommended text editor.
 
