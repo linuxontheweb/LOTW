@@ -20,6 +20,7 @@ Win.no_shadow = true;
 //Var«
 
 let blink_interval;
+let BLINK_DELAY_MS = 500;
 
 //»
 
@@ -43,7 +44,7 @@ Win.r=r;
 
 this.onappinit=()=>{
 //Main.bgcol="#fff";
-Main.bgcol="rgba(0,0,0,1)";
+Main.bgcol="#000";
 Main.tcol="#fff";
 Win.op=1;
 Main.w="";
@@ -67,13 +68,13 @@ Win.op=0;
 blink_interval = setInterval(()=>{
 		if (Win.op==="0") Win.op=1;
 		else Win.op = 0;
-	}, 1000);
+	}, BLINK_DELAY_MS);
 }
 
 }
 }//»
 
-this.onkeypress=e=>{
+this.onkeypress=e=>{//«
 
 let k = e.key;
 if (k=="0"){
@@ -88,12 +89,27 @@ else if (k=="a"){
 do_set(42,`🡇 See Keystrokes Here! 🡇`
 ,"","",60,20);
 }
-};
+};//»
 this.onkill = function() {//«
 if (blink_interval) clearInterval(blink_interval);
 
 }//»
 this.onresize = function() {//«
+}//»
+
+
+this.onfocus=()=>{//«
+
+Main.bgcol="#000";
+Main.tcol="#fff";
+
+}//»
+
+this.onblur=()=>{//«
+
+Main.bgcol="#131313";
+Main.tcol="#e9e9e9";
+
 }//»
 
 //»

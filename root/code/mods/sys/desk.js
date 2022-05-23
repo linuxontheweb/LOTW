@@ -3074,8 +3074,8 @@ const toggle_win_layout = (winarg) => {//«
 		odiv.pos = "absolute";
 		odiv.w = rect.width;
 		odiv.h = rect.height; 
-		odiv.bgcol=Core.api.randCol(0.25);
-//		odiv.bgcol = "rgba(0,0,0,0.25)";
+//		odiv.bgcol=Core.api.randCol(0.25);
+		odiv.bgcol = "rgba(255,255,255,0.4)";
 		odiv.x = 0;
 		odiv.y = 0;
 		odiv.z = 10000000;
@@ -5547,25 +5547,41 @@ const keydiv_blur_cb = ()=>{
 };
 const toggle_key_viewer = () =>{
 if (!keydiv) {
+	let o = mkdv();
+	o.pos = "absolute";
+	o.innerHTML="Keystroke Viewer";
+	o.b=0;
+	o.r=0;
+	o.w = 600;
+	o.h = 60;
+	o.tcol="#000";
+	o.bgcol="#fff";
+	o.fs = 50;
+	o.z=CGZ+2;
+	o.fw=900;
+	o.ta="center";
+	o.padb=4;
+
 	let d = mkdv();
 	d.pos = "absolute";
 	d.dis = "flex";
-	d.style.justifyContent="space-between";
 	d.style.alignItems="center";
+	d.style.justifyContent="space-between";
 	d.b=0;
 	d.r=0;
 	d.w = 600;
 	d.h = 60;
-	d.fs=40;
+	d.fs=50;
 	d.fw=900;
 	d.tcol="#000";
 	d.bgcol="#fff";
 	d.pad=3;
 	d.z=CGZ+1;
 	desk.add(d);
+	desk.add(o);
 	keydiv = d;	
 	let d1 = mkdv();d1.w="38%";
-	d1.bor = "1px dotted #000";
+	d1.bor = "1px solid #000";
 	d1.ta="center";
 	let timer = null;
 	keydiv.on=(s)=>{
@@ -5586,26 +5602,29 @@ if (!keydiv) {
 	keydiv.add(d1)
 
 	let d2 = mkdv();d2.w="19%";
-	d2.bor = "1px dotted #000";
+	d2.bor = "1px solid #000";
 	d2.ta="center";
 	keydiv.shiftOn=()=>{d2.innerHTML="Shift";}
 	keydiv.shiftOff=()=>{d2.innerHTML="";}
 	keydiv.add(d2)
 
 	let d3 = mkdv();d3.w="19%";
-	d3.bor = "1px dotted #000";
+	d3.bor = "1px solid #000";
 	d3.ta="center";
 	keydiv.ctrlOn=()=>{d3.innerHTML="Ctrl";}
 	keydiv.ctrlOff=()=>{d3.innerHTML="";}
 	keydiv.add(d3)
 
 	let d4 = mkdv();d4.w="19%";
-	d4.bor = "1px dotted #000";
+	d4.bor = "1px solid #000";
 	d4.ta="center";
 	keydiv.altOn=()=>{d4.innerHTML="Alt";}
 	keydiv.altOff=()=>{d4.innerHTML="";}
 	keydiv.add(d4)
 	window.addEventListener('blur', keydiv_blur_cb);
+setTimeout(()=>{
+o.del();
+},1500);
 }
 else {
 	keydiv.del();
