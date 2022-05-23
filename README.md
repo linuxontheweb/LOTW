@@ -36,7 +36,7 @@ many tiny glitches that degrade the user experience in other browsers and/or ope
 
 # Getting started
 
-First, clone this repo (duh)!
+First, clone this repo!
 
 Then, start the site server with nodejs (uses the default port, 8080):
 
@@ -62,8 +62,8 @@ the taskbar is visible, then the windows held by it are kept in the window
 stack, and can therefore be accessed by the **Cycle window stack** keyboard
 shortcut. If the taskbar is not visible, the windows held by it are considered
 to be in a "background" state, i.e., they are no longer in the window stack,
-and cannot be accessed. In this case, the taskbar *must* be brought back into
-view in order to regain access to minimized windows.
+and cannot be accessed via the graphical interface; to regain access, the
+taskbar *must* be brought back into view.
 
 ## Icon cursor
 
