@@ -1,10 +1,12 @@
 # Linux on the Web (LOTW)
 
-![Screenshot of LOTW destop](https://github.com/linuxontheweb/os/blob/main/www/img/screenshot.png)
+## Screenshot
 
-# Overview
+![Screenshot of LOTW desktop](https://github.com/linuxontheweb/os/blob/main/www/img/screenshot.png)
 
-## It's like Linux... on the web!
+## Overview
+
+### It's like Linux... on the web!
 
 LOTW is all about porting the Linux/Unix (\*nix) text-based command and
 configuration ethos into the modern web platform. The desktop environment is
@@ -12,7 +14,7 @@ minimal: the only visible UI element (other than the desktop) is the taskbar (wh
 minimized windows go).  It is essential that everything can be accomplished via
 the keyboard (e.g. resizing windows and changing icon locations).
 
-## Your files are locally stored
+### Your files are locally stored
 
 Everything that I've ever seen that called itself a "web-based operating
 system" never seemed to have any real concept of *persistent client-side state*. With
