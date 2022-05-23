@@ -1,4 +1,4 @@
-# Linux on the Web (LOTW) basics
+# About Linux on the Web (LOTW)
 
 ## Screenshot
 
