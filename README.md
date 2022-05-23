@@ -150,19 +150,20 @@ To quickly toggle between opened and closed row folds with the Enter key, add th
 ### Inserting fold markers
 These are for easily inserting fold markers into the code file (from both normal and insert mode).
 
-This inserts an open fold marker, invoked with Alt+o:
+To insert an open fold marker, invoked with Alt+o, add these lines:
 
 	execute "set <M-o>=\eo"
 	nnoremap <M-o> a//«<esc>
 	inoremap <M-o> //«
 
-This inserts a close fold marker, invoked with Alt+c:
+To insert close fold marker, invoked with Alt+c, add these lines:
 
 	execute "set <M-c>=\ec"
 	nnoremap <M-c> a//»<esc>
 	inoremap <M-c> //»
 
-This inserts an open and close fold marker, with a space in between, invoked with Alt+f:
+To insert insert both an open and close fold marker, with a space in between,
+invoked with Alt+f, add these lines:
 
 	execute "set <M-f>=\ef"
 	nnoremap <M-f> a//«<enter><enter>//»<esc>
