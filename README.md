@@ -77,10 +77,11 @@ the LOTW file system).
 
 ## Keyboard shortcuts
 
-### Desktop
+### General
 - **Open terminal**: Alt+t
 - **Invoke context menu**: Alt+c
 - **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
+- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
 
 ### Windows
 - **Maximize window**: Alt+m
@@ -94,7 +95,6 @@ the LOTW file system).
 - **Cycle window stack**: Alt+\`
 
 ### Icons
-- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
 - **Toggle icon selection status under cursor**: Space
 - **Select/open icon under the cursor**: Enter
 - **Open icon under cursor**: Alt+Enter
