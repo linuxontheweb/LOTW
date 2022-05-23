@@ -156,7 +156,7 @@ To insert an open fold marker, invoked with Alt+o, add these lines:
 	nnoremap <M-o> a//«<esc>
 	inoremap <M-o> //«
 
-To insert close fold marker, invoked with Alt+c, add these lines:
+To insert a close fold marker, invoked with Alt+c, add these lines:
 
 	execute "set <M-c>=\ec"
 	nnoremap <M-c> a//»<esc>
