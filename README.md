@@ -26,7 +26,7 @@ storage, accessible regardless of network status.
 	~$ echo "A bunch of interesting thoughts" > file.txt
 
 
-# Disclaimer (YMMV)
+## Disclaimer (YMMV)
 
 LOTW is developed in [the crouton environment](https://github.com/dnschneid/crouton),
 which involves ChromeOS in developer mode.  All development and testing is currently done
