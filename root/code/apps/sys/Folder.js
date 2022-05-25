@@ -37,8 +37,9 @@ Main.add(dd);
 Main.overy="auto";
 Main.overx="hidden";
 Main.tabIndex="-1";
-Main.pad=5;
+//Main.pad=5;
 const icondv = mkdv();
+icondv.mar=5;
 icondv.main = Main;
 icondv.win = Main.top;
 icondv.pos = "relative";
@@ -74,7 +75,7 @@ const reload = ()=>{//«
 	icondv.innerHTML="";
 	init();
 	stat(`${dir.KIDS._keys.length-2} entries`);
-	topwin.CURSOR.set();
+	if (topwin.CURSOR) topwin.CURSOR.set();
 };//»
 
 const stat=(s)=>{statbar.innerHTML=s;};

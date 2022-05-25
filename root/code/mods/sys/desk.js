@@ -244,7 +244,7 @@ let std_keysym_map={};
 //Style/CSS Values«
 
 //const TASK_BAR_COL_RGB="16,16,16";
-let DEF_APP_BG_COL = "#fff";
+let DEF_APP_BG_COL = "#271313";
 let APP_BG_COL;
 
 const TASK_BAR_COL_RGB="0,0,0";
@@ -3725,6 +3725,7 @@ if (globals.read_only){
 	let paths = [];
 	let good = [];
 	let fakes = [];
+	let proms = [];
 	if (e && destpath === desk_path) usewin = desk;
 	for (let icn of ICONS) {
 		icon_off(icn);
@@ -3835,7 +3836,6 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 	let origwin = ICONS[0].parwin;
 	let real_locs = [];
 	let del_icons = [];
-	let proms = [];
 	for (let icn of ICONS) {
 		if (icn.move_cb) icn.move_cb();
 		icn.op=0.5;
@@ -3854,17 +3854,17 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 			vacate_icon_slot(icn);
 			icn.loc(r.left, r.top+scrdiff);
 			desk.add(icn);
-			move_icon(icn, loc.x-winx(), loc.y-winy(), {scale:0.25, fade:true, cb:()=>{
+			proms.push(move_icon(icn, loc.x-winx(), loc.y-winy(), {scale:0.25, fade:true, cb:()=>{
 //				if (fake) fake.del();
 				icn.del();}
-			});
+			}));
 		} else if (usewin == desk) { /*Onto the desktop:get location from 'e',passed into the desktop's ondrop event handler*/
 			icn.loc(r.left, r.top+scrdiff);
 			desk.add(icn);
 //icn.move_cb=()=>{
 //if (fake) fake.del();
 //};
-			place_in_icon_slot(icn,{X:e.clientX-winx(),Y:e.clientY-winy()});
+			proms.push(place_in_icon_slot(icn,{X:e.clientX-winx(),Y:e.clientY-winy()}));
 		}
 		else { /*Onto a folder main window,from the desktop or another folder. The folder automatically places it*/
 			const movecb=()=>{
@@ -3902,11 +3902,11 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 				usewin.icon_div.add(fake);
 				let r2 = fake.gbcr();
 				fake.del();
-				move_icon(icn, r2.left, r2.top, {cb:movecb});
+				proms.push(move_icon(icn, r2.left, r2.top, {cb:movecb}));
 			}
 			else {
 				wr = usewin.gbcr();
-				move_icon(icn, wr.left, wr.top+usewin.titlebar.clientHeight, {cb:movecb});
+				proms.push(move_icon(icn, wr.left, wr.top+usewin.titlebar.clientHeight, {cb:movecb}));
 			}
 		}
 		if (nextsib){
@@ -3918,6 +3918,13 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 			fakes.push(fake);
 		}
 	}
+	Promise.all(proms).then(()=>{
+//		for (let fak of fakes) fak.del();
+if (origwin && origwin !== desk){
+origwin.obj.reload();
+}
+
+	});
 	fs.com_mv(shell_exports, paths, do_copy, {
 		WIN: usewin,
 		ICONS: icon_obj
