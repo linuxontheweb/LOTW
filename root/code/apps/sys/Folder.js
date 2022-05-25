@@ -105,20 +105,31 @@ const options = {
 observer = new IntersectionObserver((ents)=>{
 	ents.forEach(ent => {
 		let d = ent.target;
-		if (d.selected) return;
 		if (ent.isIntersecting) {
-			let icn = makeIcon(kids[d.dataset.name], d, observer);
-			icn.parwin = topwin;
+//			let icn = makeIcon(kids[d.dataset.name], d, observer);
+//			icn.parwin = topwin;
+			d.show();
 		}
 		else {
-//log(d.selected);
-			d.innerHTML="";
+			d.hide();
+//			d.innerHTML="";
 		}
 	});
 }, options);
 
-for (let kid of icondv.children) observer.observe(kid);
-
+for (let kid of icondv.children) {
+//log(kid.dataset.name);
+kid.show = ()=>{
+	let icn = makeIcon(kids[kid.dataset.name], kid, observer);
+	icn.parwin = topwin;
+	kid.showing = true;
+};
+kid.hide = ()=>{
+	kid.innerHTML="";
+	kid.showing = false;
+};
+	observer.observe(kid);
+}
 is_loading = false;
 
 }//»

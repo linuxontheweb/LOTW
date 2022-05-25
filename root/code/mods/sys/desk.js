@@ -3876,6 +3876,7 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 		let nextsib;
 //		let fake;
 		if (icn.parwin!==desk) {
+			if (!icn.showing) icn.show();
 			let mn = icn.parwin.main;
 			if (mn.scrollTop > 0) scrdiff = mn.scrollTop + r.height;
 			nextsib = icn.nextSibling;
@@ -4803,7 +4804,6 @@ const icon_off = (icon, do_vacate) => {//«
 	if (do_vacate && ICONS.includes(icon)) ICONS.splice(ICONS.indexOf(icon), 1);
 	icon.bor = "2px solid transparent";
 	icon.bgcol="";
-	icon.selected = false;
 }//»
 const icon_on = (icon, do_add) => {//«
 	if (!(icon && icon.imgdiv)) return;
@@ -4819,7 +4819,6 @@ const icon_on = (icon, do_add) => {//«
 		icon.bor = FOLDER_ICON_BOR;
 		icon.bgcol = FOLDER_ICON_BG;
 	}
-	icon.selected = true;
 }//»
 //const make_icon_if_new = (path, appwinarg, fent) => {
 const make_icon_if_new = (fobj, appwinarg, fent) => {//«
@@ -6048,13 +6047,11 @@ return;
 		else if (kstr=="BACK_C"&&ICONS.length)return delete_icons();
 		else if (kstr=="a_C"){/*Select all icons*/
 			icon_array_off();
-//			let icons = get_icon_array(((!!cwin)?cwin:desk), true);
-let icons;
-if (!cwin) icons = Array.from(desk.children).filter(el=>el.className==="icon");
-else icons = Array.from(cwin.getElementsByClassName("icon"));
+			let icons;
+			if (!cwin) icons = Array.from(desk.children).filter(el=>el.className==="icon");
+			else icons = Array.from(cwin.icon_div.childNodes);
 			for (let icn of icons) icon_on(icn,true);
 		}
-//		else if ((!cwin||cwin.app==FOLDER_APP)&&CUR.ison()){
 		else if ((!cwin||cwin.app==FOLDER_APP)){
 if (kstr=="c_"){
 if (CUR.ison()) {
