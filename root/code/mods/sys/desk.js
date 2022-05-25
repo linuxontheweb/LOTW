@@ -607,6 +607,20 @@ CUR.set=()=>{
 		}
 	}
 };
+CUR.zero=()=>{
+	if (CUR.isdesk()){
+		CUR.x=desk_grid_start_x;
+		CUR.y=desk_grid_start_y;
+	}
+	else{
+		CUR.x=CUR_FOLDER_XOFF;
+		CUR.y=CUR.main.scrollTop;
+		let icn = CUR.geticon();
+		if (!icn) return;
+		CUR.x = icn.offsetLeft;
+		CUR.y = icn.offsetTop;
+	}
+};
 CUR.todesk=()=>{
 	if (CUR.parentNode===desk){
 		return CUR.on();
@@ -637,8 +651,13 @@ CUR.right=(if_ctrl)=>{
 		return;
 	}
 	let icn = CUR.geticon();
-	if (!icn) return;
-	let next = icn.nextSibling;
+	let next;
+	if (!icn) {
+		let num = CUR.icon_div.childNodes.length;
+		if (!num) return;
+		next = CUR.icon_div.childNodes[0];
+	}
+	else next = icn.nextSibling;
 	if (!next) return;
 	let xpos = next.offsetLeft;
 	let ypos = next.offsetTop;
@@ -670,8 +689,13 @@ CUR.left=(if_ctrl)=>{
 		return;
 	}
 	let icn = CUR.geticon();
-	if (!icn) return;
-	let prev = icn.previousSibling;
+	let prev;
+	if (!icn) {
+		let num = CUR.icon_div.childNodes.length;
+		if (!num) return;
+		prev = CUR.icon_div.childNodes[num-1];
+	}
+	else prev = icn.previousSibling;
 	if (!prev) return;
 	let xpos = prev.offsetLeft;
 	let ypos = prev.offsetTop;
@@ -693,7 +717,10 @@ CUR.up=if_ctrl=>{
 		return;
 	}
 	let icn = CUR.geticon();
-	if (!icn) return;
+	if (!icn) {
+		CUR.left();
+		return;
+	}
 	const doit=()=>{
 		let r = icn.gbcr();
 		let elem = document.elementFromPoint(5+r.left, r.top-10);
@@ -726,7 +753,10 @@ CUR.down=if_ctrl=>{
 		return;
 	}
 	let icn = CUR.geticon();
-	if (!icn) return;
+	if (!icn) {
+		CUR.right();
+		return;
+	}
 	const doit=()=>{
 		let r = icn.gbcr();
 		let elem = document.elementFromPoint(5+r.left, 5+IGSY+r.top);
@@ -4773,6 +4803,7 @@ const icon_off = (icon, do_vacate) => {//«
 	if (do_vacate && ICONS.includes(icon)) ICONS.splice(ICONS.indexOf(icon), 1);
 	icon.bor = "2px solid transparent";
 	icon.bgcol="";
+	icon.selected = false;
 }//»
 const icon_on = (icon, do_add) => {//«
 	if (!(icon && icon.imgdiv)) return;
@@ -4788,6 +4819,7 @@ const icon_on = (icon, do_add) => {//«
 		icon.bor = FOLDER_ICON_BOR;
 		icon.bgcol = FOLDER_ICON_BG;
 	}
+	icon.selected = true;
 }//»
 //const make_icon_if_new = (path, appwinarg, fent) => {
 const make_icon_if_new = (fobj, appwinarg, fent) => {//«

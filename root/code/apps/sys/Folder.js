@@ -105,11 +105,15 @@ const options = {
 observer = new IntersectionObserver((ents)=>{
 	ents.forEach(ent => {
 		let d = ent.target;
+		if (d.selected) return;
 		if (ent.isIntersecting) {
 			let icn = makeIcon(kids[d.dataset.name], d, observer);
 			icn.parwin = topwin;
 		}
-		else d.innerHTML="";
+		else {
+//log(d.selected);
+			d.innerHTML="";
+		}
 	});
 }, options);
 
@@ -155,9 +159,14 @@ console.error(`Directory not found: ${path}`);
 this.reload=reload;
 
 this.onkeydown = function(e,s) {//«
-if (s=="r_"){
-reload();
+if (s=="r_")reload();
+else if (s=="0_"){
+	if (topwin.CURSOR) {
+		topwin.CURSOR.zero();
+	}
+//topwin.CURSOR.set();
 }
+
 
 }//»
 this.onkill = function() {//«
