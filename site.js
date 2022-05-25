@@ -57,10 +57,13 @@ if (process.argv[3]){
 
 let arr = process.argv[1].split("/");arr.pop();
 const BINPATH = arr.join("/")+"/root/bin";
+const EXAMPLESPATH = arr.join("/")+"/www/examples";
+const APPPATH = arr.join("/")+"/root/code/apps";
 
 //»
 
 //Util«
+
 const mime_from_path=(path, force_bin)=>{//«
 	if (path.match(/\.jpg$/i)) return "image/jpeg"
 	else if (path.match(/\.gif$/i)) return "image/gif"
@@ -88,22 +91,48 @@ const header=(res, code, mimearg)=>{//«
 	}
 	else res.writeHead(code, {'Content-Type': usemime, 'Access-Control-Allow-Origin': "*"});
 }//»
-const readdir=path=>{//«
+const readdir=(path, opts={}, pattern)=>{//«
 
 return new Promise(async(Y,N)=>{
+let pathext="";
+let regexp = null;
+
+if (pattern){
+if (pattern.match("\.")){
+let arr = pattern.split(".");
+let fname = arr.pop();
+if (fname) regexp = new RegExp("^" + fname.replace(/\./g,"\\."));
+path = `${path}/`+arr.join("/");
+}
+else regexp = new RegExp("^" + pattern.replace(/\./g,"\\."));
+}
+//log(regexp);
+
     let dir = fs.opendirSync(path);
     let ent = await dir.read();
 	let arr = [];
     while(ent){
         let name = ent.name;
-        if (ent.name.match(/\.js$/)) {
+        if (opts.getDir || opts.getRaw || ent.name.match(/\.js$/)) {
             if (ent.isSymbolicLink()){
                 try{
                     ent = fs.statSync(`${path}/${name}`);
                 }catch(e){}
             }
-            if (ent && ent.isFile()) {
-				arr.push(name.replace(/\.js$/,""));
+            if (ent) {
+				if (regexp && !regexp.test(name)) {
+        			ent = await dir.read();
+					continue;
+				}
+				if (ent.isFile()) {
+					if (!name.match(/^\./)) {
+						if (opts.getRaw) arr.push(name);
+						else arr.push(name.replace(/\.js$/,""));
+					}
+				}
+				else if (ent.isDirectory()){
+					if (opts.getDir) arr.push(name);
+				}
 			}
         }   
         ent = await dir.read();
@@ -127,6 +156,8 @@ const handle_request=async(req, res, url, args)=>{//«
 		if (url.match(/^\/(desk|shell)$/)) return res.end(OS_HTML);
 		if (url.match(/^\/_/)){
 			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
+			else if (url == "/_getapp") res.end(JSON.stringify(await readdir(APPPATH, {getDir:true, getRaw:true}, args.path)));
+			else if (url == "/_getexamples") res.end(JSON.stringify(await readdir(EXAMPLESPATH, {getRaw: true})));
 			else if (url == "/_ip") {
 				let rv = await fetch("https://ifconfig.me/ip");
 				if (!(rv && rv.ok)) return nogo(res, "Could not get ip address");
@@ -147,11 +178,12 @@ const handle_request=async(req, res, url, args)=>{//«
 			"json": "application/javascript",
 			"html": "text/html",
 			"txt": "text/plain",
+			"synth": "text/plain",
 			"sh": "text/plain",
 			"gz": "application/gzip",
 			"wav": "audio/wav"
 		}
-		if (marr = url.match(/\.(js|html|json|txt|sh|mf)$/)) {
+		if (marr = url.match(/\.(js|html|json|txt|sh|mf|synth)$/)) {
 			usemime = ext_to_mime[marr[1]];
 			try {
 				str = fs.readFileSync("."+decodeURIComponent(url), 'utf8');

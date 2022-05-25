@@ -45,15 +45,20 @@ Of course, the nodes can be arbitrarily complex abstractions of, e.g. musical in
 and the configuration files can likewise be arbitrarily complex.
 
 */
+export const app = function (arg) {
+const {Core, Main, NS}=arg;
+const{api:capi,KC,kc,log,cwarn,cerr,globals,Desk}=Core;
 
 const KNOBVALS=(globals.AppVars["Synth-KNOBVALS"]||[0,0,0,0,0,0,0,0,0]);
 const KV = KNOBVALS;
 
-const log=(...args)=>console.log(...args);
-const wrn=(...args)=>console.warn(...args);
-const cwarn=wrn;
-const err=(...args)=>console.error(...args);
-const cerr=err;
+//const log=(...args)=>console.log(...args);
+//const wrn=(...args)=>console.warn(...args);
+//const cwarn=wrn;
+//const err=(...args)=>console.error(...args);
+//const cerr=err;
+const wrn = cwarn;
+const err = cerr;
 
 const n = arg.NODE || Core.get_appvar(Main.top, "NODE");//Node
 
@@ -87,6 +92,10 @@ win.title = `${type}\x20(${name})`;
 
 this.onkill = ()=>{
 	delete n._window;
+};
+
+this.onkeydown=(e,s)=>{
+log(s);
 };
 
 this.onmidiknob=(e)=>{
@@ -143,4 +152,7 @@ this.onmidikeyup=e=>{
 //    f&&f();
 log(e);
 };
+
+}
+
 

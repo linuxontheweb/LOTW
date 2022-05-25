@@ -11,7 +11,6 @@ export const app = function (arg) {
 //const cerr=err;
 
 const {Core, Main, NS}=arg;
-//log(Core);
 const{api:capi,KC,kc,log,cwarn,cerr,globals,Desk}=Core;
 const {util,dev_mode,dev_env}=globals;
 const {gbid,mk,mkdv,mksp}=util;
@@ -19,6 +18,7 @@ const {fs}=NS.api;
 const {poperr}=globals.widgets;
 
 const NUM = Number.isFinite;
+
 
 //const {mixer, ctx}=globals.audio;
 
@@ -332,6 +332,9 @@ Main.innerHTML = "Could not load module 'av.synth'!";
 //OBJ/CB«
 
 this.onloadfile=bytes=>{init(Core.api.bytesToStr(bytes));};
+this.onload=()=>{
+	if (arg.TEXT) init(arg.TEXT);
+};
 this.onfocus=()=>{};
 this.onescape=()=>{return false;};
 

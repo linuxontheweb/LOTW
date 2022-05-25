@@ -3974,6 +3974,24 @@ const do_ls = (args)=>{
 //XXXXXXXXXXXX
 
 builtins = {//«
+'example':async(args)=>{
+	let opts=failopts(args,{s:{l:1},l:{list:1}});
+	if (!opts) return;
+	if (opts.list||opts.l){
+		let rv = await fetch(`/_getexamples`)
+		if (!(rv && rv.ok)) return cberr(`???`);
+		let arr = await rv.json();
+		woutarr(arr);
+		cbok();
+		return;
+	}
+	let name = args.shift();
+	if (!name) return cberr("Need example name");
+	let rv = await fetch(`/www/examples/${name}`)
+	if (!(rv && rv.ok)) return cberr(`${name}: example not found`);
+	wout(await rv.text());
+	cbok();
+},
 'ip':async(args)=>{
 	let rv = await fetch("https://ifconfig.me/ip")
 	if (!(rv && rv.ok)) return cberr("Could not get ip address");
@@ -4299,7 +4317,24 @@ cerr("Dropping", ret);
 'true': cbok,
 'close':args=>{if(!Desk)return cberr(ENODESK);let id=args.shift();if(!id)return cberr("No app given!");if(!id.match(/^win_\d+$/))return cberr("Invalid window id");let win=document.getElementById(id);if(!win)return cberr("Nothing found");win.force_kill();cbok();},
 'open':async args=>{let opts=getwinargopts(args);if(!opts)return;if(!_Desk)return cberr(ENODESK);let path=args.shift();if(!path)return cberr("No path!");let fent=await pathToNode(path);if(!fent)return cberr(path+":\x20file not found");_Desk.open_file_by_path(fent.fullpath,null,opts);cbok();},
-'openapp':async args=>{let opts=getwinargopts(args);if(!opts)return;if(!_Desk)return cberr(ENODESK);let which=args.shift();if(!which)return cberr("No app given!");if(!await _Desk.openApp(which,opts.FORCE,opts.WINARGS))return cberr();cbok();},
+'app': async args => {
+	const openit=async(usearg)=>{
+		if (!await _Desk.openApp(which, opts.FORCE, opts.WINARGS, usearg)) return cberr();
+		cbok();
+	};
+	let opts = getwinargopts(args);
+	if (!opts) return;
+	if (!_Desk) return cberr(ENODESK);
+	let which = args.shift();
+	if (!which) return cberr("No app given!");
+	let rdr = get_reader();
+	if (rdr.is_terminal) return openit();
+	read_stdin(rv=>{
+		if (rv.EOF===true) return;
+		if (!(isarr(rv)&&isstr(rv[0]))) return cberr("Unknown input received (check console)");
+		openit({TEXT: rv.join("\n")});
+	})
+},
 'alias':args=>{for(let i=0;i<args.length;i++){let got=args[i];let com,rep;if(got.match(/=$/)&& args[i+1]){com=got.replace(/=$/,"");i++;rep=args[i];}else if(got.match(/=/)){let arr=got.split("=");com=arr[0];rep=arr[1];}if(com.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/))termobj['ALIASES'][com]=rep;else werr("Bad command name:\x20"+com);}cbok();},
 'env': () => {
 	let keys = Object.keys(var_env).concat(Object.keys(tmp_env));

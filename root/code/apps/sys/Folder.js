@@ -74,6 +74,7 @@ const reload = ()=>{//«
 	icondv.innerHTML="";
 	init();
 	stat(`${dir.KIDS._keys.length-2} entries`);
+	topwin.CURSOR.set();
 };//»
 
 const stat=(s)=>{statbar.innerHTML=s;};

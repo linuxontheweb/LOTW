@@ -1,0 +1,15 @@
+Osc o1 
+o1.t = "square" ;
+o1.freq  =  "D3" ;
+ADSR e1(.05,.05,.1,.1);
+
+Note n(o1,e1);
+
+Clock clk1(4.0);
+NoteSeq seqn('["nnnn","n--n","-nn-","n-n-","----"]',true);
+
+clk1 > seqn;
+
+Spk s;
+
+n > s;

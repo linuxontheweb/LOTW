@@ -49,7 +49,7 @@ Continuously changing Clock BPS via hardware controllers introduces hiccups into
 the pattern. Not sure how much it relates to the work being put into spitting 
 out and responding to midi or kb events.
 
-A NoteSequencer is plays a series of single notes at a time, but each of the times can
+A NoteSeq is plays a series of single notes at a time, but each of the times can
 call different notes.  So then we can figure out how to create composite ChordSequencer notes.
 
 »*/
@@ -105,11 +105,11 @@ Note m(o2,e2);
 
 Clock clk1(4);
 Clock clk2(4);
-//NoteSequencer seqn('["nnnn"]',true);
-//NoteSequencer seqm('["mmmm"]',true);
-NoteSequencer seqn('["nnnn","n--n","-nn-","n-n-","----"]',true);
-NoteSequencer seqm('["mmmm","m--m","-mm-","m-m-","----"]',true);
-//NoteSequencer seqm('["mmmm","m--m","-mm-","--m-"]',true);
+//NoteSeq seqn('["nnnn"]',true);
+//NoteSeq seqm('["mmmm"]',true);
+NoteSeq seqn('["nnnn","n--n","-nn-","n-n-","----"]',true);
+NoteSeq seqm('["mmmm","m--m","-mm-","m-m-","----"]',true);
+//NoteSeq seqm('["mmmm","m--m","-mm-","--m-"]',true);
 
 clk2 > seqn;
 clk1 > seqm;
@@ -129,14 +129,14 @@ knb1 > m.det;
 up > clk1.testinc;
 dn > clk1.testdec;
 
-MidiKeyDown mkd1(48);
+MidiDown mkd1(48);
 mkd1 > clk1.pausereset;
-MidiKeyUp mku1(48);
+MidiUp mku1(48);
 mku1 > clk1.unpause;
 
-//MidiKeyDown mkd2(50);
+//MidiDown mkd2(50);
 //mkd2 > clk2.pausereset;
-//MidiKeyUp mku2(50);
+//MidiUp mku2(50);
 //mku2 > clk2.unpause;
 
 Gain g; 
@@ -420,7 +420,7 @@ let noteToScaleIndex = {//«
 const Clock = function(_bps){//«
 this.connect=(to)=>{
 	let ctr=to.constructor.name;
-	if (ctr!="NoteSequencer") throw new Error("Bad connectee: "+ctr);
+	if (ctr!="NoteSeq") throw new Error("Bad connectee: "+ctr);
 	conns.push(to);
 }
 let cur_bps = _bps;
@@ -515,7 +515,7 @@ this.start = ticker;
 //ticker();
 };//»
 
-const NoteSequencer = function(measures, if_repeat){//«
+const NoteSeq = function(measures, if_repeat){//«
 
 const err=s=>{throw new Error(s);}
 
@@ -641,7 +641,7 @@ const MidiKnob=function(which,min,max){//«
 		for (let con of conns) con.setValueAtTime(v,ctx.currentTime);
 	};
 };//»
-const MidiKeyDown = function(which){//«
+const MidiDown = function(which){//«
 	let conns = [];
 	this.connect=to=>{
 		conns.push(to);
@@ -650,7 +650,7 @@ const MidiKeyDown = function(which){//«
 		for (let f of conns) f();
 	};
 };//»
-const MidiKeyUp = function(which){//«
+const MidiUp = function(which){//«
 	let conns = [];
 	this.connect=to=>{
 		conns.push(to);
@@ -661,8 +661,7 @@ const MidiKeyUp = function(which){//«
 
 };//»
 
-
-const Module = function(obj){
+const Module = function(obj){//«
 
 	this.connect=(to)=>{
 		obj.lineout.connect(to);
@@ -672,11 +671,11 @@ const Module = function(obj){
 
 	this.service_obj = obj;
 
-};
+};//»
 
-const Symbol = function(node){
+const Symbol = function(node){//«
 	this.ref = node;
-};
+};//»
 
 const Clip=function(){//«
 
@@ -712,11 +711,11 @@ const Clip=function(){//«
 
 const FuncMap={//«
 
-	NoteSequencer:(...args)=>{//«
-		const err=s=>{create_error="NoteSequencer:"+s;};
+	NoteSeq:(...args)=>{//«
+		const err=s=>{create_error="NoteSeq:"+s;};
 		let nargs = args.length;
 		if (nargs<1||nargs>2) return err("Bad number of args");
-		return new NoteSequencer(...args);
+		return new NoteSeq(...args);
 	},//»
 	Clock:(...args)=>{//«
 		const err=s=>{create_error="Clock:"+s;};
@@ -725,13 +724,13 @@ const FuncMap={//«
 		if (!POS(bps)) return err("Bad bps");
 		return new Clock(bps);
 	},//»
-	MidiKeyDown:(...args)=>{//«
-		const err=s=>{create_error="MidiKeyDown:"+s;};
-		return new MidiKeyDown(...args);
+	MidiDown:(...args)=>{//«
+		const err=s=>{create_error="MidiDown:"+s;};
+		return new MidiDown(...args);
 
 	},//»
-	MidiKeyUp:(...args)=>{//«
-		return new MidiKeyUp(...args);
+	MidiUp:(...args)=>{//«
+		return new MidiUp(...args);
 	},//»
 	MidiKnob:(...args)=>{//«
 		const err=s=>{create_error="MidiKnob:"+s;};
@@ -747,6 +746,10 @@ const FuncMap={//«
 
 		return new MidiKnob(which,min,max);
 	},//»
+	KbKey:(...args)=>{//«
+		return new KbKey(...args);
+	},//»
+
 	Note:(...args)=>{//«
 		const err=s=>{create_error="Note: "+s;};
 		const ok_sources=["OscillatorNode","AudioBufferSourceNode","Tone"];
@@ -757,9 +760,6 @@ const FuncMap={//«
 		if (!ok_sources.includes(src.constructor.name)) return err("Bad first arg (source node)");
 		if (!ok_envs.includes(env.constructor.name)) return err("Bad second arg (envelope node)");
 		return new Note(...args);
-	},//»
-	KbKey:(...args)=>{//«
-		return new KbKey(...args);
 	},//»
 	ADSR:(...args)=>{//«
 		const err=s=>{create_error="ADSR:"+s;};
@@ -854,41 +854,10 @@ console.error(s);
 		});
 	},//»
 
-/*
-	Clip: async (...args)=>{//«
-		const err=s=>{
-			create_error="Clip:\x20"+s;
-//			y();
-		};
-
-		if (args.length!=1) {
-			return err("Need a filename!");
-		}
-		let path = args[0];
-		if (!path.match(/^\//)) return err("Not a fullpath: "+path);
-		
-		let blob = await fs.readFile(path);
-		if (!blob) return err("File not found: "+path);
-		if (!(blob instanceof Blob)) return err(`Expected a Blob!`);
-		let buf = await Core.api.toBuf(blob);
-
-ctx.decodeAudioData();
-		
-		let node = ctx.createBufferSource();
-//		node._noisetype = t;
-//		node.buffer = buf;
-//		node.loop=true;
-log(node);
-		return node;
-
-	},//»
-*/
-///*
 	Sym:(...args)=>{//«
 		if (args.length!=1) return;
 		return new Symbol(args[0]);
 	},//»
-//*/
 	Clip:async (...args)=>{//«
 		const err=s=>{
 			create_error="Clip:\x20"+s;
@@ -918,14 +887,14 @@ console.error(e);
 		return node;
 	},//»
 
-	Spk:()=>{
+	Spk:()=>{//«
 		if (!speaker){
 			speaker = ctx.createGain();
 			servobj.speaker = speaker;
 			mixer_plug = mixer.plug_in(speaker);
 		}
 		return speaker;
-	}
+	}//»
 
 };//»
 

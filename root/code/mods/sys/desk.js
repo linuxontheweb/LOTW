@@ -1525,7 +1525,7 @@ const deskcontext = (loc, opts={}) => {//«
 };
 this.deskcontext=deskcontext;
 //»
-const toggle_show_windows = () => {//«
+const toggle_show_windows = (if_no_current) => {//«
 	let wins = filter_windows();
 	if (windows_showing) {
 		windows_showing = false;
@@ -1546,14 +1546,14 @@ const toggle_show_windows = () => {//«
 			w.dis = "block";
 			if (w.overdiv) w.overdiv.dis = "block";
 			if (w.is_current) {
-				if (w.is_minimized) {
-					w.overdiv.on();
+				if (!if_no_current) {
+					if (w.is_minimized) w.overdiv.on();
+					else window_on(w);
 				}
-				else window_on(w);
 				w.is_current = null;
 			}
 		}
-		if (!Desk.CWIN) top_win_on();
+		if (!Desk.CWIN && !if_no_current) top_win_on();
 	}
 //	Desk.update_windows_showing();
 	return true;
@@ -3439,6 +3439,7 @@ const window_on = (win, if_no_zup) => {//«
 		CUR.icon_div = win.main.icon_div;
 		CUR.main = win.main;
 		win.main.add(CUR);
+		win.CURSOR = CUR;
 		CUR.set();
 		CUR.on();
 	}
@@ -3466,7 +3467,10 @@ this.window_on = window_on;
 const window_off = (win) => {//«
 	if (!win) return;
 	if (win.is_chrome) return;
-//	if (win.app == FOLDER_APP) win.lastcurpos = CUR.getpos();
+	if (win.app == FOLDER_APP) {
+		delete win.CURSOR;
+		win.CURSOR = null;
+	}
 	win.img_div.op = 0.5;
 	win.namespan.fw = "";
 	win.namespan.tcol = win.namespan["tcol.off"];
@@ -3640,6 +3644,13 @@ if (!cb) cb=()=>{};
 			}
 			res();
 			delete icon.ontransitionend;
+/*
+if (icon.move_cb) {
+icon.move_cb();
+delete icon.move_cb;
+icon.move_cb = null;
+}
+*/
 			cb();
 		};
 		if (Desk.automate_mode) return transend();
@@ -3706,12 +3717,14 @@ if (globals.read_only){
 				else w.obj.update(-didnum);
 			}
 		}
+//		for (let fake of fakes) fake.del();
 		icon_array_off();
 		if (cb) cb(true);
 	};//»
 	let do_copy = false;
 	let paths = [];
 	let good = [];
+	let fakes = [];
 	if (e && destpath === desk_path) usewin = desk;
 	for (let icn of ICONS) {
 		icon_off(icn);
@@ -3830,22 +3843,32 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 		let r = icn.gbcr();
 		icn.pos="absolute";
 		let scrdiff=0;
+		let nextsib;
+//		let fake;
 		if (icn.parwin!==desk) {
 			let mn = icn.parwin.main;
 			if (mn.scrollTop > 0) scrdiff = mn.scrollTop + r.height;
+			nextsib = icn.nextSibling;
 		}
 		if (loc) { /*Onto a folder icon's dropzone*/
 			vacate_icon_slot(icn);
 			icn.loc(r.left, r.top+scrdiff);
 			desk.add(icn);
-			move_icon(icn, loc.x-winx(), loc.y-winy(), {scale:0.25, fade:true, cb:()=>{icn.del();}});
+			move_icon(icn, loc.x-winx(), loc.y-winy(), {scale:0.25, fade:true, cb:()=>{
+//				if (fake) fake.del();
+				icn.del();}
+			});
 		} else if (usewin == desk) { /*Onto the desktop:get location from 'e',passed into the desktop's ondrop event handler*/
 			icn.loc(r.left, r.top+scrdiff);
 			desk.add(icn);
+//icn.move_cb=()=>{
+//if (fake) fake.del();
+//};
 			place_in_icon_slot(icn,{X:e.clientX-winx(),Y:e.clientY-winy()});
 		}
 		else { /*Onto a folder main window,from the desktop or another folder. The folder automatically places it*/
 			const movecb=()=>{
+//				if (fake) fake.del();
 				let name = icn.name;
 				let ext = icn.ext;
 				if (ext) name += `.${ext}`;
@@ -3885,6 +3908,14 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 				wr = usewin.gbcr();
 				move_icon(icn, wr.left, wr.top+usewin.titlebar.clientHeight, {cb:movecb});
 			}
+		}
+		if (nextsib){
+			let fake = mkdv();
+			fake = mkdv();
+			fake.w = 104;
+			fake.h = 104;
+			nextsib.parentNode.insertBefore(fake, nextsib);
+			fakes.push(fake);
 		}
 	}
 	fs.com_mv(shell_exports, paths, do_copy, {
@@ -5995,76 +6026,83 @@ else {
 return;
 }
 //			if (CUR.ison()) {
-			if (kstr=="m_C"){/*Move icons*/
-				let r;
-				const move_to_win_or_desk=()=>{
-					if (!cwin) {
-						let par = ICONS[0].parwin;
-						let	x=((r.left+r.right)/2)-winx();
-						let	y=((r.top+r.bottom)/2)-winy();
-						if (par===desk) {
-							for (let icn of ICONS) place_in_icon_slot(icn, {X:x,Y:y});
-							icon_array_off();
-						}
-						else {
+			if (kstr=="m_C"){//«/*Move icons*/
+const move_icon_array = ()=>{
+	let r;
+	const move_to_win_or_desk=()=>{
+		if (!cwin) {
+			let par = ICONS[0].parwin;
+			let	x=((r.left+r.right)/2)-winx();
+			let	y=((r.top+r.bottom)/2)-winy();
+			if (par===desk) {
+				for (let icn of ICONS) place_in_icon_slot(icn, {X:x,Y:y});
+				icon_array_off();
+			}
+			else {
 if (!CUR.ison()){
 x=0;y=0;
 }
-							move_icons(desk_path, (rv)=>{
-							}, {clientX:x,clientY:y});
+				move_icons(desk_path, (rv)=>{
+				}, {clientX:x,clientY:y});
 
-						}
-					}
-					else {
-						move_icons(cwin.fullpath(),(rv)=>{
+			}
+		}
+		else {
+			move_icons(cwin.fullpath(),(rv)=>{
 //							cwin.obj.reload();
 //							cwin.obj.update();
-						},null,cwin);
-					}
-				};
+			},null,cwin);
+		}
+	};
 
-				if (!ICONS.length) return;
-				if (!CUR.ison()){
-					r=ICONS[0].gbcr();
-					move_to_win_or_desk();
-					return;
-				}
-				let goticn = CUR.geticon();
-				r=CUR.gbcr();
-				if (goticn){
-					remove_icon_from_icons(goticn);
-					if (!ICONS.length) return;
-					if (goticn.app !== FOLDER_APP){
-						poperr("Cannot move to a non-folder!");
+	if (!ICONS.length) return;
+	if (!CUR.ison()){
+		r=ICONS[0].gbcr();
+		move_to_win_or_desk();
+		return;
+	}
+	let goticn = CUR.geticon();
+	r=CUR.gbcr();
+	if (goticn){
+		remove_icon_from_icons(goticn);
+		if (!ICONS.length) return;
+		if (goticn.app !== FOLDER_APP){
+			poperr("Cannot move to a non-folder!");
 /*						if (goticn.parwin===desk) {
-							cwin=null;
-							move_to_win_or_desk();
-							return 
-						}
-						cwin = goticn.parwin;
-						move_to_win_or_desk();
-*/
-						return;
-					}
-					let r = goticn.gbcr();
-					move_icons(goticn.fullpath(), (rv, icns) => {
-						if (!rv) {
-							return;
-						}
-						if (Desk.CWIN) window_off(Desk.CWIN);
-						if (goticn.parwin&&goticn.parwin !== desk) window_on(goticn.parwin);
-						icon_array_off();
-						if (goticn.win) goticn.win.obj.reload();
-					}, null, null, {
-						x: r.left,
-						y: r.top
-					});
-					return;
-				}
+				cwin=null;
 				move_to_win_or_desk();
+				return 
+			}
+			cwin = goticn.parwin;
+			move_to_win_or_desk();
+*/
+			return;
+		}
+		let r = goticn.gbcr();
+		move_icons(goticn.fullpath(), (rv, icns) => {
+			if (!rv) {
 				return;
 			}
-//			}
+			if (Desk.CWIN) window_off(Desk.CWIN);
+			if (goticn.parwin&&goticn.parwin !== desk) window_on(goticn.parwin);
+			icon_array_off();
+			if (goticn.win) goticn.win.obj.reload();
+		}, null, null, {
+			x: r.left,
+			y: r.top
+		});
+		return;
+	}
+	move_to_win_or_desk();
+	return;
+};
+if (!windows_showing){
+toggle_show_windows(true);
+setTimeout(move_icon_array, 10);
+}
+else move_icon_array();
+
+			}//»
 		}
 	}
 

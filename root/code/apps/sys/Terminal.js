@@ -147,7 +147,8 @@ let downevt=null;
 
 let MAX_TAB_SIZE=256;
 let awaiting_remote_tab_completion = false;
-const com_completers = ["help","man"];
+//const com_completers = ["help","man", "examples"];
+const com_completers = ["example", "app"];
 const STAT_OK=1;
 const STAT_WARNING=2;
 const STAT_ERROR=3;
@@ -2158,7 +2159,7 @@ const get_fullpath = (path, cur_dir) => {//«
 	return normalize_path(usedir + path);
 }//»
 
-const handle_tab=()=>{//«
+const handle_tab=async()=>{//«
 	if (cur_scroll_command) insert_cur_scroll();
 	let contents;
 	let use_dir = cur_dir;
@@ -2188,6 +2189,9 @@ const handle_tab=()=>{//«
 //				fs.populate_dirobj_by_path(use_dir+"/"+str,(rv,err)=>{if (err) return cerr(err);}, root_state, dsk);
 			}
 ///*
+			else if (type=="AppDir"){
+				handle_letter_press(".");//"/"
+			}
 			else if (type=="Link") {
 				let link = contents[0][2];
 				if (!link){
@@ -2359,11 +2363,45 @@ log("YARR WHAT MAN OPTIONS????");
 		});
 	};
 	if (!got_path && (tokpos==1||(tokpos==2 && com_completers.includes(tok0)))) {
-		get_command_arr(use_dir, tok, rv=>{
-			contents = rv;
-			if (contents && contents.length) docontents();
-			else do_gdc();
-		});
+		if (tokpos==1) {
+			get_command_arr(use_dir, tok, rv=>{
+				contents = rv;
+//log(contents);
+				if (contents && contents.length) docontents();
+				else do_gdc();
+			});
+		}
+		else {
+		if (tok0==="example"){
+let rv = await fetch(`/_getexamples`)
+let arr = await rv.json();
+let all = [];
+let re = new RegExp("^" + tok.replace(/\./g,"\\."));
+for (let n of arr){
+	if (re.test(n)) all.push([n,"File"]);
+}
+contents = all;
+docontents();
+		}
+		else if (tok0==="app"){
+let path="";
+if (tok) path=`?path=${tok}`;
+let rv = await fetch(`/_getapp${path}`);
+let arr = await rv.json();
+let all = [];
+for (let n of arr) {
+	if (n.match(/\.js$/)) all.push([n.replace(/\.js$/,""),"File"]);
+	else all.push([n,"AppDir"]);
+}
+contents = all;
+if (tok.match(/\./)){
+let arr = tok.split(".");
+tok = arr.pop();
+}
+docontents();
+
+		}
+		}
 	}
 	else do_gdc();
 	
