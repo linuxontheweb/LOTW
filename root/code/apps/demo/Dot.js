@@ -1,25 +1,24 @@
 
+export const app = function(arg) {
+
 //Imports«
-const {is_app}=arg;
-Main.top.title="HelloWorld";
-const{log,cwarn,cerr}=Core;
-const{fs,util}=globals;
+
+const {Core, Main, NS}=arg;
+Main.top.title="Dot";
+const{log,cwarn,cerr, globals, Desk}=Core;
+
+const{util}=globals;
 const{make,mkdv,mk,mksp}=util;
 
 //»
 
 //Var«
 
-let rafId;
-
 let SCREEN_HEIGHT, SCREEN_WIDTH, ASPECT;
 
 let cx,cy;
 let cwid = 6;
 let cwid_half = cwid/2;
-
-let did_read = false;
-let gamepad_kill_cb=null;
 
 //»
 
@@ -41,43 +40,7 @@ _.flexDirection="column";
 
 //Funcs«
 
-const stat=s=>{
-if (is_app) return console.log(s);
-	Main.top.status_bar.innerHTML=s;
-};
-
-const poll_gp =()=>{//«
-	fs.get_all_gp_events(true);
-	rafId = requestAnimationFrame(poll_gp);
-	try{
-		if (did_read) {
-			if (!navigator.getGamepads()[0]){
-				did_read = false;
-				stat("Gamepad disconnected");
-			}
-			return;
-		}
-		if (navigator.getGamepads()[0]) try_gp_read();
-	}
-	catch(e){}
-};//»
-const try_gp_read=()=>{//«
-	if (gamepad_kill_cb) {
-		gamepad_kill_cb();
-		gamepad_kill_cb = null;
-	}
-	fs.read_device("/dev/gamepad/1",(e,kill_cb)=>{
-		if (kill_cb) {
-			did_read = true;
-			stat("Gamepad detected");
-			gamepad_kill_cb=kill_cb;
-			return 
-		}
-		if (!e) return;
-		move_cursor(e);
-	},{INTERVAL: 0});
-}//»
-
+const stat=s=>{Main.top.status_bar.innerHTML=s;};
 const draw=()=>{//«
 	ctx.fillStyle = 'black';
 	ctx.fillRect(0,0,w,h);
@@ -88,31 +51,6 @@ const draw=()=>{//«
 	ctx.fillStyle = 'white';
 	ctx.fillRect(cx-cwid_half,cy-cwid_half,cwid,cwid);
 };//»
-const move_cursor = e =>{//«
-	let val = e.value;
-	let typ = e.type;
-	if (typ=="gpaxis"){
-		if (e.axis=="lX"){
-			cx=SCREEN_WIDTH*(0.5+(val/2));
-			draw();
-		}
-		else if (e.axis=="lY"){
-			cy=SCREEN_HEIGHT*(0.5+(val/2));
-			draw();
-		}
-		return;
-	}
-	if (typ=="gpbutton"){
-		if (val=="up") return;
-		let b = e.button;
-		if (b=="U")cy-=cwid;
-		else if (b=="D")cy+=cwid;
-		else if (b=="L")cx-=cwid;
-		else if (b=="R")cx+=cwid;
-		draw();
-	}
-};//»
-
 const init=()=>{//«
 	SCREEN_WIDTH = w;
 	SCREEN_HEIGHT = h;
@@ -131,9 +69,7 @@ const init=()=>{//«
 	Main.add(canvas);
 	ctx = canvas.getContext('2d');
 	draw();
-	if (!is_app) rafId = requestAnimationFrame(poll_gp);
 }//»
-
 const resize=()=>{//«
 	if (!canvas) return;
 	if (h*ASPECT > w) {
@@ -163,8 +99,6 @@ this.onkeydown = function(e,s) {//«
 	}
 }//»
 this.onkill = function() {//«
-	cancelAnimationFrame(rafId);
-	if (gamepad_kill_cb) gamepad_kill_cb();
 }//»
 this.onresize = function() {//«
 	w = Main.clientWidth;
@@ -174,7 +108,7 @@ this.onresize = function() {//«
 
 //»
 
-//log(arg);
-	if (!is_app) stat("Try plugging in a USB gamepad!");
+	stat("Use arrow keys or click around");
 	init();
 
+}

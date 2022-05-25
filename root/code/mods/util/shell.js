@@ -3097,9 +3097,11 @@ const getwinargopts=(args)=>{//«
 	let sws = failopts(args, {
 		LONG: {
 			force: 1,
-			fullscreen :1
+			fullscreen :1,
+			source: 1
 		},
 		SHORT: {
+			s: 1,
 			f: 1,
 			x: 3,
 			y: 3,
@@ -3136,6 +3138,7 @@ const getwinargopts=(args)=>{//«
 		}
 	}
 	 return {
+		SOURCE:(sws.source||sws.s),
 		FORCE:(sws.force||sws.f),
 		WINARGS: {
 			FULLSCREEN: fullscreen,
@@ -4327,6 +4330,14 @@ cerr("Dropping", ret);
 	if (!_Desk) return cberr(ENODESK);
 	let which = args.shift();
 	if (!which) return cberr("No app given!");
+	if (opts.SOURCE){
+		let path = which.replace(/\./g, "/");
+		let rv = await fetch(`/root/code/apps/${path}.js`);
+		if (!rv.ok) return cberr(`${which}: not found`);
+		wout(await rv.text());
+		cbok();
+		return;
+	}
 	let rdr = get_reader();
 	if (rdr.is_terminal) return openit();
 	read_stdin(rv=>{

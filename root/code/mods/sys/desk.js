@@ -5151,7 +5151,7 @@ const open_app = (appname, cb, force_open, winargs, appobj, if_reload, icon) => 
 		usew = winw() - (20 + 134);
 		useh = winh() - (35 + 79);
 	} 
-	if (appname == FOLDER_APP) wintitle = "File Explorer".tonbsp();
+//	if (appname == FOLDER_APP) wintitle = "File Explorer".tonbsp();
 	let useicon = winargs.ICON || icon || {ready:{}};
 	win = make_window({
 		CENTER: winargs.CENTER||defwinargs.CENTER,

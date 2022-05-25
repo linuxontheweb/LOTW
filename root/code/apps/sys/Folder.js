@@ -17,6 +17,8 @@ let path = topwin._fullpath;
 let statbar = topwin.status_bar;
 let num_entries = 0;
 
+const{poperr} = globals.widgets;
+
 //»
 
 //DOM«
@@ -141,7 +143,8 @@ else stat(`${num_entries} entries`);
 const init=async()=>{//«
 	dir = await fs.pathToNode(path);
 	if (!dir) {
-console.error(`Directory not found: ${path}`);
+if (path) poperr(`Directory not found: ${path}`);
+else cwarn("Opening in 'app mode'");
 		return;
 	}
 	if (!dir.done){
