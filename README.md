@@ -82,7 +82,7 @@ the LOTW file system).
 - **Open terminal**: Alt+t
 - **Invoke context menu**: Alt+c
 - **Toggle taskbar visibility**: Ctrl+Alt+Shift+b
-- **Toggle icon cursor visibility**: Ctrl+Alt+Shift+c
+- **Toggle icon cursor visibility**: /
 
 ### Windows
 - **Maximize window**: Alt+m

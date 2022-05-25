@@ -5986,7 +5986,8 @@ done in the typical mousedown and mousemove kinds of ways, I decided to turn it
 into a cursor based approach. You select icons by moving the cursor over them.
 */
 if (kstr == "f_CAS") return toggle_fullscreen();
-if (kstr=="c_CAS"){
+//if (kstr=="c_CAS"){
+if (kstr=="/_"){
 toggle_cursor();
 return;
 }
