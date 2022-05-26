@@ -4151,7 +4151,8 @@ cerr("Dropping", ret);
 	if (!which.match(/^[a-z]+(\.[a-zA-Z][a-zA-Z0-9]*)+$/)) return cberr("Bad arg!");
 	let out = {app:which};
 	out.args = appargs;
-	cbok(JSON.stringify(out));
+	wout(JSON.stringify(out,null,"\t"));
+	cbok();
 },//»
 'lib': args => {
 	let which = args.shift();

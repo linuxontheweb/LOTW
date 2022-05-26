@@ -59,7 +59,7 @@ let arr = process.argv[1].split("/");arr.pop();
 const BINPATH = arr.join("/")+"/root/bin";
 const EXAMPLESPATH = arr.join("/")+"/www/examples";
 const APPPATH = arr.join("/")+"/root/code/apps";
-
+log(BINPATH);
 //»
 
 //Util«

@@ -11,6 +11,7 @@ const{util}=globals;
 const{FOLDER_APP}=globals;
 const{make,mkdv,mk,mksp}=util;
 const {fs}=NS.api;
+let CUR_FOLDER_XOFF = 5;
 let topwin = Main.top;
 let winid = topwin.id;
 let path = topwin._fullpath;
@@ -187,6 +188,14 @@ this.onkill = function() {//«
 	icondv.del();
 }//»
 this.onresize = function() {//«
+let cur = topwin.CURSOR;
+if (!cur) return;
+let icn = Main.lasticon;
+if (!icn) return;
+icn.scrollIntoViewIfNeeded();
+cur.loc(icn.offsetLeft+CUR_FOLDER_XOFF, icn.offsetTop);
+//log(icn);
+
 
 }//»
 

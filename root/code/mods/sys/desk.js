@@ -3878,11 +3878,12 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 		if (icn.parwin!==desk) {
 			if (!icn.showing) icn.show();
 			let mn = icn.parwin.main;
-			if (mn.scrollTop > 0) scrdiff = mn.scrollTop + r.height;
+//			if (mn.scrollTop > 0) scrdiff = mn.scrollTop + r.height;
 			nextsib = icn.nextSibling;
 		}
 		if (loc) { /*Onto a folder icon's dropzone*/
 			vacate_icon_slot(icn);
+//log(scrdiff);
 			icn.loc(r.left, r.top+scrdiff);
 			desk.add(icn);
 			proms.push(move_icon(icn, loc.x-winx(), loc.y-winy(), {scale:0.25, fade:true, cb:()=>{
