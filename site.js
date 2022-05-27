@@ -56,6 +56,8 @@ const OS_HTML=`
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
 
+log(argv.join(" "));
+
 let fname = process.argv.pop();
 let arr = fname.split("/");
 if ((!fname.match(/^\x2f/)) || (arr.pop()!=="site.js")){
