@@ -69,11 +69,13 @@ const log = (...args)=>{console.log(...args)}
 //const BASEPATH = arr.join("/");
 
 const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
-log("Base: "+BASEPATH);
 let stats;
 
 const BINPATH = `${BASEPATH}/root/bin`;
-if (!(fs.statSync(`${BINPATH}/dummy.js`))) return;
+if (!(fs.statSync(`${BINPATH}/dummy.js`))) {
+log(`Cannot stat: ${BINPATH}/dummy.js`);
+	return;
+}
 
 const EXAMPLESPATH = `${BASEPATH}/www/examples`;
 const APPPATH = `${BASEPATH}/root/code/apps`;
