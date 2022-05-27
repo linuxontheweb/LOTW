@@ -56,7 +56,8 @@ const OS_HTML=`
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
 
-log(argv.join(" "));
+log("ARGS:");
+log(process.argv.join(" "));
 
 let fname = process.argv.pop();
 let arr = fname.split("/");
