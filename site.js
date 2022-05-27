@@ -19,7 +19,7 @@ LOTW - Main
 </head>
 <body>
 <h2>Linux on the Web</h2>
-<center><img src="/www/img/lotw256.png"></img></center>
+<img src="/www/img/lotw256.png"></img>
 <ul>
 <li><h3><a href="/www/about.html">About</a></h3>
 <li><h3><a href="/desk">Desktop</a></h3>
