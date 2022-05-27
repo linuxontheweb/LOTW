@@ -56,17 +56,19 @@ const OS_HTML=`
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
 
-log("ARGS:");
-log(process.argv.join(" "));
+//log("ARGS:");
+//log(process.argv.join(" "));
 
-let fname = process.argv.pop();
-let arr = fname.split("/");
-if ((!fname.match(/^\x2f/)) || (arr.pop()!=="site.js")){
-	log("Found extra args!");
-	return;
-}
+//let fname = process.argv.pop();
+//let arr = fname.split("/");
+//if ((!fname.match(/^\x2f/)) || (arr.pop()!=="site.js")){
+//	log("Found extra args!");
+//	return;
+//}
 
-const BASEPATH = arr.join("/");
+//const BASEPATH = arr.join("/");
+
+const BASEPATH = process.env.PWD;
 let stats;
 
 const BINPATH = `${BASEPATH}/root/bin`;
