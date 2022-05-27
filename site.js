@@ -69,6 +69,7 @@ const log = (...args)=>{console.log(...args)}
 //const BASEPATH = arr.join("/");
 
 const BASEPATH = process.env.PWD;
+log("Base: "+BASEPATH);
 let stats;
 
 const BINPATH = `${BASEPATH}/root/bin`;
