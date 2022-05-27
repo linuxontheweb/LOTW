@@ -1,3 +1,8 @@
+//If starting with pm2 on a public server (to listen on port 80), do something like this:
+// $ sudo LOTW_LIVE=1 pm2 site.js
+
+//Use an LOTW_PORT env var to use a different address scheme than localhost:8080 
+//or publicsite.com:80;
 
 //Imports«
 const http = require('http');
@@ -5,9 +10,25 @@ const spawn = require('child_process').spawn;
 const fs = require('fs');
 const qs = require('querystring');
 
+//«
 const BASE_PAGE=`
-The server is live!<br>You might want to go to <a href="/desk">the desktop</a> or <a href="/shell">the shell</a>!
+<html><head>
+<title>
+LOTW - Main
+</title>
+</head>
+<body>
+<h2>Linux on the Web</h2>
+<ul>
+<li><h3><a href="/www/about.html">About</a></h3>
+<li><h3><a href="/desk">Desktop</a></h3>
+<li><h3><a href="/shell">Shell</a></h3>
+<li><h3><a href="https://github.com/linuxontheweb/LOTW">Github</a></h3>
+</ul>
+</body>
+</html>
 `;
+//»
 
 //»
 
@@ -34,32 +55,35 @@ const OS_HTML=`
 
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
-const debug = (...args)=>{if (!if_debug) return;console.log(...args);}
 
-
-const hostname = "localhost";
-
-let port = 8080;
-let if_debug = false;
-
-if (process.argv[2]){
-	let arg2 = process.argv[2];
-	port = parseInt(arg2);
-	if (isNaN(port)||port>65535||port<1) {
-		log("Invalid port argument: " + arg2);
-		return;
-	}
-}
-if (process.argv[3]){
-	log("Too many arguments");
+let fname = process.argv.pop();
+let arr = fname.split("/");
+if ((!fname.match(/^\x2f/)) || (arr.pop()!=="site.js")){
+	log("Found extra args!");
 	return;
 }
 
-let arr = process.argv[1].split("/");arr.pop();
-const BINPATH = arr.join("/")+"/root/bin";
-const EXAMPLESPATH = arr.join("/")+"/www/examples";
-const APPPATH = arr.join("/")+"/root/code/apps";
-log(BINPATH);
+const BASEPATH = arr.join("/");
+let stats;
+
+const BINPATH = `${BASEPATH}/root/bin`;
+if (!(fs.statSync(`${BINPATH}/dummy.js`))) return;
+
+const EXAMPLESPATH = `${BASEPATH}/www/examples`;
+const APPPATH = `${BASEPATH}/root/code/apps`;
+
+let hostname;
+let use_port = process.env.LOTW_PORT;
+let port = use_port||8080;
+if (process.env.LOTW_LIVE){
+	hostname="0.0.0.0";
+	port = use_port||80;
+}
+else{
+	hostname="localhost";
+	port = use_port||8080;
+}
+
 //»
 
 //Util«
@@ -203,10 +227,10 @@ const handle_request=async(req, res, url, args)=>{//«
 		}
 		if (!str) {
 			nogo(res, "404: File not found: " + url);
-debug("Not found");
+//debug("Not found");
 			return;
 		}
-debug("OK: " + (str.length) + " bytes");
+//debug("OK: " + (str.length) + " bytes");
 		okay(res, usemime);
 		res.end(str);
 	}//»
@@ -240,5 +264,4 @@ http.createServer((req, res)=>{//«
 //»
 
 log(`Site server listening at http://${hostname}:${port}`);
-
 

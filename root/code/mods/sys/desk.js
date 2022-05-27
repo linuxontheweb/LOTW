@@ -260,6 +260,7 @@ let TASKBAR_OP=1;
 
 //In Folder.js, Main.pad = 5. We need this value here so the icon selection cursor will line up right.
 let CUR_FOLDER_XOFF = 5;
+let CUR_FOLDER_YOFF = 5;
 
 let DEF_BG_IMG_OP = 0.3;
 let DESK_ICON_BOR = "2px solid #ff7";
@@ -603,7 +604,7 @@ CUR.set=()=>{
 		else {
 			CUR.main.scrollTop=0;
 			CUR.x=CUR_FOLDER_XOFF;
-			CUR.y=0;
+			CUR.y=CUR_FOLDER_YOFF;
 		}
 	}
 };
@@ -662,7 +663,7 @@ CUR.right=(if_ctrl)=>{
 	let xpos = next.offsetLeft;
 	let ypos = next.offsetTop;
 	CUR.main.lasticon = next;
-	CUR.loc(xpos+CUR_FOLDER_XOFF,ypos);
+	CUR.loc(xpos+CUR_FOLDER_XOFF,ypos+CUR_FOLDER_YOFF);
 	if (Desk.CWIN) {
 		if (!next.fullname){
 			setTimeout(()=>{
@@ -701,7 +702,7 @@ CUR.left=(if_ctrl)=>{
 	let ypos = prev.offsetTop;
 	CUR.main.lasticon = prev;
 	if (Desk.CWIN) Desk.CWIN.obj.stat(prev.fullname);
-	CUR.loc(xpos+CUR_FOLDER_XOFF,ypos);
+	CUR.loc(xpos+CUR_FOLDER_XOFF,ypos+CUR_FOLDER_YOFF);
 };
 CUR.up=if_ctrl=>{
 	if (if_ctrl) CUR.select(true);
@@ -727,7 +728,7 @@ CUR.up=if_ctrl=>{
 		if (!elem) return;
 		if (elem.parentNode.className==="icon") elem = elem.parentNode;
 		if (elem.className==="icon" && elem.parentNode===icn.parentNode){
-			CUR.loc(elem.offsetLeft+CUR_FOLDER_XOFF, elem.offsetTop);
+			CUR.loc(elem.offsetLeft+CUR_FOLDER_XOFF, elem.offsetTop+CUR_FOLDER_YOFF);
 			CUR.scrollIntoViewIfNeeded();
 			CUR.main.lasticon = elem;
 			if (Desk.CWIN) Desk.CWIN.obj.stat(elem.fullname);
@@ -762,7 +763,7 @@ CUR.down=if_ctrl=>{
 		let elem = document.elementFromPoint(5+r.left, 5+IGSY+r.top);
 		if (!elem) return;
 		if (elem.className==="icon" && elem.parentNode===icn.parentNode){
-			CUR.loc(elem.offsetLeft+CUR_FOLDER_XOFF, elem.offsetTop);
+			CUR.loc(elem.offsetLeft+CUR_FOLDER_XOFF, elem.offsetTop+CUR_FOLDER_YOFF);
 			CUR.scrollIntoViewIfNeeded();
 			CUR.main.lasticon = elem;
 			if (Desk.CWIN) {
@@ -3876,7 +3877,8 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 		let nextsib;
 //		let fake;
 		if (icn.parwin!==desk) {
-			if (!icn.showing) icn.show();
+//			if (!icn.showing) icn.show();
+			if (icn.show && !icn.showing) icn.show();
 			let mn = icn.parwin.main;
 //			if (mn.scrollTop > 0) scrdiff = mn.scrollTop + r.height;
 			nextsib = icn.nextSibling;
@@ -5608,14 +5610,18 @@ this.check_open_files = check_open_files;
 
 //Show key presses«
 let keydiv;
+
 const keydiv_blur_cb = ()=>{
 	keydiv.off();
 	keydiv.ctrlOff();
 	keydiv.altOff();
 	keydiv.shiftOff();
 };
+
 const toggle_key_viewer = () =>{
+
 if (!keydiv) {
+/*
 	let o = mkdv();
 	o.pos = "absolute";
 	o.innerHTML="Keystroke Viewer";
@@ -5630,7 +5636,7 @@ if (!keydiv) {
 	o.fw=900;
 	o.ta="center";
 	o.padb=4;
-
+*/
 	let d = mkdv();
 	d.pos = "absolute";
 	d.dis = "flex";
@@ -5647,7 +5653,7 @@ if (!keydiv) {
 	d.pad=3;
 	d.z=CGZ+1;
 	desk.add(d);
-	desk.add(o);
+//	desk.add(o);
 	keydiv = d;	
 	let d1 = mkdv();d1.w="38%";
 	d1.bor = "1px solid #000";
@@ -5691,9 +5697,7 @@ if (!keydiv) {
 	keydiv.altOff=()=>{d4.innerHTML="";}
 	keydiv.add(d4)
 	window.addEventListener('blur', keydiv_blur_cb);
-setTimeout(()=>{
-o.del();
-},1500);
+//	setTimeout(()=>{o.del();},1500);
 }
 else {
 	keydiv.del();

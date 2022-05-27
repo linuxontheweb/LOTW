@@ -6,7 +6,6 @@ About LOTW
 <!--«-->
 <style>
 body{
-	font-size: 22px;
 	padding-top:15px;
 	padding-bottom:15px;
 }
@@ -19,11 +18,11 @@ body{
 	text-align:justify;
 }
 h2{
-margin-left:3ch;
-margin-bottom:0px;
+	margin-left:-5ch;
+	margin-bottom:0px;
 }
 h3{
-margin-left:-3ch;
+	margin-left:-3ch;
 }
 </style>
 <!--»-->
@@ -32,14 +31,64 @@ margin-left:-3ch;
 <body>
 
 <div class="text">
-<h3>
-Some header stuff here
-</h3>
+<h2>
+About <i>Linux on the Web</i> (LOTW)
+</h2>
+
+<h3>Background</h3>
 
 <p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+Circa 1990, the web was just a way for public servers to deliver static
+"documents" to remote clients. Inevitably, the question of how to allow for
+programs and dynamic content arose, which led to led to the development of
+plugins like Java applets and scripting languages like JavaScript.
+
 <p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+In time, JavaScript won the day when it was adopted by the European Computer
+Manufacturers Association (ECMA), and was technically to be known as
+ECMAScript. Since there was now an official mechanism to allow for
+international consensus regarding the evolution of the language, it became a
+"modern" language that experts and companies could depend on.
+
+<p>
+
+In the late 2000's, Google began work on it's own JavaScript implementation in
+the form of the v8 engine, which was used as the runtime for the Chrome browser
+and for Node.js.  As these technologies evolved in terms of raw performance and
+developer APIs, the web application paradigm could begin a rapidly ascendant
+trajectory.
+
+<h3>The Question of <i>State</i></h3>
+
+<p>
+
+The very first web browsers had no mechanism for persistent statefulness.
+Then, so-called cookies came around as a way to uniquely identify the visitors
+of websites and deliver custom content. In this way, login mechanisms could be
+devised to allow for merchants to take orders from their customers, among other
+applications.
+
+<p>
+
+Over time, there have been many mechanisms to allow for the persistence of
+end-user specific data. In 2011, Chrome released a file system API to allow for
+the usage of a local, sandboxed file system. Right around then, I first began
+to experiment with web development, and one of the questions swimming around my
+head must have been something like: <i>If web domains have access to their own
+internal file systems, then what is the limit in terms of the user interfaces
+that put those file systems to use</i>?
+
+
+<h3>LOTW is really "Unix philosophy in a browser"</h3>
+
+The LOTW project is an attempt to create a highly portable general computing
+environment. While it is natural for people to fixate on (or just emphasize)
+either its OS-like aspects or web-like aspects, the truth is that LOTW is a new
+kind of thing that harmoniously blends both parts in a synthetic whole.
+
+
 
 </div>
 

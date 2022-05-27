@@ -193,8 +193,8 @@ if (!cur) return;
 let icn = Main.lasticon;
 if (!icn) return;
 icn.scrollIntoViewIfNeeded();
-cur.loc(icn.offsetLeft+CUR_FOLDER_XOFF, icn.offsetTop);
-//log(icn);
+//cur.loc(icn.offsetLeft+CUR_FOLDER_XOFF, icn.offsetTop);
+cur.loc(icn.offsetLeft+2, icn.offsetTop+2);
 
 
 }//»

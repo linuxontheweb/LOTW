@@ -47,9 +47,17 @@ Finally, in your browser, go to: http://localhost:8080
 
 Or if you want to use another port (e.g. 12345), start it like so:
 
-`$ node site.js 12345`
+`$ LOTW_PORT=12345 node site.js`
 
 Then, go to: http://localhost:12345
+
+To make it a "live" site, do something this (you must use sudo here because the live site
+binds to port 80):
+
+`$ sudo LOTW_LIVE=1 node site.js`
+
+Then, go to: http://yourdomain.com
+
 
 # Desktop usage
 
