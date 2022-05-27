@@ -68,7 +68,7 @@ const log = (...args)=>{console.log(...args)}
 
 //const BASEPATH = arr.join("/");
 
-const BASEPATH = process.env.PWD;
+const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
 log("Base: "+BASEPATH);
 let stats;
 
