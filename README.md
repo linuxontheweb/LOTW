@@ -15,8 +15,9 @@ Here >>> https://lotw.site
 LOTW is all about porting the Linux/Unix/POSIX (\*nix) text-based command and
 configuration ethos into the modern web platform. The desktop environment is
 minimal: the only visible UI element (other than the desktop itself) is the
-taskbar (where minimized windows go).  It is essential that everything can be
+taskbar (where minimized windows go).  It is essential that all tasks can be
 accomplished via the keyboard (e.g. resizing windows and moving icons around).
+
 
 ### Your files are locally stored
 
