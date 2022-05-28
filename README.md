@@ -119,11 +119,11 @@ Or if you want to use another port (e.g. 12345), start it like so:
 Then, go to: http://localhost:12345
 
 To make it a "live" site, do something this (you must use sudo here because the live site
-binds to port 80):
+binds to port 443):
 
 `$ sudo LOTW_LIVE=1 node site.js`
 
-Then, go to: http://yourdomain.com
+Then, assuming that your SSL setup is working, go to: https://yourdomain.ext
 
 ## Project structure
 
