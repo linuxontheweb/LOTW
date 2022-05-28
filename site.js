@@ -4,12 +4,27 @@
 //Use an LOTW_PORT env var to use a different address scheme than localhost:8080 
 //or publicsite.com:80;
 
+
+//Imports«
+
+const http = require('http');
+const spawn = require('child_process').spawn;
+const fs = require('fs');
+const qs = require('querystring');
+
+let FAVICON;
+
+//»
+
+//Var«
+
 //Default page«
 const BASE_PAGE=`
 <html><head>
 <title>
 LOTW - Main
 </title>
+<link rel="icon" href="/www/img/favicon.ico">
 </head>
 <body>
 <h2>Linux on the Web (LOTW)</h2>
@@ -25,19 +40,7 @@ LOTW - Main
 `;
 //»
 
-
-//Imports«
-
-const http = require('http');
-const spawn = require('child_process').spawn;
-const fs = require('fs');
-const qs = require('querystring');
-
-
-//»
-
-//Var«
-
+//OS_HTML«
 const OS_HTML=`
 <html>
 <head>
@@ -46,6 +49,7 @@ const OS_HTML=`
 <meta name="description" content="This is an operating system that runs inside of most modern web browsers">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link href="www/css/os.css" rel="stylesheet">
+<link rel="icon" href="/www/img/favicon.ico">
 </head>
 <body>
 <div style="z-index:100000000;position:absolute;left:0;top:0;overflow:hidden;">
@@ -56,21 +60,10 @@ const OS_HTML=`
 </body>
 </html>
 `;
+//»
 
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
-
-//log("ARGS:");
-//log(process.argv.join(" "));
-
-//let fname = process.argv.pop();
-//let arr = fname.split("/");
-//if ((!fname.match(/^\x2f/)) || (arr.pop()!=="site.js")){
-//	log("Found extra args!");
-//	return;
-//}
-
-//const BASEPATH = arr.join("/");
 
 const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
 let stats;
@@ -188,7 +181,6 @@ const handle_request=async(req, res, url, args)=>{//«
 	let marr;
 	if (meth == "GET") {//«
 		if (url=="/") {okay(res, "text/html");return res.end(BASE_PAGE);}
-//		if (url.match(/^\/(desk|shell)$/)) return res.end(fs.readFileSync('./os.html', 'utf8'));
 		if (url.match(/^\/(desk|shell)$/)) return res.end(OS_HTML);
 		if (url.match(/^\/_/)){
 			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
@@ -199,7 +191,6 @@ const handle_request=async(req, res, url, args)=>{//«
 				if (!(rv && rv.ok)) return nogo(res, "Could not get ip address");
 				res.end(await rv.text());
 			}
-//res.end(JSON.stringify(await readdir(BINPATH)));
 			else nogo(res, "Bad command");
 			return;
 		}
