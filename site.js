@@ -4,13 +4,7 @@
 //Use an LOTW_PORT env var to use a different address scheme than localhost:8080 
 //or publicsite.com:80;
 
-//Imports«
-const http = require('http');
-const spawn = require('child_process').spawn;
-const fs = require('fs');
-const qs = require('querystring');
-
-//«
+//Default page«
 const BASE_PAGE=`
 <html><head>
 <title>
@@ -18,18 +12,27 @@ LOTW - Main
 </title>
 </head>
 <body>
-<h2>Linux on the Web</h2>
+<h2>Linux on the Web (LOTW)</h2>
 <img src="/www/img/lotw256.png"></img>
 <ul>
-<li><h3><a href="/www/about.html">About</a></h3>
-<li><h3><a href="/desk">Desktop</a></h3>
-<li><h3><a href="/shell">Shell</a></h3>
-<li><h3><a href="https://github.com/linuxontheweb/LOTW">Github</a></h3>
+<li><h3><a href="/desk">The desktop environment</a></h3>
+<li><h3><a href="/shell">The shell environment</a></h3>
+<li><h3><a href="/www/about.html">About page</a></h3>
+<li><h3><a href="https://github.com/linuxontheweb/LOTW">Source code and documentation on Github</a></h3>
 </ul>
 </body>
 </html>
 `;
 //»
+
+
+//Imports«
+
+const http = require('http');
+const spawn = require('child_process').spawn;
+const fs = require('fs');
+const qs = require('querystring');
+
 
 //»
 
