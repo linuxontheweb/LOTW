@@ -20,15 +20,19 @@ const qs = require('querystring');
 
 //SSL/HTTPS«
 
-/*
+/*Instructions«
 
 I am using Debian 11 in Linode.
 
 Followed the instructions at https://certbot.eff.org/instructions:
 
-Installed packages: apache2, snapd
+Install packages: apache2, snapd
+
+$ sudo apt-get install apache2 snapd
+
 $ sudo snap install core; sudo snap refresh core
-Start the default apache2 server:
+
+Start the default apache2 server (if not already running):
 $ sudo systemctl start apache2.service
 
 $ sudo snap install --classic certbot
@@ -41,7 +45,27 @@ The paths below were found in the file:
 
 /etc/apache2/sites-available/000-default-le-ssl.conf
 
-*/
+
+
+To renew the cert:
+
+1) Stop this server.
+
+2) Start apache2:
+
+$ sudo systemctl start apache2.service
+
+3) Renew it:
+
+$ sudo certbot renew
+
+4) Stop apache server: 
+
+$ sudo systemctl stop apache2.service
+
+5) Start this server.
+
+»*/
 
 const SITE_NAME = "lotw.site";
 const KEY_PATH =`/etc/letsencrypt/live/${SITE_NAME}/privkey.pem`;
