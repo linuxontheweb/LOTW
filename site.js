@@ -18,9 +18,36 @@ const qs = require('querystring');
 
 //Var«
 
+//SSL/HTTPS«
+
+/*
+
+I am using Debian 11 in Linode.
+
+Followed the instructions at https://certbot.eff.org/instructions:
+
+Installed packages: apache2, snapd
+$ sudo snap install core; sudo snap refresh core
+Start the default apache2 server:
+$ sudo systemctl start apache2.service
+
+$ sudo snap install --classic certbot
+
+$ sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+$ sudo certbot --apache
+
+The paths below were found in the file:
+
+/etc/apache2/sites-available/000-default-le-ssl.conf
+
+*/
+
 const SITE_NAME = "lotw.site";
 const KEY_PATH =`/etc/letsencrypt/live/${SITE_NAME}/privkey.pem`;
 const CERT_PATH =`/etc/letsencrypt/live/${SITE_NAME}/fullchain.pem`;
+
+//»
 
 //Default page«
 const BASE_PAGE=`
@@ -69,7 +96,8 @@ const OS_HTML=`
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
 
-const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
+//const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
+const BASEPATH = process.env.PWD;
 let stats;
 
 const BINPATH = `${BASEPATH}/root/bin`;
@@ -86,7 +114,7 @@ let use_port = process.env.LOTW_PORT;
 let port = use_port||8080;
 if (process.env.LOTW_LIVE){
 	hostname="0.0.0.0";
-	port = use_port||80;
+	port = 443;
 }
 else{
 	hostname="localhost";
@@ -274,7 +302,7 @@ if (process.env.LOTW_LIVE) {
 	https.createServer({
 		key: fs.readFileSync(KEY_PATH),
 		cert: fs.readFileSync(CERT_PATH)
-	}, app).listen(443, hostname)
+	}, app).listen(port, hostname)
 }
 else http.createServer(app).listen(port, hostname);
 
