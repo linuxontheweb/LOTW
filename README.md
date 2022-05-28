@@ -38,31 +38,6 @@ on a Chromebook, using an up-to-date Chrome browser.
 The system should basically work in any modern browser and host OS, but there are likely
 many tiny glitches that degrade the user experience in other browsers and/or operating systems.
 
-# Getting started
-
-First, clone this repo!
-
-Then, start the site server with nodejs (uses the default port, 8080):
-
-`$ node site.js`
-
-Finally, in your browser, go to: http://localhost:8080
-
-
-Or if you want to use another port (e.g. 12345), start it like so:
-
-`$ LOTW_PORT=12345 node site.js`
-
-Then, go to: http://localhost:12345
-
-To make it a "live" site, do something this (you must use sudo here because the live site
-binds to port 80):
-
-`$ sudo LOTW_LIVE=1 node site.js`
-
-Then, go to: http://yourdomain.com
-
-
 # Desktop usage
 
 ## Taskbar
@@ -86,7 +61,6 @@ selection status, opening, and moving of icons. With the **Move selected icons
 to cursor** shortcut, icons on the desktop can be moved to different desktop
 locations, and also between the desktop and folders (changing their paths in
 the LOTW file system).
-
 
 ## Keyboard shortcuts
 
@@ -125,6 +99,30 @@ capabilities of the LOTW system. Those are forthcoming.
 
 
 # Development
+
+## Local setup
+
+First, clone this repo!
+
+Then, start the site server with nodejs (uses the default port, 8080):
+
+`$ node site.js`
+
+Finally, in your browser, go to: http://localhost:8080
+
+
+Or if you want to use another port (e.g. 12345), start it like so:
+
+`$ LOTW_PORT=12345 node site.js`
+
+Then, go to: http://localhost:12345
+
+To make it a "live" site, do something this (you must use sudo here because the live site
+binds to port 80):
+
+`$ sudo LOTW_LIVE=1 node site.js`
+
+Then, go to: http://yourdomain.com
 
 ## Project structure
 
