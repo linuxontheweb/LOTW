@@ -4,6 +4,10 @@
 
 ![Screenshot of LOTW desktop](https://github.com/linuxontheweb/os/blob/main/www/img/screenshot.png)
 
+## Try it!
+
+Here -> http://lotw.site
+
 ## Overview
 
 ### It's like Linux... on the web!
