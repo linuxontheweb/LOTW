@@ -96,8 +96,7 @@ const OS_HTML=`
 const OKAY_DIRS=["root","www"];
 const log = (...args)=>{console.log(...args)}
 
-//const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
-const BASEPATH = process.env.PWD;
+const BASEPATH = process.env.LOTW_PWD || process.env.PWD;
 let stats;
 
 const BINPATH = `${BASEPATH}/root/bin`;
