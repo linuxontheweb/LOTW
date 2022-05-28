@@ -8,15 +8,19 @@
 //Imports«
 
 const http = require('http');
+const https = require('https');
 const spawn = require('child_process').spawn;
 const fs = require('fs');
 const qs = require('querystring');
 
-let FAVICON;
 
 //»
 
 //Var«
+
+const SITE_NAME = "lotw.site";
+const KEY_PATH =`/etc/letsencrypt/live/${SITE_NAME}/privkey.pem`;
+const CERT_PATH =`/etc/letsencrypt/live/${SITE_NAME}/fullchain.pem`;
 
 //Default page«
 const BASE_PAGE=`
@@ -241,7 +245,8 @@ const handle_request=async(req, res, url, args)=>{//«
 	else nogo(res);
 }//»
 
-http.createServer((req, res)=>{//«
+const app =(req,res)=>{
+
 	let url_arr = req.url.split("?");
 	let len = url_arr.length;
 	if (len == 1 || len == 2) {
@@ -263,8 +268,15 @@ http.createServer((req, res)=>{//«
 	else {
 		nogo(res);
 	}
-}).listen(port, hostname);
-//»
+};
+
+if (process.env.LOTW_LIVE) {
+	https.createServer({
+		key: fs.readFileSync(KEY_PATH),
+		cert: fs.readFileSync(CERT_PATH)
+	}, app).listen(443, hostname)
+}
+else http.createServer(app).listen(port, hostname);
 
 log(`Site server listening at http://${hostname}:${port}`);
 
