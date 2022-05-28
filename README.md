@@ -6,7 +6,7 @@
 
 ## Try it!
 
-Here -> http://lotw.site
+Here >>> http://lotw.site
 
 ## Overview
 
