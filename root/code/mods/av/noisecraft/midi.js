@@ -19,7 +19,7 @@ class MIDI extends Eventable{//«
 
         this.midiAccess = await navigator.requestMIDIAccess({ sysex: false });
 
-        console.log('got MIDI access');
+//        console.log('got MIDI access');
 
         // For each MIDI input
         for (let input of this.midiAccess.inputs.values())
@@ -27,7 +27,7 @@ class MIDI extends Eventable{//«
             if (input.state != "connected")
                 continue;
 
-            console.log(input.name);
+//            console.log(input.name);
 
             input.onmidimessage = this.makeMessageCb(input.id);
         }
@@ -37,7 +37,7 @@ class MIDI extends Eventable{//«
         {
             if (evt.port.type == "input" && evt.port.state == "connected")
             {
-                console.log('new device connected:', evt.port.name, evt.port.id);
+//                console.log('new device connected:', evt.port.name, evt.port.id);
 
                 evt.port.onmidimessage = this.makeMessageCb(evt.port.id);
             }
@@ -54,7 +54,7 @@ class MIDI extends Eventable{//«
             {
                 str += "0x" + evt.data[i].toString(16) + " ";
             }
-            console.log(str);
+//            console.log(str);
 
             // Send the device name and the data to callbacks
             this.trigger('midimessage', deviceId, evt.data);

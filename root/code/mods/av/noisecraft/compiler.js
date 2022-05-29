@@ -220,7 +220,7 @@ export function compile(graph){//«
 
     // Produce a topological sort of the graph
     let order = topoSort(graph);
-    console.log('num nodes in topo order: ', order.length);
+//    console.log('num nodes in topo order: ', order.length);
 
     /*
     for (let node of order)

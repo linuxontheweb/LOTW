@@ -106,7 +106,7 @@ const OS_HTML=`
 <link href="www/css/os.css" rel="stylesheet">
 <link rel="icon" href="/www/img/favicon.ico">
 </head>
-<body>
+<body style="overscroll-behavior-x: none;">
 <div style="z-index:100000000;position:absolute;left:0;top:0;overflow:hidden;">
 <table style="font-family:monospace;font-size:18;" id="initlog"></table>
 </div>

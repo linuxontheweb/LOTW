@@ -8,8 +8,12 @@ import * as music from './music.js';
 import { midi } from './midi.js';
 import { Knob } from './knob.js';
 //»
-
+let debug_mode = false;
 const log=(...args)=>{console.log(...args);};
+const debug = (s)=>{
+if (!debug_mode) return;
+log(s);
+};
 
 export class Editor {//«
 
@@ -77,7 +81,7 @@ export class Editor {//«
             if (evt.button != 0)
                 return;
 
-            console.log('editor mouse down');
+            debug('editor mouse down');
 
             let mousePos = this.getMousePos(evt);
             this.startMousePos = mousePos;
@@ -114,7 +118,7 @@ export class Editor {//«
         }//»
         function onPointerUp(evt){//«
         // Mouse click callback
-            console.log('editor click');
+            debug('editor click');
 
             if (evt.pointerId)
             {
@@ -135,7 +139,7 @@ export class Editor {//«
             // click anywhere that's not another port, cancel the connection
             if (this.edge)
             {
-                console.log('abort edge connection');
+                debug('abort edge connection');
                 this.svg.removeChild(this.edge.line);
                 this.edge = null;
                 return;
@@ -251,7 +255,7 @@ export class Editor {//«
             this.selected = action.pastedIds;
         }
 
-        console.log('recreating UI nodes');
+        debug('recreating UI nodes');
 
         // Release resource for all UI nodes
         for (let node of this.nodes.values())
@@ -395,7 +399,7 @@ export class Editor {//«
     selectNodes(nodeIds){//«
     // Select a given set of nodes
         nodeIds = Array.from(nodeIds);
-        console.log(`selecting ${nodeIds.length} nodes`);
+        debug(`selecting ${nodeIds.length} nodes`);
 
         // Unhighlight the currently selected nodes
         for (let nodeId of this.selected)
@@ -456,10 +460,11 @@ export class Editor {//«
     }//»
     createNodeDialog(mousePos){//«
     // Show node creation dialog
-        console.log('createNodeDialog');
+        debug('createNodeDialog');
 
         // Dialog contents
         var dialog = new Dialog('Create Node', this.mainDiv);
+		this.mainDiv.dialog = dialog;
         dialog.div.style['text-align'] = 'center';
 
         // Display the possible node types to create
@@ -473,6 +478,7 @@ export class Editor {//«
 
             function subDivClick(evt)
             {
+				this.mainDiv.dialog = null;
                 dialog.close();
                 evt.stopPropagation();
 
@@ -514,7 +520,7 @@ export class Editor {//«
         if (this.startDragPos)
             return;
 
-        console.log('starting drag');
+        debug('starting drag');
 
         // If the node that was clicked is not already selected
         if (this.selected.indexOf(nodeId) == -1)
@@ -531,7 +537,7 @@ export class Editor {//«
         if (!this.startDragPos)
             return;
 
-        console.log('end drag');
+        debug('end drag');
 
         // Compute how much we've moved the nodes
         let dragPos = this.getDragPos();
@@ -851,7 +857,7 @@ class UINode {//«
 
             evt.stopPropagation();
 
-            console.log('pointerdown on node');
+            debug('pointerdown on node');
 
             // Can't drag a node while connecting a port
             if (this.editor.edge)
@@ -1086,13 +1092,13 @@ portDiv.style.cssText=`
 //        portDiv.className = (side == 'dst')? 'node_in_port':'node_out_port';
 
         portDiv.onpointerdown = (evt) => {
-            console.log(`pointer down ${portName} ${side}`);
+            debug(`pointer down ${portName} ${side}`);
             evt.stopPropagation();
             portClick.call(this, 'down');
         }
 
         portDiv.onpointerup = (evt) => {
-            console.log(`pointer up ${portName} ${side}`);
+            debug(`pointer up ${portName} ${side}`);
             evt.stopPropagation();
             portClick.call(this, 'up');
         }
@@ -1231,7 +1237,7 @@ connDiv.style.cssText=`
             {
                 // If model updates fail, we don't close the dialog
                 dialog.showError(e.message);
-                console.log(e);
+                debug(e);
                 return;
             }
 
@@ -1549,14 +1555,14 @@ Keep track of the currently active keys on a musical keyboard
             if (this.notesOn.has(noteNo))
                 return;
 
-            console.log('note on:', noteNo);
+            debug('note on:', noteNo);
             this.send(new model.NoteOn(this.nodeId, noteNo, vel));
             this.notesOn.add(noteNo);
             this.lightDiv.style.background = '#F00';
         }
         else
         {
-            console.log('note off:', noteNo);
+            debug('note off:', noteNo);
             this.send(new model.NoteOn(this.nodeId, noteNo, 0));
             this.notesOn.delete(noteNo);
             this.lightDiv.style.background = '#333';
@@ -1867,7 +1873,7 @@ class Sequencer extends UINode{//«
 
             cell.onclick = (evt) =>
             {
-                console.log('clicked ' + i + ', ' + j);
+                debug('clicked ' + i + ', ' + j);
                 this.send(new model.ToggleCell(
                     this.nodeId,
                     patIdx,
@@ -1957,7 +1963,7 @@ class Sequencer extends UINode{//«
         // otherwise immediately set the next pattern
         if (this.editor.model.playing)
         {
-            console.log('sending QueuePattern');
+            debug('sending QueuePattern');
 
             this.send(new model.QueuePattern(
                 this.nodeId,
@@ -1966,7 +1972,7 @@ class Sequencer extends UINode{//«
         }
         else
         {
-            console.log('sending SetPattern');
+            debug('sending SetPattern');
 
             this.send(new model.SetPattern(
                 this.nodeId,

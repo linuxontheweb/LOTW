@@ -78,7 +78,8 @@ this.wrapperDiv.style.cssText=`
         }
 
         this.keyHandler = keyHandler.bind(this);
-        body.addEventListener('keydown', this.keyHandler);
+//        body.addEventListener('keydown', this.keyHandler);
+//		main.dialog = this;
     }//»
 
     appendChild(node){//«

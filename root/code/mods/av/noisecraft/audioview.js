@@ -5,6 +5,10 @@ import * as model from './model.js';
 import { compile } from './compiler.js';
 //»
 
+const log = (...args)=>{
+console.log(...args);
+};
+
 export class AudioView{//«
 
 	constructor(model){//«
@@ -108,7 +112,7 @@ export class AudioView{//«
 			return;
 		}
 
-		console.log('recompile unit');
+//		console.log('recompile unit');
 
 		// Compile a new unit from the project state
 		this.unit = compile(state);
@@ -131,8 +135,7 @@ export class AudioView{//«
 
 		// This seems to be necessary for Safari
 		this.audioCtx.resume();
-
-		await this.audioCtx.audioWorklet.addModule('/public/audioworklet.js');
+		await this.audioCtx.audioWorklet.addModule('/root/code/mods/av/noisecraft/audioworklet.js');
 
 		this.audioWorklet = new AudioWorkletNode(
 			this.audioCtx,

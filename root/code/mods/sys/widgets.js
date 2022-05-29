@@ -757,7 +757,7 @@ api.popyesno = (str, opts = {}) => {
 	});
 }
 
-const poparea = (str_or_arr, title, if_rev_arr, cb, if_input, if_cancel, win) => {
+const poparea = (str_or_arr, title, if_rev_arr, cb, read_only, if_cancel, win) => {
 	let arr;
 	if (typeof str_or_arr == "string") arr = str_or_arr.split("\n");
 	else arr = str_or_arr;
@@ -766,7 +766,9 @@ const poparea = (str_or_arr, title, if_rev_arr, cb, if_input, if_cancel, win) =>
 	let area = make('textarea');
 	area.value = arr.join("\n");
 	area.id="prompt_textarea";
-	if (!if_input) area.attset("readonly", "1");
+	if (read_only) {
+		area.attset("readonly", "1");
+	}
 	area.w = "100%";
 	area.h = "100%";
 	area.fs = 20;
@@ -785,11 +787,16 @@ const poparea = (str_or_arr, title, if_rev_arr, cb, if_input, if_cancel, win) =>
 }
 this.poparea=poparea;
 this.popinarea=(tit, cb)=>{
-	poparea("",tit,null,cb,true,true);
+	poparea("",tit,null,cb,false,true);
 };
 api.popinarea=(str,tit, opts={})=>{
+	let if_can = true;
+	if (opts.noCancel) if_can = false;
+//	let read_only = fa;
+//if (opts.readOnly) read
 	return new Promise((y,n)=>{
-		poparea("",tit,null,y,true,true, opts.win);
+//		poparea(str,tit,null,y,true,true, opts.win);
+		poparea(str,tit,null,y,opts.readOnly,if_can, opts.win);
 	})
 }
 const make_prompt=(str,def_text,cb,if_long)=>{let isshort=true;if(if_long)isshort=null;make_popup({'STR':str,'ICO':true,'TXT':def_text,'CB':cb,'SHT':isshort});}
