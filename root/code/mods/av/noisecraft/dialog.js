@@ -66,7 +66,7 @@ this.errorDiv.style.cssText=`
         this.bgDiv = document.createElement('div');
 //        this.bgDiv.className = 'dark_overlay';
 this.bgDiv.style.cssText=`
-    position: fixed;
+    position: absolute;
     width: 100%;
     height: 100%;
     left: 0;

@@ -56,21 +56,6 @@ editor_div.style.flexGrow=1;
 editor_div.over="scroll";
 editor_div.pos="relative";
 
-editor_div.addEventListener('mousewheel', function(e) {
-  e.stopPropagation();
-//  e.preventDefault();
-/*
-  var max = this.scrollWidth - this.offsetWidth; // this might change if you have dynamic content, perhaps some 
-  
-  if (this.scrollLeft + e.deltaX < 0 || this.scrollLeft + e.deltaX > max) {
-    e.preventDefault();
-    this.scrollLeft = Math.max(0, Math.min(max, this.scrollLeft + e.deltaX));
-  }
-*/
-}, false);
-//editor_div.onscroll=e=>{
-//log(e);
-//};
 layout_div.add(editor_div);
 
 const graph_div = mkdv();
@@ -151,11 +136,13 @@ model.new();
 //log(Main.bgcol);
 };//»
 this.onloadfile=bytes=>{//«
-//    let str = Core.api.bytesToStr(bytes);
+//	graph_div.innerHTML="Loading file...";
 	init();
     try
     {
-        model.deserialize(Core.api.bytesToStr(bytes));
+		setTimeout(()=>{
+			model.deserialize(Core.api.bytesToStr(bytes));
+		},0);
     }
     catch (e)
     {
