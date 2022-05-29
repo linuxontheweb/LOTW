@@ -39,6 +39,8 @@ const FS = NS.api.fs;
 
 //Main.bgcol="rgba(1,1,1,0)";
 Main.bgcol="";
+Main.tcol="#fff";
+Main.fs=16;
 
 const layout_div = mkdv();
 layout_div.dis="flex";
@@ -98,9 +100,9 @@ const dosave = async()=>{
 let path = (Win.fullpath());
 let str = model.serialize();
 if (path){
-log("SAVING: "+str.length+" bytes");
+//log("SAVING: "+str.length+" bytes");
 await FS.saveFsByPath(path, str);
-log("SAVED!");
+await WDG.popok(`Saved: ${str.length} bytes!`, {win: Win});
 }
 else{
 	await WDG.popinarea(str, "JSON", {noCancel:true, readOnly:true});
@@ -197,6 +199,10 @@ Main.dialog.close();
 Main.dialog = null;
 return true;
 }
+if (editor.selected.length > 0){
+	editor.deselect();
+	return true;
+}
 return false;
 };
 this.onresize = function() {//«
@@ -216,6 +222,15 @@ this.onblur=()=>{//«
 //Main.tcol="#e9e9e9";
 
 }//»
+this.get_context=()=>{
+	return [
+		`About Noisecraft`, async()=>{
+			this.onblur();
+			await WDG.popok('Courtesy of: <a href="https://github.com/maximecb/noisecraft">This Github repo</a>',{win:Win});
+			this.onfocus();
+		}
+	]
+}
 
 //»
 

@@ -92,7 +92,6 @@ export class Editor {//«
         // Mouse movement callback
             // Avoids selecting the project title in Chrome
             evt.preventDefault();
-
             var mousePos = this.getMousePos(evt);
 
             // If currently moving one or more nodes
@@ -340,13 +339,17 @@ export class Editor {//«
         let yMax = Math.max(startPos.y, curPos.y);
         let dx = xMax - xMin;
         let dy = yMax - yMin;
-
         // If we meet the criteria for starting a new selection
         if (!this.selectDiv && (Math.abs(dx) > 5 || Math.abs(dy) > 5))
         {
             // Start a new selection
             this.selectDiv = document.createElement('div');
-            this.selectDiv.id = "select_div";
+//            this.selectDiv.id = "select_div";
+this.selectDiv.style.cssText=`
+    z-index: 3;
+    position: absolute;
+    border: 1px solid red;
+`;
             this.editorDiv.appendChild(this.selectDiv);
         }
 
@@ -918,6 +921,7 @@ this.nodeDiv.style.cssText=`
         this.headerDiv = document.createElement('div');
 //        this.headerDiv.className = 'node_header';
 this.headerDiv.style.cssText=`
+color: #fff;
     padding-top: 2px;
     padding-bottom: 2px;
     padding-left: 8px;
@@ -1157,11 +1161,18 @@ connDiv.style.cssText=`
         let newParams = Object.assign({}, nodeState.params);
 
         // Dialog contents
-        var dialog = new Dialog('Node Parameters');
+//log(this.mainDiv);
+//log(this);
+        var dialog = new Dialog('Node Parameters', this.editor.mainDiv);
+		this.editor.mainDiv.dialog = dialog;
 
         // Node type
         let typeDiv = document.createElement('div');
-        typeDiv.className = 'form_div';
+typeDiv.style.cssText=`
+    margin-top: 6;
+    margin-bottom: 6;
+`;
+//        typeDiv.className = 'form_div';
         dialog.appendChild(typeDiv);
         typeDiv.appendChild(document.createTextNode('Node type '));
         let typeElem = document.createElement('input');
@@ -1173,7 +1184,11 @@ connDiv.style.cssText=`
 
         // Node name editing
         let paramDiv = document.createElement('div');
-        paramDiv.className = 'form_div';
+paramDiv.style.cssText=`
+    margin-top: 6;
+    margin-bottom: 6;
+`;
+//        paramDiv.className = 'form_div';
         dialog.appendChild(paramDiv);
         paramDiv.appendChild(document.createTextNode('Node name '));
         let input = document.createElement('input');
@@ -1192,7 +1207,11 @@ connDiv.style.cssText=`
         for (let param of this.schema.params)
         {
             let paramDiv = document.createElement('div');
-            paramDiv.className = 'form_div';
+paramDiv.style.cssText=`
+    margin-top: 6;
+    margin-bottom: 6;
+`;
+//            paramDiv.className = 'form_div';
             dialog.appendChild(paramDiv);
 
             let name = document.createTextNode(param.name + ' ');
@@ -1213,17 +1232,29 @@ connDiv.style.cssText=`
 
         let saveBtn = document.createElement('button');
         saveBtn.textContent = 'Save';
-        saveBtn.className = 'form_btn';
+//        saveBtn.className = 'form_btn';
+saveBtn.style.cssText=`
+    margin-top: 4;
+    margin-right: 4;
+`;
         dialog.appendChild(saveBtn);
 
         let cancelBtn = document.createElement('button');
         cancelBtn.textContent = 'Cancel';
-        cancelBtn.className = 'form_btn';
+//        cancelBtn.className = 'form_btn';
+cancelBtn.style.cssText=`
+    margin-top: 4;
+    margin-right: 4;
+`;
         dialog.appendChild(cancelBtn);
 
         let deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Delete';
-        deleteBtn.className = 'form_btn';
+//        deleteBtn.className = 'form_btn';
+deleteBtn.style.cssText=`
+    margin-top: 4;
+    margin-right: 4;
+`;
         dialog.appendChild(deleteBtn);
 
         function saveParams()
@@ -1784,7 +1815,15 @@ class Sequencer extends UINode{//«
         for (let i = 0; i < 8; ++i)
         {
             let patSel = document.createElement('div');
-            patSel.className = 'patsel_btn';
+//            patSel.className = 'patsel_btn';
+patSel.style.cssText=`
+    display: inline-block;
+    border: 1px solid white;
+    background: #222;
+    width: 18;
+    margin-left: 2;
+    margin-right: 2;
+`;
             patSel.textContent = String(i+1);
 
             // When clicked, select this pattern
@@ -1856,6 +1895,24 @@ class Sequencer extends UINode{//«
 
             // The inner div is the colored/highlighted element
             var inner = document.createElement('div');
+if (cellOn){
+inner.style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(255, 0, 0);
+`;
+}
+else{
+inner.style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(120, 0, 0);
+`;
+}
             inner.className = cellOn? 'cell_on':'cell_off';
             cell.appendChild(inner);
 
@@ -1989,7 +2046,15 @@ class Sequencer extends UINode{//«
         if (this.nextPat !== undefined)
         {
             clearTimeout(this.blinkTimer);
-            this.patBtns[this.nextPat].className = 'patsel_btn';
+//            this.patBtns[this.nextPat].className = 'patsel_btn';
+            this.patBtns[this.nextPat].style.cssText=`
+    display: inline-block;
+    border: 1px solid white;
+    background: #222;
+    width: 18;
+    margin-left: 2;
+    margin-right: 2;
+`;
         }
 
         // If this is already the current pattern, do nothing
@@ -2003,7 +2068,29 @@ class Sequencer extends UINode{//«
 
         function blink(state)
         {
-            this.patBtns[patIdx].className = state? 'patsel_btn_queue':'patsel_btn';
+if (state){
+this.patBtns[patIdx].style.cssText=`
+    display: inline-block;
+    border: 1px solid #0F0;
+    background: #131;
+    color: #0F0;
+    width: 18;
+    margin-left: 2;
+    margin-right: 2;
+`;
+}
+else{
+this.patBtns[patIdx].style.cssText=`
+    display: inline-block;
+    border: 1px solid white;
+    background: #222;
+    width: 18;
+    margin-left: 2;
+    margin-right: 2;
+`;
+
+}
+//            this.patBtns[patIdx].className = state? 'patsel_btn_queue':'patsel_btn';
 
             // Reschedule the blink function
             this.blinkTimer = setTimeout(evt => blink.call(this, !state), 200);
@@ -2035,7 +2122,29 @@ class Sequencer extends UINode{//«
         // Update the pattern selection bar, highlight current pattern
         for (var i = 0; i < this.patBtns.length; ++i)
         {
-            this.patBtns[i].className = (i == patIdx)? 'patsel_btn_on':'patsel_btn';
+//            this.patBtns[i].className = (i == patIdx)? 'patsel_btn_on':'patsel_btn';
+if (i == patIdx){
+this.patBtns[i].style.cssText=`
+    display: inline-block;
+    border: 1px solid red;
+    background: #111;
+    color: red;
+    width: 18;
+    margin-left: 2;
+    margin-right: 2;
+`;
+}
+else{
+this.patBtns[i].style.cssText=`
+    display: inline-block;
+    border: 1px solid white;
+    background: #222;
+    width: 18;
+    margin-left: 2;
+    margin-right: 2;
+`;
+
+}
         }
 
         // Make the pattern visible, hide all other patterns
@@ -2057,6 +2166,25 @@ class Sequencer extends UINode{//«
         assert (rowIdx < row.length);
 
         row[rowIdx].className = value? 'cell_on':'cell_off';
+if (value){
+row[rowIdx].style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(255, 0, 0);
+`;
+}
+else{
+row[rowIdx].style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(120, 0, 0);
+`;
+
+}
     }//»
 
     highlight(stepIdx) {//«
@@ -2075,6 +2203,25 @@ class Sequencer extends UINode{//«
             {
                 let div = cellDivs[prevStep][rowIdx];
                 div.className = (div.className == 'cell_off')? 'cell_off':'cell_on';
+if (div.className == 'cell_off'){
+div.style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(120, 0, 0);
+`;
+}
+else{
+div.style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(255, 0, 0);
+`;
+
+}
             }
         }
 
@@ -2085,6 +2232,28 @@ class Sequencer extends UINode{//«
             {
                 let div = cellDivs[stepIdx][rowIdx];
                 div.className = (div.className == 'cell_off')? 'cell_off':'cell_high';
+
+
+if (div.className == 'cell_off'){
+div.style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(120, 0, 0);
+`;
+}
+else{
+div.style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(255, 255, 255);
+`;
+
+}
+
             }
         }
     }//»
@@ -2179,7 +2348,32 @@ class MonoSeq extends Sequencer {//«
         // Clear all other cells in this row
         for (let i = 0; i < row.length; ++i)
             row[i].className = 'cell_off';
+			row[i].style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(120, 0, 0);
+`;
+if (value){
+row[rowIdx].style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(255, 0, 0);
+`;
+}
+else{
+row[rowIdx].style.cssText=`
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin: 2px;
+    background: rgb(120, 0, 0);
+`;
 
+}
         row[rowIdx].className = value? 'cell_on':'cell_off';
     }//»
 
