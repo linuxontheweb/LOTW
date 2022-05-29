@@ -3570,17 +3570,16 @@ const make_icon = (kid, elem, observer) =>{//«
 		app = kid.ref.APP;
 		islink = true;
 	}
-	else if (kid.APPICON){
+	else if (kid.appicon){
 		let o;
 		try{
-			o=JSON.parse(kid.APPICON);
+			o=JSON.parse(kid.appicon);
 			app = o.app;
 		}
 		catch(e){console.error(e);};
 	}
 	else if (kid.APP) app = kid.APP;
 	else if (ext) app = capi.extToApp(ext);
-
 	if (!app) app = "util.BinView";
 
 /*«
@@ -3966,226 +3965,16 @@ origwin.obj.reload();
 };//»
 
 const IGen=function(){//«
-
-const ICONS={//«
-Folder:"\u{1f5c2}",
-Synth:"\u{1f39b}",
-XSynth:"\u{1f39a}",
-Arcade:"\u{1f579}",
-Unzip:"\u{1f5dc}",
-BinView:"\u{1f51f}",
-TextView:["\u{1f4dd}",100,76],
-Mail:"\u{1f4ec}",
-Help:"\u{26a1}",
-About:"\u{1f4ca}",
-Login:"\u{1f464}",
-Forum:"\u{1f5e3}",
-Hello:"\u{1f64b}",
-MediaPlayer:"\u{1f3a6}",
-HelloWorld:"\u{270b}",
-ImageView:"\u{1f304}",
-Terminal:"\u{1f5b3}"
-}//»
-
-/*«
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="128" height="128">
-</svg>
-'<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="128" height="128"></svg>',
-const ICONS={
-Folder:"🔍",
-Settings: ["\u2699",100,64],
-Help:["\u2753",100,64],
-Recorder:"🎤",
-MicPlayer:"📢",
-DerbyCar:["🚗",80,64,115],
-Volume:"🎛",
-Toolbox:"🔨",
-Launcher:"🚀",
-Clock:"🕰",
-Iconator:"🖼",
-Breaker:"💥",
-Mario:"\u{1f9d9}",
-Background:"🌌",
-CrazyTalk:"👅",
-Face:"\u{1f9d1}",
-
-StartButton:"\u{1f518}",
-ImagePaste:"\u{1f4cb}",
-VoxFX:"🎚"
-};»*/
-//Used to create another image of the open folder that was turned on while the icon was being hovered//«
-//let fold_open = '<path style="fill:#bcbda7;fill-opacity:1;stroke:#636555;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"  d="m 4.3140235,38.796086 -3.5336837,-11.938809 17.5291782,0 1.655381,-2.207175 31.602731,0 -3.210436,14.246311 z" />';
-//»
-
-const make_rect = col =>{return `<rect width="128" height="128" x="0" y="0" style="fill:${col};" />`;};
-const make_text = col =>{return `<text text-anchor="middle" x="64" y="87.34375" xml:space="preserve" style="font-size:72px;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:${col};stroke:#fff;font-family:Times New Roman;"><tspan y="87.34375">`;};
-
-let fold_back = '<g transform="matrix(2.4716489,0,0,2.4716489,-0.69290156,15.625899)"><path style="fill:#868876;fill-opacity:1;stroke:#636555;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 4.315197,0.7879925 0,37.8986865 43.902439,0 0,-33.5834895 -22.326454,0 -3.752345,-3.7523452 z" />';
-let fold_closed = '<path style="fill:#c0c1ac;fill-opacity:1;stroke:#636555;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 4.3626238,38.700495 0,-25.278499 12.5731272,0 4.759317,-4.759317 26.392576,0 0,29.853898 z" />';
-let folder_str = fold_back+fold_closed+"</g>";
-
-let svg_open = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="128" height="128">';
-let rect_beg = '<rect style="fill:';
-let rect_end = '" width="128" height="128" x="0" y="0" />';
-let link_g = '<g style="opacity:1;"><rect style="fill:#fff;stroke:none;" x="68" y="68" height="60" width="60" /><g style="fill:none;stroke:#000;stroke-width:3.234;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"><rect width="11.473064" height="24.621971" rx="6.5" ry="6.5" x="134.24921" y="-51.794231" transform="matrix(0.36548997,0.93081528,-0.93081528,0.36548997,0,0)" /><rect width="11.473064" height="24.621971" rx="6.5" ry="6.5" x="143.13367" y="-16.949551" transform="matrix(0.6743771,0.73838711,-0.73838711,0.6743771,0,0)" /><rect width="11.473064" height="24.621971" rx="6.5" ry="6.5" x="137.76695" y="21.29994" transform="matrix(0.90331408,0.42897981,-0.42897981,0.90331408,0,0)" /></g></g>';
-let link_x = '<g style="fill:none;stroke:red;stroke-width: 8px"><path d="M 128,128 70,78"></g>'
-let svg_close = '</svg>';
-
-let black_rect = make_rect("#000");
-let white_rect = make_rect("#e7e7e7");
-let blue_rect = make_rect("#55f");
-let red_rect = make_rect("#b33");
-
-
-const appmap = {
-	Unknown: white_rect,
-	Link: white_rect,
-	BrokenLink: white_rect,
-	LinkObject: red_rect,
-	www: blue_rect,
-//	Terminal:'<rect width="122.74" height="108.39" rx="12.5" ry="12.515" x="2.52" y="13.85" style="color:#000;fill:#777;stroke:#636555;stroke-width:0.8;" /><rect width="122.74" height="108.39" rx="12.5" ry="12.5" x="2.52" y="13.85" style="color:#000;fill:#777;stroke:#636555;stroke-width:0.807;" /><rect width="90.62" height="80.029" rx="9.24" ry="9.24" x="19.4" y="28.43" style="color:#000;fill:#000;fill-opacity:1;stroke:#141414;stroke-width:1.84;" /><rect width="90.63" height="80" rx="9.24" ry="9.24" x="19.4" y="28.43" style="color:#000;fill:black;stroke:#141414;stroke-width:1.84;" /><text x="29.6" y="53" xml:space="preserve" style="font-size:24px;font-weight:bold;text-align:start;line-height:125%;letter-spacing:0px;text-anchor:start;fill:#ddd;fill-opacity:1;stroke:none;font-family:Monospace;"><tspan x="29.629631" y="53">$_</tspan></text>',
-//	BinView:'<rect width="128" height="128" x="0"  y="0" style="color:#000;fill:#000;stroke:#aaa;stroke-width:4;" /><g style="font-size:36px;font-weight:bold;line-height:100%;letter-spacing:0px;word-spacing:0px;fill:#f0f0f0;stroke:#fff;font-family:monospace;"><text text-anchor="middle" x="64" xml:space="preserve"><tspan y="35">0100</tspan></text><text text-anchor="middle" x="64" y="75" xml:space="preserve"><tspan y="75">1001</tspan></text><text text-anchor="middle" x="64" y="120" xml:space="preserve"><tspan y="120">1011</tspan></text></g>',
-//	Folder: folder_str,
-	Folder: folder_str
-};
-
-const make_appicon_str=(appname, extarg, opts={})=>{//«
-	let testlet;
-	let testlet_col = opts.TCOL||"black";
-	let testlet_op = 1;
-	let testlet_x = 64;
-	let testlet_y = 100;
-	let testlet_sz = 100;
-	let marr;
-	let subtle_let = false;
-	let gotstr, pathstr;
-
-	let icn = ICONS[appname];
-	let str = svg_open;
-
-	if (icn) {//«
-		if (isarr(icn)) {
-			testlet = icn[0];
-			if (icn[1]) {
-				testlet_y = icn[1];
-				if (icn[2]) {
-					testlet_x = icn[2];
-					if (icn[3]) {
-						testlet_sz = icn[3];
-					}
-				}
-			}
-		} 
-		else if (isobj(icn)&&isstr(icn.sym)){
-			testlet = icn.sym;
-			if (icn.col)testlet_col=icn.col;
-			if (icn.sz) testlet_sz=icn.sz;
-		}
-		else {
-			if (appname === "Unzip") {
-				str += `<rect width="96" height="116" x="16"  y="6" rx="8" ry="8" style="color:#000;fill:#e3e3e3;"/>`;
-				testlet_sz = 80;
-				testlet_y = 90;
-			}
-			testlet = icn;
-		}
-		return `${str}<text text-anchor="middle" x="${testlet_x}" xml:space="preserve" style="fill-opacity:${testlet_op};fill:${testlet_col};font-size:${testlet_sz}px;"><tspan y="${testlet_y}">${testlet}</tspan></text></svg>`;
-	}//»
-
-	if (appname == "Unknown") testlet = "?";
-	else if (appname == "LinkObject" || appname == "www") {//«
-		testlet_sz = 50;
-		if (appname == "www") {
-			testlet = "www";
-			testlet_y = 50;
-			testlet_col = "#ff5";
-		} else {
-			testlet = "Link";
-			testlet_y = 80;
-			testlet_col = "#ccf";
-		}
-	}//»
-	pathstr = appmap[appname];
-	let arr = appname.split(".");
-	let name = arr.pop();
-	if (!pathstr) {
-		let open = (opts.BGCOL&&make_rect(opts.BGCOL)||black_rect) + make_text(opts.TCOL||"#CC0");
-		if (testlet) pathstr=`${open}</tspan></text>`;
-		else pathstr = `${open}${opts.LETS||name.slice(0, 2)}</tspan></text>`;
+	this.attach = (obj, cb)=>{
+		let appname = obj.APP.split(".").pop();
+		let got = capi.getAppIcon(appname);
+		let par = obj.PAR;
+		par.innerText = got;
 	}
-	str += pathstr;
-	if (testlet) {
-		str += `<text text-anchor="middle" x="${testlet_x}" xml:space="preserve" style="font-size:${testlet_sz}px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:${testlet_col};fill-opacity:${testlet_op};stroke:#fff;stroke-width:0px;"><tspan y="${testlet_y}">${testlet}</tspan></text>`;
-	}
-	str += '</svg>';
-
-	return str;
-
-};//»
-/*
-this.attach = (obj, cb)=>{//«
-	let appname = obj.APP.split(".").pop();
-
-//let got = capi.getAppIcon(appname);
-//log(appname, got);
-
-	let par = obj.PAR;
-	let icn = par.icon;
-	let wrapper;
-	if (icn&&icn.wrapper) wrapper = icn.wrapper;
-	else wrapper=mksp();
-	wrapper.bor="1px dotted #aaa";
-	wrapper.dis="inline-block";
-	wrapper.pos="relative";
-	return new Promise((Y,N)=>{
-		let loadcb = ()=>{
-			if (par.onload) par.onload();
-			if (cb) cb();
-			if (icn){
-				icn.op=1;
-//				icn.marl = (IGSX - icn.clientWidth)/2;
-			}
-			Y();
-		};
-		const geturl = str => {
-			return URL.createObjectURL(new Blob([str], {
-				type: "image/svg+xml;charset=utf-8"
-			}));
-		}
-		const make_str = () => {
-			img.onload = loadcb;
-			let ret = make_appicon_str(appname, obj.EXT, obj.OPTS);
-			img.src = geturl(ret);
-		};
-		let which_fs = globals.use_fs_type || globals.fs_type;
-
-		let img = new Image();
-		if (par.icon) img.id = "img_"+par.icon.id;
-		img.style.maxWidth=ICON_DIM;
-		par.add(wrapper);
-		wrapper.add(img);
-		par.img = img;
-		par.wrapper = wrapper;
-		img.wrapper = wrapper;
-		make_str();
-	});
-}//»
-*/
-this.attach = (obj, cb)=>{//«
-
-let appname = obj.APP.split(".").pop();
-let got = capi.getAppIcon(appname);
-let par = obj.PAR;
-par.innerText = got;
-//log(appname, got);
-//log(par);
-
-}//»
-
-
 }
 const igen = new IGen();
 Desk.iconGen=igen;
+
 //»
 
 const icon_dblclick = (icon, e, win_cb) => {//«
@@ -5294,21 +5083,14 @@ const open_file_by_path = (patharg, cb, opt={}) => {//«
 }
 this.open_file_by_path=open_file_by_path;
 //»
-const open_icon_window = (icon, dataarg) => {//«
+const open_file = (bytes, icon) => {//«
 	open_new_window(icon, win => {
 		if (win) {
 			if (icon.ext) win.ext = icon.ext;
-			if (dataarg) {
-				win.obj.onloadfile(dataarg, icon.name, icon.ext);
-			}
+			if (bytes) win.obj.onloadfile(bytes, icon.name, icon.ext);
 			else win.obj.onloadfile();
 		}
 	});
-}//»
-const open_file = (bytes, icon) => {//«
-	let app = icon.app;
-	if (icon.linkapp) app = icon.linkapp;
-	open_icon_window(icon, bytes);
 }//»
 const open_new_window = (icon, cb, opts={}) => {//«
 	if (!(icon.fullpath instanceof Function)) {

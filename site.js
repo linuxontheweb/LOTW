@@ -83,7 +83,7 @@ LOTW - Main
 </head>
 <body>
 <h2>Linux on the Web (LOTW)</h2>
-<img src="/www/img/lotw256.png"></img>
+<img width="256" height="256" src="/www/img/lotw256.png"></img>
 <ul>
 <li><h3><a href="/desk">The desktop environment</a></h3>
 <li><h3><a href="/shell">The shell environment</a></h3>
@@ -296,7 +296,7 @@ const handle_request=async(req, res, url, args)=>{//«
 	else nogo(res);
 }//»
 
-const app =(req,res)=>{
+const app =(req,res)=>{//«
 
 	let url_arr = req.url.split("?");
 	let len = url_arr.length;
@@ -319,7 +319,7 @@ const app =(req,res)=>{
 	else {
 		nogo(res);
 	}
-};
+};//»
 
 if (process.env.LOTW_LIVE) {
 	https.createServer({

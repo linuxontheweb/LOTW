@@ -19,7 +19,8 @@ const APP_ARR=[//«
     "games.Arcade",
     "audio.Synth",
 	"util.ImageView",
-	"media.MediaPlayer"
+	"media.MediaPlayer",
+    "audio.Noisecraft"
 ];//»
 
 //Extension points to the array position above
@@ -42,7 +43,8 @@ const EXT_TO_APP_MAP={//«
 	webp:6,
 	webm:7,
 	mp4:7,
-	m4a:7
+	m4a:7,
+	ncft: 8
 };//»
 for (let k in EXT_TO_APP_MAP) ALL_EXTENSIONS.push(k);
 
@@ -356,6 +358,7 @@ const APPICONS={//«
 	BinView:"1f51f",
 	Terminal:"1f5b3",
 	Synth:"1f39b",
+	Noisecraft:"1f3b9",
 	XSynth:"1f39a",
 	Arcade:"1f579",
 	Unzip:"1f5dc",
