@@ -2045,12 +2045,24 @@ this.update_folder_statuses=update_folder_statuses;
 //			if (this.type !== "window") return console.warn("Trying to set the path of type=" + this.type);
 
 const make_window = (arg) => {//«
+
 	let do_center = false;
 	let is_embedded = arg.EMBEDDED;
 	let is_chrome = arg.ISCHROME;
 	let is_normal = !(is_embedded || is_chrome);
 	let is_hidden = arg.HIDDEN;
 	let app = arg.APP;
+
+	if (app==="audio.Noisecraft"){
+		let allwins = Array.from(document.getElementsByClassName("topwin"));
+		for (let w of allwins){
+			if (w.app==="audio.Noisecraft"){
+				poperr("An instance of Noisecraft is already running... please close it first!");
+				return;
+			}
+		}
+	}
+
 	let appobj = arg.APPOBJ;
 	let winid;
 	if (!appobj) appobj = {};
@@ -4987,6 +4999,7 @@ const open_app = (appname, cb, force_open, winargs, appobj, if_reload, icon) => 
 		APPOBJ: appobj,
 		APPMODE: true
 	});
+	if (!win) return;
 	if (useicon) {
 		useicon.win = win;
 		win.icon = useicon;
@@ -5185,6 +5198,7 @@ const open_new_window = (icon, cb, opts={}) => {//«
 		CB: cb,
 		TYPE: "window"
 	});
+	if (!win) return;
 	win.name = usename;
 	win.path = usepath;
 	win.ext = useext;

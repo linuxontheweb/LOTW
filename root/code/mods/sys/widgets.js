@@ -563,7 +563,13 @@ const poperr = (str, opts = {}, dsk) => {
 	},dsk);
 }
 this.poperr = poperr;
-api.poperr=poperr;
+//api.poperr=poperr;
+api.poperr = (str, opts={})=>{
+	return new Promise((Y, N) => {
+		if (!opts.cb) opts.cb = Y;
+		poperr(str, opts);
+	});
+}
 //const popup = (str, if_sel, dsk) => {
 //const popup = (str, if_sel, opts={}, dsk) => {
 const popup = (str, opts={}, dsk) => {

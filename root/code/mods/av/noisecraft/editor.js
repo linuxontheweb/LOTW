@@ -408,7 +408,8 @@ this.selectDiv.style.cssText=`
         for (let nodeId of this.selected)
         {
             let node = this.nodes.get(nodeId);
-            node.nodeDiv.style.removeProperty('border-color');
+//            node.nodeDiv.style.removeProperty('border-color');
+            node.nodeDiv.style['border-color'] = '#666';
         }
 
         // Update the selected node ids
@@ -1416,7 +1417,7 @@ class ConstNode extends UINode{//«
         super(id, state, editor);
 
         // Hide the node header
-        this.headerDiv.style.display = 'none';
+//        this.headerDiv.style.display = 'none';
 
         let input = this.input = document.createElement('input');
         input.style['text-align'] = 'center';

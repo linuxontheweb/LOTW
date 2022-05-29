@@ -37,6 +37,8 @@ const FS = NS.api.fs;
 
 //DOM«
 
+
+
 //Main.bgcol="rgba(1,1,1,0)";
 Main.bgcol="";
 Main.tcol="#fff";
@@ -105,14 +107,26 @@ await FS.saveFsByPath(path, str);
 await WDG.popok(`Saved: ${str.length} bytes!`, {win: Win});
 }
 else{
-	await WDG.popinarea(str, "JSON", {noCancel:true, readOnly:true});
+	await WDG.popinarea(str, "File text (.ncft format)", {noCancel:true, readOnly:true});
 }
 
 //log(Win.nosave);
 
 };
 
-const init=()=>{
+const init=async()=>{
+/*
+let wins = Array.from(document.getElementsByClassName("topwin"));
+for (let w of wins){
+	if (w===Win) continue;
+	if (w.app==="audio.Noisecraft"){
+//		await WDG.poperr("An instance of Noisecraft is already running... please close it first!", {win: Win});
+//		Win.force_kill();
+		return;
+	}
+}
+*/
+//log(Array.from(wins));
 
 model = new Model();
 editor = new Editor(model, editor_div, graph_div, graph_svg, Main);
