@@ -4352,6 +4352,10 @@ const save_icon_editing = async() => {//«
 			delete CEDICN._savetext;
 		}
 
+		if (CEDICN._editcb) {
+			CEDICN._editcb(newval);
+			CEDICN._editcb = null;;
+		}
 		CEDICN.save();
 		CEDICN = null;
 		CG.off();
@@ -4507,43 +4511,52 @@ const make_folder_icon_cb = async(winarg, winpath, namearg, if_autopos, roottype
 this.make_folder_icon_cb=make_folder_icon_cb;
 //»
 
+const make_new_file=(val, ext, path, winarg)=>{//«
+	return new Promise(async(Y,N)=>{
+		if (!path) path = globals.desk_path;
+		let usepos = null;
+		let num = 0;
+		let name = "New_File";
+		let iter = 0;
+		while (await check_name_exists(`${name}.${ext}`, null, path)) {
+			name = "New_File_" + (++num);
+			iter++;
+			if (iter > 200) {
+				console.error("infinite loop detected");
+				return;
+			}
+		}
+		path_to_obj(path, parobj => {
+			if (!parobj) return;
+			let rtype = parobj.root.TYPE;
+			if (rtype != "fs") return poperr("Not making a directory of type:\x20" + rtype);
+			let icon = make_icon({NAME: `${name}.${ext}`});
+			icon._savetext = val;
+			icon._editcb = Y;
+	//				if (usewin===desk) place_in_icon_slot(icon, null, true);
+			if (path===globals.desk_path) place_in_icon_slot(icon, null, true);
+			else add_icon_to_folder_win(icon, winarg);
+			setTimeout(() => {
+				init_icon_editing(icon);
+			}, 0);
+			icon.isnew = true;
+		});
+		return true;
+	});
+};
+this.make_new_file = make_new_file;
+//»
 this.make_icon_cb = (path, app, winarg) => {//«
 	if (app == FOLDER_APP) {
 		make_folder_icon_cb(null, path, null, true);
 	}
 	else if (app == "Text") {
-		WDG.popinarea("Paste text", async(val) => {
+		WDG.popinarea("Paste text", (val) => {
 			if (!val) return;
 			if (CG.dis != "none") return;
 			CG.on();
-			let usewin = winarg || desk;
-			let usepath = path;
-			let usepos = null;
-			let num = 0;
-			let name = "New_File";
-			let iter = 0;
-			while (await check_name_exists(name + ".txt", null, usepath)) {
-				name = "New_File_" + (++num);
-				iter++;
-				if (iter == 50) {
-					cerr("infinite loop detected");
-					return;
-				}
-			}
-			path_to_obj(usepath, parobj => {
-				if (!parobj) return;
-				let rtype = parobj.root.TYPE;
-				if (rtype != "fs") return poperr("Not making a directory of type:\x20" + rtype);
-	 			let icon = make_icon({NAME: `${name}.txt`});
-				icon._savetext = val;
-				if (usewin===desk) place_in_icon_slot(icon, null, true);
-				else add_icon_to_folder_win(icon, usewin);
-				setTimeout(() => {
-					init_icon_editing(icon);
-				}, 0);
-				icon.isnew = true;
-			});
-			return true;
+			make_new_file(val, "txt", path, winarg);
+//			let usewin = winarg || desk;
 		});
 	}
 	else{

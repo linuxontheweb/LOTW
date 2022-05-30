@@ -1,8 +1,10 @@
 
-// Noisecraft is courtesy of https://github.com/maximecb/noisecraft
-// Everything in this file is my handiwork
-// Everything under /root/code/mods/av/noisecraft/ is mostly the 
-// same as the files in: https://github.com/maximecb/noisecraft/tree/main/public/
+/* 
+Noisecraft is courtesy of https://github.com/maximecb/noisecraft
+Everything in this file is my handiwork
+Everything under /root/code/mods/av/noisecraft/ is mostly the same 
+as the files in: https://github.com/maximecb/noisecraft/tree/main/public/
+*/
 
 import { anyInputActive } from '/root/code/mods/av/noisecraft/utils.js';
 import { Dialog, errorDialog } from '/root/code/mods/av/noisecraft/dialog.js';
@@ -10,6 +12,7 @@ import { Model, Paste, Play, Stop , MoveNodes} from '/root/code/mods/av/noisecra
 import { Editor } from '/root/code/mods/av/noisecraft/editor.js';
 import { AudioView } from '/root/code/mods/av/noisecraft/audioview.js';
 
+const FILE_EXT = "ncft";
 
 export const app = function(arg) {
 
@@ -170,7 +173,12 @@ const dosave = async(force_popup)=>{//«
 		await FS.saveFsByPath(path, str);
 		await WDG.popok(`Saved: ${str.length} bytes!`);
 	}
-	else await WDG.popinarea(str, "File text (.ncft format)", {noCancel:true, readOnly:true});
+	else{
+		Win.title = await Desk.make_new_file(str, FILE_EXT);
+		Win.name = Win.title;
+		Win.path = globals.desk_path;
+		Win.ext = FILE_EXT;
+	}
 
 };//»
 const init=async()=>{//«
