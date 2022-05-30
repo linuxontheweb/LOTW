@@ -154,12 +154,12 @@ const remove_select_div=()=>{//«
 };//»
 const toggle_cursor=()=>{//«
 	if (CUR.op==1) {
+		remove_select_div();
 		CUR.op=0;
 		CUR.z=-1;
 	}
 	else {
 		CUR.op=1;
-//		CUR.z=10000000;
 		CUR.z=3;
 	}
 }//»
