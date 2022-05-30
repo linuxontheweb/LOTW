@@ -820,7 +820,7 @@ function resetState(project){//«
         {
             if (!nodeProps.has(key) && !stateVars.has(key))
             {
-                console.log('deleting', node.type, key);
+//                console.log('deleting', node.type, key);
                 delete node[key];
             }
         }
@@ -983,6 +983,8 @@ export class MoveNodes extends Action{//«
             let node = model.state.nodes[nodeId];
             node.x += this.dx;
             node.y += this.dy;
+			if (node.x < 0) node.x=0;
+			if (node.y < 0) node.y=0;
         }
     }
 }//»

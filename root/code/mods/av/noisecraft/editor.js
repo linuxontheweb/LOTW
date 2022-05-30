@@ -165,8 +165,13 @@ export class Editor {//«
         this.resize();
     }//»
     update(newState, action){//«
+//This function causes big delays when moving nodes with arrow keys in a large graph
+if (action instanceof model.MoveNodes){
+	return;
+}
     // Update the GUI view
         // Find the node this action refers to, if any
+
         let node = action? this.nodes.get(action.nodeId):null;
 
         // Ignore note on messages
@@ -286,11 +291,6 @@ export class Editor {//«
             this.nodes.set(nodeId, node);
             this.graphDiv.appendChild(node.nodeDiv);
 			node.nodeDiv.nodeId = nodeId;
-//log(node);
-//if (action instanceof model.CreateNode){
-//log("Created: "+action.nodeType);
-//log(node);
-//}
         }
 
         // For each node
@@ -302,15 +302,9 @@ export class Editor {//«
             // For each input-side connection
             for (let dstPort in dstState.ins)
             {
-//                if (!dstState.ins[dstPort])
                 if (!dstState.ins[dstPort])
                     continue;
 				if (!dstState.ins.hasOwnProperty(dstPort)) continue;
-//                if (dstState.ins[dstPort] instanceof Function)
-//                    continue;
-
-//console.log(dstPort);
-//console.log(dstState.ins[dstPort]);
                 let [srcId, srcPort] = dstState.ins[dstPort];
                 assert (typeof srcId == 'string');
                 assert (this.nodes.has(srcId));
@@ -380,18 +374,38 @@ this.selectDiv.style.cssText=`
             let top = node.nodeDiv.offsetTop;
             let width = node.nodeDiv.offsetWidth;
             let height = node.nodeDiv.offsetHeight;
-
+			let right = left+width;
+			let bot = top+height;
+/*
             let nodeInside = (
                 left > xMin &&
-                left + width < xMax &&
+                right < xMax &&
                 top > yMin &&
-                top + height < yMax
+                bot < yMax
             );
+*/
+///*
+/*
+			let nodeInside = !( 
+				(left > xMax && 
+				top > yMax) ||
+                (bot < yMin ||
+				right < xMin) ||
+                (top > yMax && right < xMin) ||
+                (bot < yMin && left > xMax) 
+			);
+*/
+			if (!(left > xMax || right < xMin || top > yMax || bot < yMin)) {
+				selected.push(nodeId);
+//				OK.push(icn);
+//				icon_on(icn);
+        	}
+//*/
 
-            if (nodeInside)
-            {
-                selected.push(nodeId);
-            }
+//            if(nodeInside){
+//                selected.push(nodeId);
+//			}
+
         }
 
         // Highlight the selected nodes
@@ -480,8 +494,16 @@ this.selectDiv.style.cssText=`
         dialog.div.style['text-align'] = 'center';
 
         // Display the possible node types to create
+let iter=0;
         for (let nodeType in NODE_SCHEMA)
         {
+let ch;
+if (iter >= 0 && iter <= 25){
+ch = String.fromCharCode(iter+97);
+}
+else{
+ch = String.fromCharCode(iter+39);
+}
             let schema = NODE_SCHEMA[nodeType];
 
             // Don't show internal node types
@@ -512,7 +534,8 @@ this.selectDiv.style.cssText=`
             subDiv.style['user-select'] = 'none';
             subDiv.style.width = '100px';
             subDiv.style.margin = '4px';
-            subDiv.appendChild(document.createTextNode(nodeType));
+//            subDiv.appendChild(document.createTextNode(nodeType));
+            subDiv.appendChild(document.createTextNode(`${nodeType}\xa0${ch}`));
             subDiv.onclick = subDivClick.bind(this);
 
             // There can be only one AudioOut or Notes node
@@ -524,6 +547,7 @@ this.selectDiv.style.cssText=`
             }
 
             dialog.appendChild(subDiv);
+			iter++;
         }
 
     }//»
@@ -1347,6 +1371,8 @@ deleteBtn.style.cssText=`
         // Move the node
         this.x += dx;
         this.y += dy;
+if (this.x < 0) this.x = 0;
+if (this.y < 0) this.y = 0;
         this.nodeDiv.style.left = this.x;
         this.nodeDiv.style.top = this.y;
 

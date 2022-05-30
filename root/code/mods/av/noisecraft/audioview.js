@@ -144,7 +144,7 @@ console.log("Caught", e);
 			this.model.playing = false;
 			this.audioCtx.close();
 			this.audioCtx = null;
-			this.model.poperr("The Audio Worklet could not be loaded");
+			this.model.__poperr("The Audio Worklet could not be loaded");
 			return;
 		}
 		this.audioWorklet = new AudioWorkletNode(
