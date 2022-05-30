@@ -3977,6 +3977,13 @@ const do_ls = (args)=>{
 //XXXXXXXXXXXX
 
 builtins = {//«
+
+'swon': async () => {
+	if (await capi.initSW()) return cbok("The service worker has been registered");
+	cberr("There was a problem registering the service worker");
+},
+'swoff':async()=>{if(await capi.initSW(true))return cbok("The service worker has been unregistered");cberr("There was a problem unregistering the service worker");},
+
 'example':async(args)=>{
 	let opts=failopts(args,{s:{l:1},l:{list:1}});
 	if (!opts) return;

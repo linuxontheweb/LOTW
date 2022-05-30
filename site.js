@@ -9,10 +9,7 @@
 
 const http = require('http');
 const https = require('https');
-const spawn = require('child_process').spawn;
 const fs = require('fs');
-const qs = require('querystring');
-
 
 //»
 
@@ -241,6 +238,43 @@ const handle_request=async(req, res, url, args)=>{//«
 			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
 			else if (url == "/_getapp") res.end(JSON.stringify(await readdir(APPPATH, {getDir:true, getRaw:true}, args.path)));
 			else if (url == "/_getexamples") res.end(JSON.stringify(await readdir(EXAMPLESPATH, {getRaw: true})));
+else if (url=="/_generateServiceWorker"){
+
+const SVC_WORKER_TOP = `
+self.addEventListener('install', function(event) {
+//if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+//  return; 
+//}     
+  event.waitUntil(
+    caches.open('desk-sw-v1').then(function(cache) {
+      return cache.addAll([
+`
+
+const SVC_WORKER_BOT = `
+      ]);
+    })
+  );
+});
+
+self.addEventListener('fetch', function(event) {
+if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
+    return;
+}
+  event.respondWith(
+    caches.match(event.request).then(function(response) {
+      return response || fetch(event.request);
+    })
+  );
+});
+`
+
+/*
+res.headers["Content-Type"] = "application/javascript";
+res.write(SVC_WORKER_TOP+"\n'"+urllib.unquote(path)+"'\n"+SVC_WORKER_BOT)
+*/
+log(SVC_WORKER_TOP+decodeURIComponent(args.path)+SVC_WORKER_BOT);
+res.end();
+}
 			else if (url == "/_ip") {
 				let rv = await fetch("https://ifconfig.me/ip");
 				if (!(rv && rv.ok)) return nogo(res, "Could not get ip address");

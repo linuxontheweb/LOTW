@@ -5,6 +5,7 @@ import * as model from './model.js';
 import { compile } from './compiler.js';
 //»
 
+
 const log = (...args)=>{
 console.log(...args);
 };
@@ -135,8 +136,17 @@ export class AudioView{//«
 
 		// This seems to be necessary for Safari
 		this.audioCtx.resume();
-		await this.audioCtx.audioWorklet.addModule('/root/code/mods/av/noisecraft/audioworklet.js');
-
+		try{
+			await this.audioCtx.audioWorklet.addModule('/root/code/mods/av/noisecraft/audioworklet.js');
+		}
+		catch(e){
+console.log("Caught", e);
+			this.model.playing = false;
+			this.audioCtx.close();
+			this.audioCtx = null;
+			this.model.poperr("The Audio Worklet could not be loaded");
+			return;
+		}
 		this.audioWorklet = new AudioWorkletNode(
 			this.audioCtx,
 			'sample-generator',
@@ -162,11 +172,11 @@ export class AudioView{//«
 	 */
 		assert (this.audioCtx);
 
-		this.audioWorklet.disconnect();
-		this.audioWorklet = null;
-
 		this.audioCtx.close();
 		this.audioCtx = null;
+
+		this.audioWorklet.disconnect();
+		this.audioWorklet = null;
 	}//»
 	send(msg){//«
 	/**

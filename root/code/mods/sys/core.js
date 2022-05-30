@@ -1386,7 +1386,7 @@ api.xget=(url,opts={})=>{return new Promise((Y,N)=>{xget(url,Y,opts.text,opts.bl
 //»
 //»
 //Util«
-
+/*
 api.initSW = if_unreg => {//«
 	return new Promise(async (Y, N) => {
 		if (!navigator.serviceWorker) {
@@ -1410,7 +1410,7 @@ api.initSW = if_unreg => {//«
 		}
 	});
 }//»
-
+*/
 api.configPath=path=>{return new Promise(async(Y,N)=>{let trypath=home_path+"/.config/"+path;if(await fsapi.pathToNode(trypath))return Y(trypath);Y("/etc/config/"+path);});};
 api.getInitStr = (path, opts = {}) => {
 	return new Promise(async (Y, N) => {

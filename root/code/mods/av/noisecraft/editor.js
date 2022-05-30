@@ -285,6 +285,12 @@ export class Editor {//«
             let node = new nodeClass(nodeId, nodeState, this);
             this.nodes.set(nodeId, node);
             this.graphDiv.appendChild(node.nodeDiv);
+			node.nodeDiv.nodeId = nodeId;
+//log(node);
+//if (action instanceof model.CreateNode){
+//log("Created: "+action.nodeType);
+//log(node);
+//}
         }
 
         // For each node
@@ -465,9 +471,11 @@ this.selectDiv.style.cssText=`
     createNodeDialog(mousePos){//«
     // Show node creation dialog
         debug('createNodeDialog');
-
         // Dialog contents
         var dialog = new Dialog('Create Node', this.mainDiv);
+		let arr = [];
+		dialog.__type = "CREATE";
+		dialog.__arr = arr;
 		this.mainDiv.dialog = dialog;
         dialog.div.style['text-align'] = 'center';
 
@@ -495,6 +503,7 @@ this.selectDiv.style.cssText=`
 
             // TODO: migrate style to CSS
             var subDiv = document.createElement('div');
+			arr.push(subDiv);
             subDiv.title = schema.description;
             subDiv.style.border = "2px solid #AAA";
             subDiv.style.display = 'inline-block';
@@ -1165,6 +1174,8 @@ connDiv.style.cssText=`
 //log(this.mainDiv);
 //log(this);
         var dialog = new Dialog('Node Parameters', this.editor.mainDiv);
+		dialog.__type = "PARAMS";
+
 		this.editor.mainDiv.dialog = dialog;
 
         // Node type

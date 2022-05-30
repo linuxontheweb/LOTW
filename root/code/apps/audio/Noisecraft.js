@@ -3,7 +3,7 @@
 
 import { anyInputActive } from '/root/code/mods/av/noisecraft/utils.js';
 import { Dialog, errorDialog } from '/root/code/mods/av/noisecraft/dialog.js';
-import { Model, Paste, Play, Stop } from '/root/code/mods/av/noisecraft/model.js';
+import { Model, Paste, Play, Stop , MoveNodes} from '/root/code/mods/av/noisecraft/model.js';
 import { Editor } from '/root/code/mods/av/noisecraft/editor.js';
 import { AudioView } from '/root/code/mods/av/noisecraft/audioview.js';
 
@@ -16,6 +16,12 @@ import { AudioView } from '/root/code/mods/av/noisecraft/audioview.js';
 //let audioView = new AudioView(model);
 
 let model, editor, audioView;
+const ARROWS=[
+	"RIGHT_",
+	"LEFT_",
+	"UP_",
+	"DOWN_"
+];
 
 export const app = function(arg) {
 
@@ -82,14 +88,12 @@ editor_div.add(graph_svg);
 
 //Funcs«
 
-const dosave = async()=>{
-//log(str);
+const dosave = async(force_popup)=>{
 let path = (Win.fullpath());
 let str = model.serialize();
-if (path){
-//log("SAVING: "+str.length+" bytes");
-await FS.saveFsByPath(path, str);
-await WDG.popok(`Saved: ${str.length} bytes!`, {win: Win});
+if (path&&!force_popup){
+	await FS.saveFsByPath(path, str);
+	await WDG.popok(`Saved: ${str.length} bytes!`);
 }
 else{
 	await WDG.popinarea(str, "File text (.ncft format)", {noCancel:true, readOnly:true});
@@ -114,6 +118,9 @@ for (let w of wins){
 //log(Array.from(wins));
 
 model = new Model();
+model.poperr=WDG.poperr;
+
+//model.poperr = WDG.poperr;
 editor = new Editor(model, editor_div, graph_div, graph_svg, Main);
 audioView = new AudioView(model);
 
@@ -160,33 +167,71 @@ this.onloadfile=bytes=>{//«
 this.onkeydown = function(e,s) {//«
 
 if (s==="SPACE_"){
-e.preventDefault();
-if (model.playing){
-    model.update(new Stop());
-}
-else{
-    model.update(new Play());
-}
-
+	e.preventDefault();
+	if (model.playing){
+		model.update(new Stop());
+	}
+	else{
+		model.update(new Play());
+	}
 }
 else if (s=="s_A"){
-dosave();
-/*
-let blob = new Blob(
-	[str],
-	{type: 'application/json'}
-);
-*/
+	dosave();
 }
-else if (s=="DOWN_"){
-//log("Down!");
-//graph_div.scrollTop+=100;
-//log(graph_div.scrollTop);
-//log(graph_div.scrollHeight);
+else if (s=="c_CAS"){
+dosave(true);
 }
+else if (s=="c_C"){
+	if (Main.dialog) return;
+if (editor.selected.length > 0){
+	editor.deselect();
+}
+	//editor.createNodeDialog({x:editor_div.scrollLeft+Math.round(editor_div.offsetWidth/2), y:editor_div.scrollTop+Math.round(editor_div.offsetHeight/2)});
+	editor.createNodeDialog({x:editor_div.scrollLeft+1, y:editor_div.scrollTop+1});
+}
+else if (ARROWS.includes(s)){
+	if (editor.selected.length){
+		e.preventDefault();
+		let dx=0, dy=0;
+		if (s=="RIGHT_") dx = 100;
+		else if (s=="LEFT_") dx = -100;
+		else if (s=="UP_") dy = -100;
+		else if (s=="DOWN_") dy = 100;
+		for (let nodeId of editor.selected){
+			let node = (editor.nodes.get(nodeId));
+			node.move(dx,dy);
+		}
+		editor.resize();	
+		model.update(new MoveNodes(
+			editor.selected,
+			dx,
+			dy
+		));
+	}
+}
+
 
 }//»
 this.onkeypress=e=>{//«
+
+let k = e.key;
+if (Main.dialog) {
+	if (Main.dialog.__type=="CREATE"){
+		let num = e.charCode;
+		if (num >= 65 && num <= 90) num-=39;
+		else if (num>=97 && num <= 122) num-=97;
+		else return;
+		let which = Main.dialog.__arr[num];
+		if(which&&which.onclick){
+			if (editor.selected.length > 0) editor.deselect();
+			Main.dialog.__arr[num].click();
+			editor.selectNodes([graph_div.lastChild.nodeId]);
+//log(graph_div.lastChild.nodeId);
+//log(graph_div.lastChild);
+		}
+	}
+}
+
 };//»
 this.onkill = function() {//«
 
@@ -194,18 +239,18 @@ if (model.playing) model.update(new Stop());
 
 
 }//»
-this.onescape = ()=>{
+this.onescape = ()=>{//«
 if (Main.dialog){
-Main.dialog.close();
-Main.dialog = null;
-return true;
+	Main.dialog.close();
+	Main.dialog = null;
+	return true;
 }
 if (editor.selected.length > 0){
 	editor.deselect();
 	return true;
 }
 return false;
-};
+};//»
 this.onresize = function() {//«
 
 editor.resize();
@@ -223,15 +268,13 @@ this.onblur=()=>{//«
 //Main.tcol="#e9e9e9";
 
 }//»
-this.get_context=()=>{
+this.get_context=()=>{//«
 	return [
 		`About Noisecraft`, async()=>{
-			this.onblur();
-			await WDG.popok('Courtesy of: <a href="https://github.com/maximecb/noisecraft">This Github repo</a>',{win:Win});
-			this.onfocus();
+			WDG.popok('Courtesy of: <a href="https://github.com/maximecb/noisecraft">This Github repo</a>');
 		}
 	]
-}
+}//»
 
 //»
 
