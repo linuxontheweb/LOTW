@@ -1,5 +1,8 @@
 
 // Noisecraft is courtesy of https://github.com/maximecb/noisecraft
+// Everything in this file is my handiwork
+// Everything under /root/code/mods/av/noisecraft/ is mostly the 
+// same as the files in: https://github.com/maximecb/noisecraft/tree/main/public/
 
 import { anyInputActive } from '/root/code/mods/av/noisecraft/utils.js';
 import { Dialog, errorDialog } from '/root/code/mods/av/noisecraft/dialog.js';
@@ -30,8 +33,8 @@ let model, editor, audioView;
 
 const CUR = mkdv();
 CUR.pos="absolute";
-CUR.loc(0,0);
-CUR.fs=50;
+//CUR.loc(0,0);
+CUR.fs=75;
 //╋
 CUR.innerHTML = "╋";
 //CUR.z=10000000;
@@ -72,7 +75,6 @@ const docopy=(e)=>{//«
 	if (!focused) return;
 	if (!editor.selected.length) return;
 	let data = JSON.stringify(model.copy(editor.selected));
-	log(data);
 	e.clipboardData.setData('text/plain', data);
 	e.preventDefault();
 };
@@ -132,6 +134,7 @@ const ARROWS=[//«
 	"HOME_",
 	"END_"
 ];//»
+const NUMS=["0_","1_","2_","3_","4_","5_","6_","7_","8_","9_" ];
 
 let last_selected;
 let focused = false;
@@ -140,6 +143,8 @@ let focused = false;
 
 //Funcs«
 
+const deselect=()=>{last_selected=editor.selected;editor.deselect();};
+const curcen=()=>{return{x:CUR.x+cur_half_w+editor_div.scrollLeft,y:CUR.y+cur_half_h+editor_div.scrollTop};};
 const remove_select_div=()=>{//«
 	editor.startMousePos=null;
 	if (editor.selectDiv){
@@ -147,9 +152,6 @@ const remove_select_div=()=>{//«
 		editor.selectDiv = null;
 	}
 };//»
-const curcen = ()=>{
-	return {x:CUR.x+cur_half_w+editor_div.scrollLeft, y:CUR.y+cur_half_h+editor_div.scrollTop};
-};
 const toggle_cursor=()=>{//«
 	if (CUR.op==1) {
 		CUR.op=0;
@@ -161,7 +163,6 @@ const toggle_cursor=()=>{//«
 		CUR.z=3;
 	}
 }//»
-const deselect=()=>{last_selected=editor.selected;editor.deselect();};
 const dosave = async(force_popup)=>{//«
 	let path = (Win.fullpath());
 	let str = model.serialize();
@@ -174,19 +175,17 @@ const dosave = async(force_popup)=>{//«
 };//»
 const init=async()=>{//«
 
-model = new Model();
-model.__poperr=WDG.poperr;
+	model = new Model();
+	model.__poperr=WDG.poperr;
 
-editor = new Editor(model, editor_div, graph_div, graph_svg, Main);
-audioView = new AudioView(model);
+	editor = new Editor(model, editor_div, graph_div, graph_svg, Main);
+	audioView = new AudioView(model);
 
-document.addEventListener('copy',docopy,false);
-document.addEventListener('cut',docut,false);
-document.addEventListener('paste',dopaste,false);
+	document.addEventListener('copy',docopy,false);
+	document.addEventListener('cut',docut,false);
+	document.addEventListener('paste',dopaste,false);
 
-//graph_div.style.transform = "scale(0.5)";
-//graph_svg.style.transform = "scale(0.5)";
-//log(editor_div);
+	CUR.loc(editor_div.clientWidth/2 - cur_half_w, editor_div.clientHeight/2 - cur_half_h);
 
 };//»
 
@@ -215,8 +214,9 @@ this.onloadfile=bytes=>{//«
     }
 };//»
 this.onkeydown = async function(e,s) {//«
+
 if (Main.dialog) return;
-if (s=="ENTER_"){
+if (s=="ENTER_"){//«
 	if (editor.startMousePos){
 		remove_select_div();
 		return true;
@@ -235,26 +235,20 @@ if (s=="ENTER_"){
 		node.ondblclick();
 	}
 	else editor.selectNodes([node.nodeId]);
-}
-else if (s=="ENTER_C"){
+}//»
+else if (s=="ENTER_C"){//«
 	if (CUR.op!=1) return;
 	let r = CUR.gbcr();
 	let arr = document.elementsFromPoint(r.left+r.width/2, r.top+r.height/2);
 
 	let node = arr[1].__node;
 	if (!node) return;
-//	if (editor.selected.length==1 && editor.selected[0] === node.nodeId){
-//		node.ondblclick();
-//	}
-//	else editor.selectNodes([node.nodeId]);
-//log(editor);
-let a = editor.selected.slice();
-a.push(node.nodeId);
-a = a.sort().uniq();
-editor.selectNodes(a);
-//log(a);
-}
-else if (s==="SPACE_"){
+	let a = editor.selected.slice();
+	a.push(node.nodeId);
+	a = a.sort().uniq();
+	editor.selectNodes(a);
+}//»
+else if (s==="SPACE_"){//«
 	e.preventDefault();
 	if (model.playing){
 		model.update(new Stop());
@@ -262,36 +256,18 @@ else if (s==="SPACE_"){
 	else{
 		model.update(new Play());
 	}
-}
-else if (s=="x_"){
-	toggle_cursor();
-}
-else if (s=="s_A"){
-	dosave();
-}
-else if (s=="c_CAS"){
-	dosave(true);
-}
-else if (s=="a_C"){
-	deselect();
-	editor.selectAll();
-}
-else if (s=="BACK_"){
+}//»
+else if (s=="x_")toggle_cursor();
+else if (s=="s_A")dosave();
+else if (s=="c_CAS") dosave(true);
+else if(s=="a_C"){deselect();editor.selectAll();}
+else if (s=="BACK_"){//«
 	if (editor.selected.length) {
 		if (await WDG.popyesno(`Delete ${editor.selected.length} nodes?`)) editor.deleteSelected();
 	}
-}
-/*
-else if (s=="n_"){
-
-//	if (editor.selected.length > 0) editor.deselect();
-	editor.deselect();
-
-	//editor.createNodeDialog({x:editor_div.scrollLeft+Math.round(editor_div.offsetWidth/2), y:editor_div.scrollTop+Math.round(editor_div.offsetHeight/2)});
-	editor.createNodeDialog({x:editor_div.scrollLeft+1, y:editor_div.scrollTop+1});
-}
-*/
+}//»
 else if (ARROWS.includes(s)){//«
+	e.preventDefault();
 	let dx=0, dy=0;
 	let base, small, tiny;
 	if (CUR.op==1)base = 25;
@@ -315,9 +291,9 @@ else if (ARROWS.includes(s)){//«
 //	else if (CUR.op==1){
 		CUR.x+=dx;
 		CUR.y+=dy;
-		let r = CUR.gbcr();
-		let maxx = editor_div.clientWidth - r.width/2 - 2;
-		let maxy = editor_div.clientHeight - r.height/2 - 5;
+//		let r = CUR.gbcr();
+		let maxx = editor_div.clientWidth - cur_half_w - 2;
+		let maxy = editor_div.clientHeight - cur_half_h - 5;
 		if (CUR.x < cur_min_x) CUR.x=cur_min_x;
 		else if (CUR.x > maxx) CUR.x = maxx;
 		if (CUR.y < cur_min_y) CUR.y=cur_min_y;
@@ -327,7 +303,6 @@ else if (ARROWS.includes(s)){//«
 		}
 	}
 	else if (editor.selected.length){
-		e.preventDefault();
 		for (let nodeId of editor.selected){
 			let node = (editor.nodes.get(nodeId));
 			node.move(dx,dy);
@@ -345,20 +320,29 @@ else if (ARROWS.includes(s)){//«
 
 	}
 }//»
-else if (s=="0_"){
+else if (NUMS.includes(s)){//«
 
-	if (CUR.op==1){
-		CUR.x =  editor_div.clientWidth/2 - CUR.clientWidth/2;
-		CUR.y =  editor_div.clientHeight/2 - CUR.clientHeight/2;
+	if (CUR.op!=1) return;
+
+	if (s=="0_") s="5_";
+	let x,y;	
+	if (s=="1_"||s=="4_"||s=="7_") x=-cur_half_w;
+	else if (s=="2_"||s=="5_"||s=="8_") x=editor_div.clientWidth/2 - cur_half_w;
+	else if (s=="3_"||s=="6_"||s=="9_") x=editor_div.clientWidth-cur_half_w-2;
+	if (s=="1_"||s=="2_"||s=="3_") y=-cur_half_h;
+	else if (s=="4_"||s=="5_"||s=="6_") y=editor_div.clientHeight/2 - cur_half_h;
+	else if (s=="7_"||s=="8_"||s=="9_") y=editor_div.clientHeight - cur_half_h-5;
+	CUR.loc(x,y);
+	if (editor.startMousePos){
+		editor.updateSelect(editor.startMousePos, curcen());
 	}
-
-}
+}//»
 
 }//»
 this.onkeypress=e=>{//«
 
 let k = e.key;
-if (Main.dialog) {
+if (Main.dialog) {//«
 	if (Main.dialog.__type=="CREATE"){
 		let num = e.charCode;
 		if (num >= 65 && num <= 90) num-=39;
@@ -371,24 +355,24 @@ if (Main.dialog) {
 			editor.selectNodes([graph_div.lastChild.nodeId]);
 		}
 	}
-}
-else if (k=="c"){
+}//»
+else if (k=="c"){//«
 	deselect();
 	editor.createNodeDialog({x:editor_div.scrollLeft, y:editor_div.scrollTop});
-}
-else if (k=="`"){
+}//»
+else if (k=="`"){//«
 	if (!editor.selected.length){
 		if (last_selected){
 			editor.selectNodes(last_selected);
 		}
 	}
-	else{
-		deselect();
-	}
-}
+	else deselect();
+	
+}//»
 
 };//»
 this.onkill = function() {//«
+
 focused = false;
 document.removeEventListener('copy',docopy,false);
 document.removeEventListener('cut',docut,false);
@@ -396,9 +380,9 @@ document.removeEventListener('paste',dopaste,false);
 
 if (model.playing) model.update(new Stop());
 
-
 }//»
 this.onescape = ()=>{//«
+
 if (Main.dialog){
 	Main.dialog.close();
 	Main.dialog = null;
@@ -413,11 +397,11 @@ if (CUR.op==1){
 	return true;
 }
 if (editor.selected.length > 0){
-//	editor.deselect();
 	deselect();
 	return true;
 }
 return false;
+
 };//»
 this.onresize = function() {//«
 
@@ -427,15 +411,11 @@ editor.resize();
 this.onfocus=()=>{//«
 
 focused = true;
-//Main.bgcol="#000";
-//Main.tcol="#fff";
 
 }//»
 this.onblur=()=>{//«
 
 focused = false;
-//Main.bgcol="#131313";
-//Main.tcol="#e9e9e9";
 
 }//»
 this.get_context=()=>{//«

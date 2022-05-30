@@ -8,12 +8,7 @@ import * as music from './music.js';
 import { midi } from './midi.js';
 import { Knob } from './knob.js';
 //»
-let debug_mode = false;
 const log=(...args)=>{console.log(...args);};
-const debug = (s)=>{
-if (!debug_mode) return;
-log(s);
-};
 
 export class Editor {//«
 
@@ -81,7 +76,6 @@ export class Editor {//«
             if (evt.button != 0)
                 return;
 
-            debug('editor mouse down');
 
             let mousePos = this.getMousePos(evt);
             this.startMousePos = mousePos;
@@ -117,7 +111,6 @@ export class Editor {//«
         }//»
         function onPointerUp(evt){//«
         // Mouse click callback
-            debug('editor click');
 
             if (evt.pointerId)
             {
@@ -138,7 +131,6 @@ export class Editor {//«
             // click anywhere that's not another port, cancel the connection
             if (this.edge)
             {
-                debug('abort edge connection');
                 this.svg.removeChild(this.edge.line);
                 this.edge = null;
                 return;
@@ -259,7 +251,6 @@ if (action instanceof model.MoveNodes){
             this.selected = action.pastedIds;
         }
 
-        debug('recreating UI nodes');
 
         // Release resource for all UI nodes
         for (let node of this.nodes.values())
@@ -422,7 +413,6 @@ this.selectDiv.style.cssText=`
     selectNodes(nodeIds){//«
     // Select a given set of nodes
         nodeIds = Array.from(nodeIds);
-        debug(`selecting ${nodeIds.length} nodes`);
 
         // Unhighlight the currently selected nodes
         for (let nodeId of this.selected)
@@ -484,7 +474,6 @@ this.selectDiv.style.cssText=`
     }//»
     createNodeDialog(mousePos){//«
     // Show node creation dialog
-        debug('createNodeDialog');
         // Dialog contents
         var dialog = new Dialog('Create Node', this.mainDiv);
 		let arr = [];
@@ -557,7 +546,6 @@ ch = String.fromCharCode(iter+39);
         if (this.startDragPos)
             return;
 
-        debug('starting drag');
 
         // If the node that was clicked is not already selected
         if (this.selected.indexOf(nodeId) == -1)
@@ -574,7 +562,6 @@ ch = String.fromCharCode(iter+39);
         if (!this.startDragPos)
             return;
 
-        debug('end drag');
 
         // Compute how much we've moved the nodes
         let dragPos = this.getDragPos();
@@ -894,7 +881,6 @@ class UINode {//«
 
             evt.stopPropagation();
 
-            debug('pointerdown on node');
 
             // Can't drag a node while connecting a port
             if (this.editor.edge)
@@ -1139,13 +1125,11 @@ portDiv.style.cssText=`
 //        portDiv.className = (side == 'dst')? 'node_in_port':'node_out_port';
 
         portDiv.onpointerdown = (evt) => {
-            debug(`pointer down ${portName} ${side}`);
             evt.stopPropagation();
             portClick.call(this, 'down');
         }
 
         portDiv.onpointerup = (evt) => {
-            debug(`pointer up ${portName} ${side}`);
             evt.stopPropagation();
             portClick.call(this, 'up');
         }
@@ -1315,7 +1299,6 @@ deleteBtn.style.cssText=`
             {
                 // If model updates fail, we don't close the dialog
                 dialog.showError(e.message);
-                debug(e);
                 return;
             }
 
@@ -1639,14 +1622,12 @@ Keep track of the currently active keys on a musical keyboard
             if (this.notesOn.has(noteNo))
                 return;
 
-            debug('note on:', noteNo);
             this.send(new model.NoteOn(this.nodeId, noteNo, vel));
             this.notesOn.add(noteNo);
             this.lightDiv.style.background = '#F00';
         }
         else
         {
-            debug('note off:', noteNo);
             this.send(new model.NoteOn(this.nodeId, noteNo, 0));
             this.notesOn.delete(noteNo);
             this.lightDiv.style.background = '#333';
@@ -1983,7 +1964,6 @@ inner.style.cssText=`
 
             cell.onclick = (evt) =>
             {
-                debug('clicked ' + i + ', ' + j);
                 this.send(new model.ToggleCell(
                     this.nodeId,
                     patIdx,
@@ -2073,8 +2053,6 @@ inner.style.cssText=`
         // otherwise immediately set the next pattern
         if (this.editor.model.playing)
         {
-            debug('sending QueuePattern');
-
             this.send(new model.QueuePattern(
                 this.nodeId,
                 patIdx
@@ -2082,8 +2060,6 @@ inner.style.cssText=`
         }
         else
         {
-            debug('sending SetPattern');
-
             this.send(new model.SetPattern(
                 this.nodeId,
                 patIdx
