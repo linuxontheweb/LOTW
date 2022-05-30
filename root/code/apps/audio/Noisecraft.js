@@ -7,10 +7,8 @@ import { Model, Paste, Play, Stop , MoveNodes} from '/root/code/mods/av/noisecra
 import { Editor } from '/root/code/mods/av/noisecraft/editor.js';
 import { AudioView } from '/root/code/mods/av/noisecraft/audioview.js';
 
-let model, editor, audioView;
 
 export const app = function(arg) {
-
 
 //Imports«
 
@@ -23,24 +21,31 @@ const{make,mkdv,mk,mksp}=util;
 const Win = Main.top;
 const WDG = NS.api.widgets;
 const FS = NS.api.fs;
-//log(WDG);
 
 //»
 
 //DOM«
+
+let model, editor, audioView;
+
 const CUR = mkdv();
 CUR.pos="absolute";
 CUR.loc(0,0);
 CUR.fs=50;
 //╋
 CUR.innerHTML = "╋";
-CUR.z=10000000;
+//CUR.z=10000000;
+CUR.z=-1;
 CUR.pad=0;
 CUR.tcol="#c00";
-CUR.op=1;
+//CUR.op=1;
+CUR.op=0;
 Main.add(CUR);
-let cur_min_x = -CUR.clientWidth/2;
-let cur_min_y = -CUR.clientHeight/2;
+const cur_half_w = CUR.clientWidth/2;
+const cur_half_h = CUR.clientHeight/2;
+const cur_min_x = -cur_half_w;
+const cur_min_y = -cur_half_h;
+
 Main.bgcol="";
 Main.tcol="#fff";
 Main.fs=16;
@@ -135,19 +140,29 @@ let focused = false;
 
 //Funcs«
 
-const toggle_cursor=()=>{
+const remove_select_div=()=>{//«
+	editor.startMousePos=null;
+	if (editor.selectDiv){
+		editor_div.removeChild(editor.selectDiv);
+		editor.selectDiv = null;
+	}
+};//»
+const curcen = ()=>{
+	return {x:CUR.x+cur_half_w+editor_div.scrollLeft, y:CUR.y+cur_half_h+editor_div.scrollTop};
+};
+const toggle_cursor=()=>{//«
 	if (CUR.op==1) {
 		CUR.op=0;
 		CUR.z=-1;
 	}
 	else {
 		CUR.op=1;
-		CUR.z=10000000;
+//		CUR.z=10000000;
+		CUR.z=3;
 	}
-}
+}//»
 const deselect=()=>{last_selected=editor.selected;editor.deselect();};
 const dosave = async(force_popup)=>{//«
-
 	let path = (Win.fullpath());
 	let str = model.serialize();
 	if (path&&!force_popup){
@@ -200,21 +215,44 @@ this.onloadfile=bytes=>{//«
     }
 };//»
 this.onkeydown = async function(e,s) {//«
-
 if (Main.dialog) return;
 if (s=="ENTER_"){
+	if (editor.startMousePos){
+		remove_select_div();
+		return true;
+	}
+	if (CUR.op!=1) return;
+	let r = CUR.gbcr();
+	let arr = document.elementsFromPoint(r.left+r.width/2, r.top+r.height/2);
+
+	let node = arr[1].__node;
+	if (!node) {
+		editor.startMousePos = curcen();
+		deselect();
+		return;
+	}
+	if (editor.selected.length==1 && editor.selected[0] === node.nodeId){
+		node.ondblclick();
+	}
+	else editor.selectNodes([node.nodeId]);
+}
+else if (s=="ENTER_C"){
 	if (CUR.op!=1) return;
 	let r = CUR.gbcr();
 	let arr = document.elementsFromPoint(r.left+r.width/2, r.top+r.height/2);
 
 	let node = arr[1].__node;
 	if (!node) return;
-	if (editor.selected.length==1 && editor.selected[0] === node.nodeId){
-		node.ondblclick();
-	}
-	else {
-		editor.selectNodes([node.nodeId]);
-	}
+//	if (editor.selected.length==1 && editor.selected[0] === node.nodeId){
+//		node.ondblclick();
+//	}
+//	else editor.selectNodes([node.nodeId]);
+//log(editor);
+let a = editor.selected.slice();
+a.push(node.nodeId);
+a = a.sort().uniq();
+editor.selectNodes(a);
+//log(a);
 }
 else if (s==="SPACE_"){
 	e.preventDefault();
@@ -255,19 +293,40 @@ else if (s=="n_"){
 */
 else if (ARROWS.includes(s)){//«
 	let dx=0, dy=0;
-	if (s=="RIGHT_") dx = 50;
-	else if (s=="LEFT_") dx = -50;
-	else if (s=="UP_") dy = -50;
-	else if (s=="DOWN_") dy = 50;
-	else if (s=="RIGHT_C") dx = 7;
-	else if (s=="LEFT_C") dx = -7;
-	else if (s=="UP_C") dy = -7;
-	else if (s=="DOWN_C") dy = 7;
-	else if (s=="RIGHT_CA") dx = 1;
-	else if (s=="LEFT_CA") dx = -1;
-	else if (s=="HOME_") dy = -1;
-	else if (s=="END_") dy = 1;
-	if (editor.selected.length){
+	let base, small, tiny;
+	if (CUR.op==1)base = 25;
+	else if (editor.selected.length) base = 50;
+	else base = 100;
+	small = base/5;
+	tiny = base/25;
+	if (s=="RIGHT_") dx = base;
+	else if (s=="LEFT_") dx = -base;
+	else if (s=="UP_") dy = -base;
+	else if (s=="DOWN_") dy = base;
+	else if (s=="RIGHT_C") dx = small;
+	else if (s=="LEFT_C") dx = -small;
+	else if (s=="UP_C") dy = -small;
+	else if (s=="DOWN_C") dy = small;
+	else if (s=="RIGHT_CA") dx = tiny;
+	else if (s=="LEFT_CA") dx = -tiny;
+	else if (s=="HOME_") dy = -tiny;
+	else if (s=="END_") dy = tiny;
+	if (CUR.op==1){
+//	else if (CUR.op==1){
+		CUR.x+=dx;
+		CUR.y+=dy;
+		let r = CUR.gbcr();
+		let maxx = editor_div.clientWidth - r.width/2 - 2;
+		let maxy = editor_div.clientHeight - r.height/2 - 5;
+		if (CUR.x < cur_min_x) CUR.x=cur_min_x;
+		else if (CUR.x > maxx) CUR.x = maxx;
+		if (CUR.y < cur_min_y) CUR.y=cur_min_y;
+		else if (CUR.y > maxy)CUR.y = maxy;
+		if (editor.startMousePos){
+			editor.updateSelect(editor.startMousePos, curcen());
+		}
+	}
+	else if (editor.selected.length){
 		e.preventDefault();
 		for (let nodeId of editor.selected){
 			let node = (editor.nodes.get(nodeId));
@@ -279,17 +338,6 @@ else if (ARROWS.includes(s)){//«
 			dx,
 			dy
 		));
-	}
-	else if (CUR.op==1){
-		CUR.x+=dx;
-		CUR.y+=dy;
-		let r = CUR.gbcr();
-		let maxx = editor_div.clientWidth - r.width/2 - 2;
-		let maxy = editor_div.clientHeight - r.height/2 - 5;
-		if (CUR.x < cur_min_x) CUR.x=cur_min_x;
-		else if (CUR.x > maxx) CUR.x = maxx;
-		if (CUR.y < cur_min_y) CUR.y=cur_min_y;
-		else if (CUR.y > maxy)CUR.y = maxy;
 	}
 	else{
 		editor_div.scrollTop+=dy;
@@ -356,13 +404,17 @@ if (Main.dialog){
 	Main.dialog = null;
 	return true;
 }
-if (editor.selected.length > 0){
-//	editor.deselect();
-	deselect();
+if (editor.startMousePos){
+	remove_select_div();
 	return true;
 }
 if (CUR.op==1){
 	toggle_cursor();
+	return true;
+}
+if (editor.selected.length > 0){
+//	editor.deselect();
+	deselect();
 	return true;
 }
 return false;

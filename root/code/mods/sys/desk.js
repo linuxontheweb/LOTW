@@ -2053,21 +2053,10 @@ const make_window = (arg) => {//«
 	let is_hidden = arg.HIDDEN;
 	let app = arg.APP;
 
-	if (app==="audio.Noisecraft"){
-		let allwins = Array.from(document.getElementsByClassName("topwin"));
-		for (let w of allwins){
-			if (w.app==="audio.Noisecraft"){
-				poperr("An instance of Noisecraft is already running... please close it first!");
-				return;
-			}
-		}
-	}
-
 	let appobj = arg.APPOBJ;
 	let winid;
 	if (!appobj) appobj = {};
 	let win = make("div");
-//log(arg.FULLPATH);
 	win.toggle_chrome=()=>{
 		do_toggle_win_chrome(win);
 	};

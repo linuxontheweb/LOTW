@@ -12,7 +12,7 @@ Create a modal dialog popup showing content wrapped in a div
         this.wrapperDiv = document.createElement('div');
 this.wrapperDiv.style.cssText=`
 color: #fff;
-    z-index:3;
+    z-index:4;
     width: 400px;
     position: absolute;
     top: 50%;
@@ -72,7 +72,7 @@ this.bgDiv.style.cssText=`
     left: 0;
     top: 0;
     background: rgba(0,0,0,0.80);
-    z-index: 2;
+    z-index: 3;
 `;
         this.bgDiv.onclick = bgClick.bind(this);
 
@@ -80,7 +80,8 @@ this.bgDiv.style.cssText=`
 //        var body = document.getElementsByTagName("body")[0];
 		this.body = main;
 		let body = main;
-        body.appendChild(this.wrapperDiv);
+    
+	    body.appendChild(this.wrapperDiv);
         body.appendChild(this.bgDiv);
 //console.log(body);
         function bgClick(evt)
