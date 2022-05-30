@@ -7,14 +7,6 @@ import { Model, Paste, Play, Stop , MoveNodes} from '/root/code/mods/av/noisecra
 import { Editor } from '/root/code/mods/av/noisecraft/editor.js';
 import { AudioView } from '/root/code/mods/av/noisecraft/audioview.js';
 
-//let model = new Model();
-
-// Graph editor view
-//let editor = new Editor(model);
-
-// Audio view of the model
-//let audioView = new AudioView(model);
-
 let model, editor, audioView;
 
 export const app = function(arg) {
@@ -36,10 +28,19 @@ const FS = NS.api.fs;
 //»
 
 //DOM«
-
-
-
-//Main.bgcol="rgba(1,1,1,0)";
+const CUR = mkdv();
+CUR.pos="absolute";
+CUR.loc(0,0);
+CUR.fs=50;
+//╋
+CUR.innerHTML = "╋";
+CUR.z=10000000;
+CUR.pad=0;
+CUR.tcol="#c00";
+CUR.op=1;
+Main.add(CUR);
+let cur_min_x = -CUR.clientWidth/2;
+let cur_min_y = -CUR.clientHeight/2;
 Main.bgcol="";
 Main.tcol="#fff";
 Main.fs=16;
@@ -128,46 +129,35 @@ const ARROWS=[//«
 ];//»
 
 let last_selected;
-
 let focused = false;
 
 //»
 
 //Funcs«
 
-const deselect = ()=>{
-	last_selected = editor.selected;
-	editor.deselect();
-};
-
-const dosave = async(force_popup)=>{
-let path = (Win.fullpath());
-let str = model.serialize();
-if (path&&!force_popup){
-	await FS.saveFsByPath(path, str);
-	await WDG.popok(`Saved: ${str.length} bytes!`);
-}
-else{
-	await WDG.popinarea(str, "File text (.ncft format)", {noCancel:true, readOnly:true});
-}
-
-//log(Win.nosave);
-
-};
-
-const init=async()=>{
-/*
-let wins = Array.from(document.getElementsByClassName("topwin"));
-for (let w of wins){
-	if (w===Win) continue;
-	if (w.app==="audio.Noisecraft"){
-//		await WDG.poperr("An instance of Noisecraft is already running... please close it first!", {win: Win});
-//		Win.force_kill();
-		return;
+const toggle_cursor=()=>{
+	if (CUR.op==1) {
+		CUR.op=0;
+		CUR.z=-1;
+	}
+	else {
+		CUR.op=1;
+		CUR.z=10000000;
 	}
 }
-*/
-//log(Array.from(wins));
+const deselect=()=>{last_selected=editor.selected;editor.deselect();};
+const dosave = async(force_popup)=>{//«
+
+	let path = (Win.fullpath());
+	let str = model.serialize();
+	if (path&&!force_popup){
+		await FS.saveFsByPath(path, str);
+		await WDG.popok(`Saved: ${str.length} bytes!`);
+	}
+	else await WDG.popinarea(str, "File text (.ncft format)", {noCancel:true, readOnly:true});
+
+};//»
+const init=async()=>{//«
 
 model = new Model();
 model.__poperr=WDG.poperr;
@@ -179,47 +169,54 @@ document.addEventListener('copy',docopy,false);
 document.addEventListener('cut',docut,false);
 document.addEventListener('paste',dopaste,false);
 
-};
+//graph_div.style.transform = "scale(0.5)";
+//graph_svg.style.transform = "scale(0.5)";
+//log(editor_div);
+
+};//»
 
 //»
 
 //OBJ/CB«
 
 this.onappinit=()=>{//«
-//log("APP INIT");
 
-Win.title = "Noisecraft";
-init();
-model.new();
-//log(Main.bgcol);
+	Win.title = "Noisecraft";
+	init();
+	model.new();
+
 };//»
 this.onloadfile=bytes=>{//«
-//	graph_div.innerHTML="Loading file...";
 	init();
-    try
-    {
-		setTimeout(()=>{
-			model.deserialize(Core.api.bytesToStr(bytes));
-		},0);
+    try{
+//		setTimeout(()=>{
+		model.deserialize(Core.api.bytesToStr(bytes));
+//		},0);
     }
-    catch (e)
-    {
+    catch (e){
         console.log(e.stack);
-
-        // If loading failed, we don't want to reload
-        // the same data again next time
-//        localStorage.removeItem('latestModelData');
-
-        // Reset the project
         model.new();
+		WDG.poperr("The file could not be loaded. See the console for error stack!");
     }
-//log(str);
 };//»
 this.onkeydown = async function(e,s) {//«
 
 if (Main.dialog) return;
+if (s=="ENTER_"){
+	if (CUR.op!=1) return;
+	let r = CUR.gbcr();
+	let arr = document.elementsFromPoint(r.left+r.width/2, r.top+r.height/2);
 
-if (s==="SPACE_"){
+	let node = arr[1].__node;
+	if (!node) return;
+	if (editor.selected.length==1 && editor.selected[0] === node.nodeId){
+		node.ondblclick();
+	}
+	else {
+		editor.selectNodes([node.nodeId]);
+	}
+}
+else if (s==="SPACE_"){
 	e.preventDefault();
 	if (model.playing){
 		model.update(new Stop());
@@ -227,6 +224,9 @@ if (s==="SPACE_"){
 	else{
 		model.update(new Play());
 	}
+}
+else if (s=="x_"){
+	toggle_cursor();
 }
 else if (s=="s_A"){
 	dosave();
@@ -253,16 +253,16 @@ else if (s=="n_"){
 	editor.createNodeDialog({x:editor_div.scrollLeft+1, y:editor_div.scrollTop+1});
 }
 */
-else if (ARROWS.includes(s)){
+else if (ARROWS.includes(s)){//«
 	let dx=0, dy=0;
-	if (s=="RIGHT_") dx = 100;
-	else if (s=="LEFT_") dx = -100;
-	else if (s=="UP_") dy = -100;
-	else if (s=="DOWN_") dy = 100;
-	else if (s=="RIGHT_C") dx = 10;
-	else if (s=="LEFT_C") dx = -10;
-	else if (s=="UP_C") dy = -10;
-	else if (s=="DOWN_C") dy = 10;
+	if (s=="RIGHT_") dx = 50;
+	else if (s=="LEFT_") dx = -50;
+	else if (s=="UP_") dy = -50;
+	else if (s=="DOWN_") dy = 50;
+	else if (s=="RIGHT_C") dx = 7;
+	else if (s=="LEFT_C") dx = -7;
+	else if (s=="UP_C") dy = -7;
+	else if (s=="DOWN_C") dy = 7;
 	else if (s=="RIGHT_CA") dx = 1;
 	else if (s=="LEFT_CA") dx = -1;
 	else if (s=="HOME_") dy = -1;
@@ -280,13 +280,31 @@ else if (ARROWS.includes(s)){
 			dy
 		));
 	}
+	else if (CUR.op==1){
+		CUR.x+=dx;
+		CUR.y+=dy;
+		let r = CUR.gbcr();
+		let maxx = editor_div.clientWidth - r.width/2 - 2;
+		let maxy = editor_div.clientHeight - r.height/2 - 5;
+		if (CUR.x < cur_min_x) CUR.x=cur_min_x;
+		else if (CUR.x > maxx) CUR.x = maxx;
+		if (CUR.y < cur_min_y) CUR.y=cur_min_y;
+		else if (CUR.y > maxy)CUR.y = maxy;
+	}
 	else{
-editor_div.scrollTop+=dy;
-editor_div.scrollLeft+=dx;
+		editor_div.scrollTop+=dy;
+		editor_div.scrollLeft+=dx;
 
 	}
-}
+}//»
+else if (s=="0_"){
 
+	if (CUR.op==1){
+		CUR.x =  editor_div.clientWidth/2 - CUR.clientWidth/2;
+		CUR.y =  editor_div.clientHeight/2 - CUR.clientHeight/2;
+	}
+
+}
 
 }//»
 this.onkeypress=e=>{//«
@@ -306,18 +324,18 @@ if (Main.dialog) {
 		}
 	}
 }
-else if (k=="n"){
+else if (k=="c"){
 	deselect();
-//	editor.deselect();
-//	editor.createNodeDialog({x:editor_div.scrollLeft+Math.round(editor_div.offsetWidth/2)-50, y:editor_div.scrollTop+Math.round(editor_div.offsetHeight/2)-50});
 	editor.createNodeDialog({x:editor_div.scrollLeft, y:editor_div.scrollTop});
-
 }
 else if (k=="`"){
 	if (!editor.selected.length){
 		if (last_selected){
 			editor.selectNodes(last_selected);
 		}
+	}
+	else{
+		deselect();
 	}
 }
 
@@ -341,6 +359,10 @@ if (Main.dialog){
 if (editor.selected.length > 0){
 //	editor.deselect();
 	deselect();
+	return true;
+}
+if (CUR.op==1){
+	toggle_cursor();
 	return true;
 }
 return false;

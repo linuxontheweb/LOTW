@@ -925,7 +925,8 @@ class UINode {//«
 
         // Top-level element for this node
         this.nodeDiv = document.createElement('div');
-//        this.nodeDiv.className = 'node';
+//        this.nodeDiv.className = 'ncft-node';
+		this.nodeDiv.__node = this.nodeDiv;
 this.nodeDiv.style.cssText=`
     position: absolute;
 
@@ -953,6 +954,7 @@ this.nodeDiv.style.cssText=`
 
         // Node header text
         this.headerDiv = document.createElement('div');
+		this.headerDiv.__node = this.nodeDiv;
 //        this.headerDiv.className = 'node_header';
 this.headerDiv.style.cssText=`
 color: #fff;
@@ -969,6 +971,7 @@ color: #fff;
         this.nodeDiv.appendChild(this.headerDiv);
 
         let contentDiv = document.createElement('div');
+		contentDiv.__node = this.nodeDiv;
 //        contentDiv.className = 'node_content';
 contentDiv.style.cssText=`
     display: flex;
@@ -978,6 +981,7 @@ contentDiv.style.cssText=`
         this.nodeDiv.appendChild(contentDiv);
 
         let inPortsDiv = document.createElement('div');
+		inPortsDiv.__node = this.nodeDiv;
 //        inPortsDiv.className = 'node_in_ports';
 inPortsDiv.style.cssText=`
 
@@ -992,6 +996,7 @@ inPortsDiv.style.cssText=`
 
         // Create a div to contain center display elements (if any)
         this.centerDiv = document.createElement('div');
+		this.centerDiv.__node = this.nodeDiv;
 //        this.centerDiv.className = 'node_center';
 this.centerDiv.style.cssText=`
 
@@ -1001,6 +1006,8 @@ this.centerDiv.style.cssText=`
         contentDiv.appendChild(this.centerDiv);
 
         let outPortsDiv = document.createElement('div');
+
+		outPortsDiv.__node = this.nodeDiv;
 outPortsDiv.style.cssText=`
 
     display: inline-block;
@@ -1109,6 +1116,8 @@ outPortsDiv.style.cssText=`
         }
 
         let portDiv = document.createElement('div');
+
+		portDiv.__node = this.nodeDiv;
 if (side == "dst"){
 portDiv.style.cssText=`
     display: grid;
@@ -1149,6 +1158,7 @@ portDiv.style.cssText=`
 
         // Port name text
         let textDiv = document.createElement('div');
+textDiv.__node = this.nodeDiv;
 //        textDiv.className = 'port_text';
 textDiv.style.cssText=`
     display: inline-block;
@@ -1162,6 +1172,7 @@ textDiv.style.cssText=`
         portDiv.appendChild(textDiv);
 
         let connDiv = document.createElement('div');
+connDiv.__node = this.nodeDiv;
 //        connDiv.className = 'port_conn';
 connDiv.style.cssText=`
     display: inline-block;
@@ -1466,6 +1477,7 @@ class ConstNode extends UINode{//«
         input.type = 'text';
         input.size = 4;
         input.maxLength = 12;
+		input.__node = this.centerDiv.__node;
         this.centerDiv.appendChild(input);
 
         input.oninput = (evt) =>
@@ -1543,6 +1555,9 @@ class KnobNode extends UINode{//«
             state.params.deviceId,
             state.params.controlId
         );
+
+		this.knob.div.childNodes[0].__node = this.centerDiv.__node;
+		this.knob.div.childNodes[1].__node = this.centerDiv.__node;
         this.centerDiv.append(this.knob.div)
 
         function knobChange(value)
