@@ -47,6 +47,9 @@ CUR.tcol="#c00";
 //CUR.op=1;
 CUR.op=0;
 Main.add(CUR);
+Main.addEventListener('mouseleave',()=>{
+	if (editor.edge) remove_edge();
+},false);
 const cur_half_w = CUR.clientWidth/2;
 const cur_half_h = CUR.clientHeight/2;
 const cur_min_x = -cur_half_w;
@@ -146,6 +149,10 @@ let focused = false;
 
 //Funcs«
 
+const remove_edge=()=>{
+	editor.svg.removeChild(editor.edge.line);
+	editor.edge = null;
+};
 const deselect=()=>{last_selected=editor.selected;editor.deselect();};
 const curcen=()=>{return{x:CUR.x+cur_half_w+editor_div.scrollLeft,y:CUR.y+cur_half_h+editor_div.scrollTop};};
 const remove_select_div=()=>{//«
@@ -252,7 +259,8 @@ else if (s=="ENTER_C"){//«
 	let node = arr[1].__node;
 	if (!node) return;
 	let a = editor.selected.slice();
-	a.push(node.nodeId);
+	if (a.includes(node.nodeId)) a.splice(a.indexOf(node.nodeId),1);
+	else a.push(node.nodeId);
 	a = a.sort().uniq();
 	editor.selectNodes(a);
 }//»
@@ -394,6 +402,10 @@ this.onescape = ()=>{//«
 if (Main.dialog){
 	Main.dialog.close();
 	Main.dialog = null;
+	return true;
+}
+if(editor.edge){
+	remove_edge();
 	return true;
 }
 if (editor.startMousePos){

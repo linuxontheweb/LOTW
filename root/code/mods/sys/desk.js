@@ -161,6 +161,8 @@ let CYCLE_MIN_WINS = true;
 //let cur_showing = false;
 let cur_showing = true;
 let taskbar_hidden;
+let taskbar_expert_mode;
+
 let have_window_cycle = false;
 let debug_keydown = false;
 if (qobj.debug_keydown) debug_keydown = true;
@@ -185,7 +187,7 @@ const desk_coldiv=mkdv();
 const desk_imgdiv=mkdv();
 const background_div=mkdv();
 const taskbar = mkdv();
-//const start_button=mkdv();
+const start_button=mkdv();
 //const system_clock=mkdv();
 //const system_clock= {} ;
 const system_user_widget = {};
@@ -436,10 +438,7 @@ const DESK_CONTEXT_MENU=[//«
 	"\u{1f5b3}\xa0Terminal",()=>{open_terminal()},
 ];//»
 const toggle_taskbar=()=>{if(taskbar_hidden)taskbar.show();else taskbar.hide();};
-const toggle_cursor=()=>{
-	if (cur_showing) CUR.off(true);
-	else CUR.on(true);
-};
+const toggle_cursor=()=>{if(cur_showing)CUR.off(true);else CUR.on(true);};
 const make_desktop = () => {//«
 
 //DOM«
@@ -858,19 +857,6 @@ CUR.select=(if_toggle,if_open)=>{
 		CDL.reset();
 	};
 	desk.onscroll=e=>{desk.scrollTop=0;};
-///*
-//desk.addEventListener('mousewheel', function(e) {
-//  e.stopPropagation();
-//  e.preventDefault();
-/*
-  var max = this.scrollWidth - this.offsetWidth; // this might change if you have dynamic content, perhaps some 
-
-  if (this.scrollLeft + e.deltaX < 0 || this.scrollLeft + e.deltaX > max) {
-    e.preventDefault();
-    this.scrollLeft = Math.max(0, Math.min(max, this.scrollLeft + e.deltaX));
-  }
-*/
-//}, false);
 //*/
 	desk.onmousemove = e => {//«
 		ev = e;
@@ -1061,8 +1047,9 @@ drag_timeout = setTimeout(()=>{
 },0);
 		}//»
 
-/*
-		else{
+///*
+//		else{
+		else if (!taskbar_expert_mode){
 			if (e.clientY+hidden_taskbar_thresh >=window.innerHeight){
 				if (taskbar_hidden){
 					if (taskbar_timer) return;
@@ -1096,7 +1083,7 @@ drag_timeout = setTimeout(()=>{
 				}
 			}
 		}
-*/
+//*/
 
 	};//»
 	desk.onmouseup = async e => {//«
@@ -1292,9 +1279,11 @@ return new Promise(async (y,n)=>{//«
 const make_taskbar=()=>{//«
 
 let bar = taskbar;//«
-let lst_str = `taskbar_hidden:${desk_path}`;
+let lst_hidden = `taskbar_hidden:${desk_path}`;
+let lst_expert = `taskbar_expert:${desk_path}`;
 
-taskbar_hidden = localStorage[lst_str];
+taskbar_hidden = localStorage[lst_hidden];
+taskbar_expert_mode = localStorage[lst_expert];
 
 desk.add(bar);
 //log(bar);
@@ -1316,7 +1305,7 @@ bar.bor=TASKBAR_BOR;
 bar.hide=()=>{
 	taskbar_hidden=true;
 	if (!globals.read_only)
-		localStorage[lst_str]="true";
+		localStorage[lst_hidden]="true";
 	bar.z=CGZ-1;
 	bar.b=-bar.gbcr().height;
 	for (let i=0; i < windows.length; i++){
@@ -1330,7 +1319,7 @@ bar.hide=()=>{
 bar.show=()=>{
 	taskbar_hidden=false;
 	if (!globals.read_only)
-		delete localStorage[lst_str];
+		delete localStorage[lst_hidden];
 	bar.z=min_win_z-1;
 	bar.b=0;
 	windows = windows.concat(minimized_windows);
@@ -1343,22 +1332,35 @@ e.stopPropagation();
 window_off(Desk.CWIN);
 
 let items_arr=[];
-/*
 if (taskbar_hidden){
 	items_arr.push("Show\x20Taskbar");
 	items_arr.push(()=>{
-//		delete localStorage[lst_str];
 		bar.show();
 	});
 }
 else{
 	items_arr.push("Hide\x20Taskbar");
 	items_arr.push(()=>{
-//		localStorage[lst_str]="true";
 		bar.hide();
 	});
 }
-*/
+if (taskbar_expert_mode){
+	items_arr.push("Expert\x20Mode\x20Off");
+	items_arr.push(()=>{
+		taskbar_expert_mode = false;
+		delete localStorage[lst_expert];
+		st.dis="";
+	});
+}
+else{
+	items_arr.push("Expert\x20Mode\x20On");
+	items_arr.push(()=>{
+		taskbar_expert_mode = true;
+		localStorage[lst_expert]="true";
+		st.dis="none";
+	});
+}
+
 deskcontext({
 	x: e.clientX,
 	y: e.clientY
@@ -1373,6 +1375,33 @@ bar.onmouseleave=()=>{
 bar.onmousemove=e=>{
 	e.stopPropagation();
 };
+//»
+
+let TASKBAR_BOR_COL="#575757";
+let TASKBAR_BOR_WID="2.5px";
+let st = start_button;//«
+st.padt=st.padb=3;
+st.padr=st.padl=5;
+st.fw="bold";
+st.tcol="#bbb";
+//st.bgcol="#272727";
+st.dis="flex";
+st.ali="center";
+st.jsc="center";
+st.fs=15;
+st.innerText="\u{1f30e}\u{202f}Begin";
+st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;
+st.onmousedown=()=>{st.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;};
+st.onmouseup=()=>{st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;};
+st.onmouseout=()=>{st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;};
+st.onclick=(e)=>{
+	const doit=()=>{deskcontext({x:0,y:bar.clientHeight+5},{BREL:true});}
+	if (e.isTrusted) return doit();
+	st.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;
+	setTimeout(()=>{st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;doit();},200);
+};
+
+bar.add(st);
 //»
 
 let mwb = minwinbar;//«
@@ -1429,7 +1458,7 @@ desk.add(t);
 	d.dis="flex";
 	d.pos="relative";
 	d.tcol="#999";
-	d.bor="2px outset #333";
+	d.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;
 	d.over="hidden";
 
 	let imdiv = w.img_div.cloneNode(true);
@@ -1453,15 +1482,15 @@ desk.add(t);
 	d.add(fdv);
 	d.onmousedown=()=>{
 		d.is_active = true;
-		d.bor="2px inset #333";
+		d.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;
 	};
 	d.onmouseup=()=>{
 		d.is_active = false;
-		d.bor="2px outset #333";
+		d.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;
 	};
 	d.onmouseout=()=>{
 		d.is_active = false;
-		d.bor="2px outset #333";
+		d.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;
 	};
 	const dounmin=(if_instant)=>{
 		w.dis="block";
@@ -1504,8 +1533,8 @@ requestAnimationFrame(()=>{
 	d.onclick=()=>{dounmin()};
 	w.unminimize=(if_instant)=>{
 		if (if_instant) return dounmin(true);
-		d.bor="2px inset #333";
-		setTimeout(()=>{d.bor="2px outset #333";dounmin();},200);
+		d.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;
+		setTimeout(()=>{d.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;dounmin();},200);
 	};
 	w._button=d;
 	mwb.add(d);
@@ -1522,6 +1551,7 @@ mwb.resize=()=>{mwb.w=winw()};
 mwb.resize();
 hidden_taskbar_thresh = bar.gbcr().height;
 if (taskbar_hidden) bar.hide();
+if (taskbar_expert_mode) st.dis="none";
 
 };//»
 

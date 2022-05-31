@@ -1,4 +1,6 @@
 
+//UNSGHSYZABD How to tell if this has a connection already???
+
 //Imports«
 import { assert, anyInputActive, makeSvg, setSvg, getBrightColor } from './utils.js';
 import { Dialog } from './dialog.js';
@@ -9,6 +11,8 @@ import { midi } from './midi.js';
 import { Knob } from './knob.js';
 //»
 const log=(...args)=>{console.log(...args);};
+
+const PORT_SZ = 16;
 
 export class Editor {//«
 
@@ -913,6 +917,7 @@ class UINode {//«
         this.nodeDiv = document.createElement('div');
 //        this.nodeDiv.className = 'ncft-node';
 		this.nodeDiv.__node = this.nodeDiv;
+//log(this.nodeDiv);
 this.nodeDiv.style.cssText=`
     position: absolute;
 
@@ -974,7 +979,7 @@ inPortsDiv.style.cssText=`
     display: inline-block;
     vertical-align: top;
     position: relative;
-    left: -5px;
+    left: -${PORT_SZ/2}px;
     min-width: 12px;
 
 `;
@@ -999,7 +1004,7 @@ outPortsDiv.style.cssText=`
     display: inline-block;
     vertical-align: top;
     position: relative;
-    right: -5px;
+    right: -${PORT_SZ/2}px;
     min-width: 12px;
 
 `;
@@ -1054,11 +1059,16 @@ outPortsDiv.style.cssText=`
                 if (side == 'dst')
                 {
                     // Remove previous connection on this port, if any
+
+//UNSGHSYZABD How to tell if this has a connection already???
+
+//if(editor.model.getNodeState(this.nodeId).ins[portIdx]) {
                     editor.model.update(new model.Disconnect(
                         this.nodeId,
                         portIdx,
                     ));
-
+//	return;
+//}
                     edge.setDst(this, portIdx, cx, cy);
                 }
                 else
@@ -1154,7 +1164,6 @@ textDiv.style.cssText=`
 `;
         textDiv.appendChild(document.createTextNode(portName));
         portDiv.appendChild(textDiv);
-
         let connDiv = document.createElement('div');
 connDiv.__node = this.nodeDiv;
 //        connDiv.className = 'port_conn';
@@ -1162,14 +1171,16 @@ connDiv.style.cssText=`
     display: inline-block;
     grid-area: port;
     align-self: center;
-    width:8px;
-    height:8px;
+    width:${PORT_SZ}px;
+    height:${PORT_SZ}px;
     margin-top: 4px;
     margin-bottom: 4px;
     background: #FA0;
+	cursor: pointer;
 `;
-        portDiv.appendChild(connDiv);
 
+        portDiv.appendChild(connDiv);
+//log(portDiv);
         if (side == 'dst')
         {
             this.inPorts[portIdx] = connDiv;
