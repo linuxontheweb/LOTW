@@ -4204,17 +4204,12 @@ const init_icon_editing = icon => {//«
 	let label = icon.label;
 	let area = make('input');
 	area.type="text";
-//	area.id="edit_icon_textarea";
 	area.value = icon.name;
 	CEDICN.area = area;
-//	let usediv = label.parentNode;
 	let usediv = label;
 	usediv.html("");
 	area.style.resize = "none";
 	area.w="100%";
-//log(area);
-//	area.w = 65;
-//	area.h = 45;
 	area.marl = "auto";
 	area.marr = "auto";
 	area.over = "hidden";
@@ -4383,10 +4378,11 @@ const save_icon_editing = async() => {//«
 		}
 
 		if (CEDICN._editcb) {
-			CEDICN._editcb(newval);
+			CEDICN._editcb(CEDICN);
 			CEDICN._editcb = null;;
 		}
 		CEDICN.save();
+		if (CEDICN.parentNode===desk && !windows_showing) toggle_show_windows();
 		CEDICN = null;
 		CG.off();
 	};

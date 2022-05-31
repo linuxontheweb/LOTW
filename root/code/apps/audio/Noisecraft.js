@@ -181,7 +181,10 @@ const dosave = async(force_popup)=>{//«
 		await WDG.popok(`Saved: ${str.length} bytes!`);
 	}
 	else{
-		Win.title = await Desk.make_new_file(str, FILE_EXT);
+		let icn = await Desk.make_new_file(str, FILE_EXT);
+		Win.title = icn.name; 
+		icn.win = Win;
+		Win.icon = icn;
 		Win.name = Win.title;
 		Win.path = globals.desk_path;
 		Win.ext = FILE_EXT;
@@ -274,7 +277,7 @@ else if (s==="SPACE_"){//«
 	}
 }//»
 else if (s=="x_")toggle_cursor();
-else if (s=="s_A")dosave();
+else if (s=="s_C")dosave();
 else if (s=="c_CAS") dosave(true);
 else if(s=="a_C"){deselect();editor.selectAll();}
 else if (s=="BACK_"){//«
