@@ -1541,13 +1541,13 @@ class KnobNode extends UINode{//«
     constructor(id, state, editor)
     {
         super(id, state, editor);
-
         this.knob = new Knob(
             state.params.minVal,
             state.params.maxVal,
             state.params.value,
             state.params.deviceId,
-            state.params.controlId
+            state.params.controlId,
+			editor.mainDiv
         );
 
 		this.knob.div.childNodes[0].__node = this.centerDiv.__node;

@@ -17,7 +17,6 @@ MV_BY_PATH
 */
 export const mod = function(Core, root) {
 
-
 //Imports«
 
 //const root = arg;
@@ -62,14 +61,12 @@ let Desk, desk, desk_path;
 let objpath;
 let MAX_FILE_SIZE = 25*MB;
 
-const root_dirs = ["tmp", "usr", "var", "home", "etc", "runtime"];
+const root_dirs = ["tmp", "usr", "home", "etc", "var"];
 this.root = root;
 
 const MAX_DAYS = 90;//Used to determine how to format the date string for file listings
 const MAX_LINK_ITERS = 8;
 const rem_cache = {};
-
-let midi;
 
 //»
 
@@ -157,6 +154,18 @@ const read_file = (fname, cb, opts = {}, killcb_cb) => {//«
 				NOCACHE: true
 			});
 		} 
+		else if (type == "www"){
+//log(ext);
+			let rv = await fetch(path);
+			if (!rv.ok) cb();
+			else{
+				let ext = path.split(".").pop();
+//				cb(await rv.arrayBuffer());
+				if (ext && TEXT_EXTENSIONS.includes(ext)) cb((await rv.text()).split("\n"));
+				else cb(await rv.blob());
+			}
+			cb(EOF);
+		}
 		else if (type == "bin"){
 			let rv = await fetch(`/root/bin/${ret.NAME}.js`);
 			cb((await rv.text()).split("\n"));
@@ -1746,15 +1755,15 @@ console.warn("NOT PASSING IN path_to_obj!!!");
 					domv();
 					return;
 				}
-				path_to_obj(savedirpath, savedir => {//«
+				path_to_obj(savedirpath, async savedir => {//«
 					if (!savedir) {
 						werr(savedirpath + ":no such directory");
 						domv();
 						return
 					}
 					let savetype = savedir.root.TYPE;
-					if (savetype == "local") {
-						werr("Not\x20(yet)\x20implementing move to local");
+					if (savetype == "local" || savetype == "www") {
+						werr(`Not\x20(yet)\x20implementing move to ${savetype}`);
 						domv();
 					} 
 					else if (savetype != "fs") {
@@ -1762,6 +1771,22 @@ console.warn("NOT PASSING IN path_to_obj!!!");
 						domv();
 						return;
 					} else {
+if (type == "www") {
+//log(frompath);
+let rv = await fetch(frompath);
+if (!rv.ok){
+werr("Could not fetch the file");
+domv();
+return;
+}
+
+await writeHtml5File(`${savedirpath}/${savename}`, await rv.blob());
+
+
+//	werr("Not (yet) supporting " + verb + " from www");
+	domv();
+return;
+}
 						if (type == "local") {//«
 							let saver = new FileSaver();
 							saver.set_cb("error", mess => {
@@ -1796,7 +1821,6 @@ console.warn("NOT PASSING IN path_to_obj!!!");
 										saver.set_cb("update", per => {
 											let str = per + "%";
 											wclerr(str);
-//log("ICONS",icons);
 											if (icons) {
 												for (let icn of icons) icn.overdiv.innerHTML = str;
 											}
@@ -1903,10 +1927,10 @@ console.warn("NOT PASSING IN path_to_obj!!!");
 					if (srcret.treeroot || (srcret.root == srcret)) mvarr.push({
 						ERR: "Skipping:\x20" + fname
 					});
-					else if (srctype == "local" && !if_cp) mvarr.push({
+					else if ((srctype == "www" || srctype == "local") && !if_cp) mvarr.push({
 						ERR: com + ":\x20" + fname + ":\x20cannot move from the remote directory"
 					});
-					else if (!(srctype == "fs" || srctype == "local")) mvarr.push({
+					else if (!(srctype == "fs" || srctype == "local" || srctype == "www")) mvarr.push({
 						ERR: com + ":\x20" + fname + ":\x20cannot " + verb + " from directory type:\x20" + srctype
 					});
 					else mvarr.push([fname, srcret]);
@@ -2061,6 +2085,7 @@ this.make_all_trees = async(allcb, rootarg, fsarg) => {//«
 	};//»
 
 	mount_dir("mnt", get_tree("mnt", "mount"));
+	mount_dir("www", get_tree("www", "www"));
 	await make_bin();
 
 	let iter = -1;
@@ -2156,10 +2181,13 @@ if (dirobj.TYPE=="local"){
 	let type = dirobj.root.TYPE;
 	let path = objpath(dirobj);
 	if (type == "fs") return populate_fs_dirobj_by_path(path, cb, {par:dirobj, long:opts.LONG, streamCb: opts.streamCb});
-	if (type == "local") return populate_rem_dirobj(path, cb, dirobj, opts);
+//	if (type == "local") return populate_rem_dirobj(path, cb, dirobj, opts);
+	if (type == "local" || type == "www") return populate_rem_dirobj(path, cb, dirobj, opts);
 	if (type == "mount") return cb(root.KIDS.mnt.KIDS);
 	if (type == "bin") return cb(root.KIDS.bin.KIDS);
+
 	FATAL(`Unknown directory type: ${type}`);
+
 //	cb({})
 }
 this.populate_dirobj = populate_dirobj;
@@ -2264,15 +2292,23 @@ populate_fs_dirobj_by_path(patharg, cb, {par:parobj, long:if_long});
 //»
 const populate_rem_dirobj = (patharg, cb, dirobj, opts = {}) => {//«
 	if (!patharg) patharg = get_path_of_object(dirobj);
-	if (!patharg.match(/^\/mnt\/?/)) return FATAL("patharg must begin with '/mnt'!");
+//	if (!patharg.match(/^\/mnt\/?/)) return FATAL("patharg must begin with '/mnt'!");
 	let holdpath = patharg;
 	let parts = patharg.split("/");
 	parts.shift();
 	parts.shift();
-	parts.shift();
+	let baseurl;
+	if (patharg.match(/^\/www\/?/)){
+		baseurl = "";
+	}
+	else if (patharg.match(/^\/mnt\/?/)) {
+		parts.shift();
+		baseurl = dirobj.root.origin;
+	}
+	else return FATAL("patharg must begin with '/mnt' or '/www'!");
 	let path = parts.join("/");
 	if (!path) path="/";
-	xgetobj(`${dirobj.root.origin}/_getdir?path=${path}`, async (ret, err) => {
+	xgetobj(`${baseurl}/_getdir?path=${path}`, async (ret, err) => {
 		if (isobj(ret)) {
 			if (ret.ERR) return cb(null, ret.ERR);
 			else {

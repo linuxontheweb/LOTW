@@ -69,7 +69,7 @@ const DEL_COMS=[
 "bin.dummy"
 ]
 const DEL_LIBS=[
-	"math.trading",
+//	"math.trading",
 //	"admin"
 //	"wasm"
 //	"synth",
@@ -78,14 +78,14 @@ const DEL_LIBS=[
 //	"js",
 //	"iface",
 //	"av"
-	"crypto",
-	"imap"
+//	"crypto",
+//	"imap"
 ];
 const DEL_MODS=[
-	"math.trading",
+//	"math.trading",
 //	"sys.idb",
 //	"iface.net",
-//	"sys.fs",
+	"sys.fs",
 	"util.shell",
 //	"util.esmangle",
 //	"av.tone",
@@ -1581,7 +1581,10 @@ const get_command_arr=async (dir, pattern, cb)=>{//«
 		if (root_state) arr = arr.concat(termobj.sys_builtins);
 		arr = arr.concat(Object.keys(termobj.FUNCS));
 	}
-	else return [];
+	else {
+log(`get_command_arr(): ${term_mode}`);
+		return [];
+	}
 	if (!arr) return;
 	let match_arr = [];
 	let re = new RegExp("^" + pattern);
@@ -1810,9 +1813,7 @@ const get_dir_contents=async(dir, pattern, cb)=>{//«
 		cb(match_arr);
 	};//»
 	if (type=="fs"&&!ret.done) {
-//FS444
 		let ret2 = await fsapi.popDir(ret,{DSK:dsk});
-//		fs.populate_dirobj(ret,ret2=>{},{DSK:dsk})
 		if (!ret2) return cb([]);
 		ret.done = true;
 		ret.KIDS = ret2;
@@ -2160,6 +2161,13 @@ const get_fullpath = (path, cur_dir) => {//«
 }//»
 
 const handle_tab=async()=>{//«
+/*
+If term_mode !=
+*/
+if (term_mode != "shell"){
+cwarn(`TAB: term_mode='${term_mode}'`);
+return;
+}
 	if (cur_scroll_command) insert_cur_scroll();
 	let contents;
 	let use_dir = cur_dir;
@@ -2366,7 +2374,6 @@ log("YARR WHAT MAN OPTIONS????");
 		if (tokpos==1) {
 			get_command_arr(use_dir, tok, rv=>{
 				contents = rv;
-//log(contents);
 				if (contents && contents.length) docontents();
 				else do_gdc();
 			});
@@ -2399,11 +2406,12 @@ let arr = tok.split(".");
 tok = arr.pop();
 }
 docontents();
-
 		}
 		}
 	}
-	else do_gdc();
+	else {
+		do_gdc();
+	}	
 	
 };//»
 const handle_buffer_scroll=(if_up)=>{//«

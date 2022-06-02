@@ -83,7 +83,6 @@ this.bgDiv.style.cssText=`
     
 	    body.appendChild(this.wrapperDiv);
         body.appendChild(this.bgDiv);
-//console.log(body);
         function bgClick(evt)
         {
             this.trigger('userclose');

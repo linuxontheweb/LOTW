@@ -51,6 +51,13 @@ for (let k in EXT_TO_APP_MAP) ALL_EXTENSIONS.push(k);
 //»
 //Var«
 
+let did_get_midi = false;
+let did_get_midi_inputs = false;
+let num_midi_inputs = 0;
+let midi;
+const midi_cbs = [];
+
+
 let VERNUM=1;
 const NOOP=()=>{};
 const FOLDER_APP = "sys.Folder";
@@ -697,7 +704,98 @@ randStr:(numarg, ifdash)=>{//«
 	}
 	else throw new Error("Invalid arg to randstr");
 },//»
-numberLines:arr=>{if(!arr)arr=[];let tmp=[];let num=0;let numwid=(arr.length+"").length;for(let ln of arr){let numstr=(++num)+"";tmp.push(("0".repeat(numwid-numstr.length)+numstr)+ "\x20"+ln);}return tmp;}
+numberLines:arr=>{if(!arr)arr=[];let tmp=[];let num=0;let numwid=(arr.length+"").length;for(let ln of arr){let numstr=(++num)+"";tmp.push(("0".repeat(numwid-numstr.length)+numstr)+ "\x20"+ln);}return tmp;},
+
+initMidi:()=>{
+///*
+
+//MIDI«
+
+//const init_midi = ()=>{
+
+return new Promise(async(y,n)=>{
+
+if (did_get_midi) return y(true);
+
+if (navigator.requestMIDIAccess) {
+	const midi_in = (mess) => {
+		if (!did_get_midi) {
+			cwarn("Midi UP!");
+			did_get_midi = true;
+		}
+		mess.toString = () => {
+			let dat = mess.data;
+			let str = "[event Midi(" + dat[0] + "," + dat[1];
+			if (isnum(dat[2])) str += "," + dat[2];
+			str += ")]";
+			return str;
+		};
+		if (Desk) Desk.onmidi(mess);
+		for (let cb of midi_cbs) {
+			if (cb) cb(mess);
+		}
+	};
+	let midiarg;
+	try {
+		midiarg	= await navigator.requestMIDIAccess({sysex: false});
+	}
+	catch(e){
+		cerr("navitagor.requestMIDIAccess():", e);
+		y();
+		return;
+	}
+	const getinputs = (e) => {//«
+		if (e) {
+			if (e instanceof MIDIConnectionEvent) {} else {
+				cwarn("WHAT MIDISTATECHANGE EVENT?");
+				log(e);
+			}
+		}
+		let inputs = midi.inputs.values();
+		num_midi_inputs = 0;
+		for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+			if (!input.value.name.match(/^Midi Through Port/)) {
+				num_midi_inputs++;
+				input.value.onmidimessage = midi_in;
+			}
+		}
+		if (num_midi_inputs) {
+			if (!did_get_midi_inputs) {
+				cwarn("MIDI:connected(" + num_midi_inputs + ")");
+				did_get_midi_inputs = true;
+			}
+		} else {
+			for (let cb of midi_cbs) {
+				if (cb) cb({
+					EOF: true
+				});
+			}
+			did_get_midi_inputs = false;
+		}
+	};//»
+	midi = midiarg;
+log(midi);
+	midi.onstatechange = getinputs;
+	getinputs();
+	y(true);
+}
+else{
+cwarn("navigator.requestMIDIAccess: not found!");
+	y();
+}
+
+})
+
+//}
+//this.init_midi = init_midi;
+//window.init_midi = init_midi;
+
+//»
+
+//*/
+
+}
+
 }
 })();
 Core.api = api;

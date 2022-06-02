@@ -6,7 +6,7 @@
 
 
 //Imports«
-
+const spawn = require('child_process').spawn;
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
@@ -126,8 +126,9 @@ log(`Cannot stat: ${BINPATH}/dummy.js`);
 	return;
 }
 
-const EXAMPLESPATH = `${BASEPATH}/www/examples`;
+const WWWPATH = `${BASEPATH}/www`;
 const APPPATH = `${BASEPATH}/root/code/apps`;
+
 
 let hostname;
 let use_port = process.env.LOTW_PORT;
@@ -144,6 +145,34 @@ else{
 //»
 
 //Util«
+
+
+const hard_spawn=(name, args, cb, send_json)=>{//«
+
+//	spawn('sh', ['-c', 'unoconv -f pdf --stdout sample.doc | pdftotext -layout -enc UTF-8 - out.txt']);
+//let arg_str = args
+	let do_unescape = true;
+
+	let com_args = args.join(" ");
+	if (do_unescape) com_args = com_args.replace(/\\x27/g,"'").replace(/\\x22/g,'"');
+	let com = spawn('sh', ['-c', name+" "+com_args]);
+    var str = '';
+    com.on('error', function() {
+        cb(null);
+    }); 
+    com.stdout.on('data', function(dat) {
+        str += dat.toString();
+    });
+    com.on('close', function() {
+		if (send_json) {
+			let arr = str.split("\n");
+			if (!arr.length) arr=[" "];
+			if (arr.length && arr[arr.length-1]==="")  arr.pop();
+			cb(JSON.stringify(arr));
+		}
+		else cb(str);
+    }); 
+}//»
 
 const mime_from_path=(path, force_bin)=>{//«
 	if (path.match(/\.jpg$/i)) return "image/jpeg"
@@ -225,56 +254,107 @@ else regexp = new RegExp("^" + pattern.replace(/\./g,"\\."));
 };//»
 
 //»
+/*
 
+	if (url=="/") {//«
+		else {
+			okay(res);
+			res.end("HI");
+		}
+	}//»
+	else if (url=="/_getdirobj"){//«
+		let path = decodeURIComponent(arg_hash.path);
+		if (path && !path.match(/\.\./)) {
+			if (path == "/") path = LOCAL_PATH;
+			else path = LOCAL_PATH + "/" + path;
+			let ret = allFilesSync(path);
+			okay(res,"application/javascript");
+			res.end(JSON.stringify(ret));
+		}   
+		else nogo(res);
+	}//»
+	else if (url=="/_getfilehash"){//«
+		let path = decodeURIComponent(arg_hash.path);
+		let ret;
+		try {
+			ret = fs.readFileSync(LOCAL_PATH+"/"+path);
+		}
+		catch(e){
+			nogo(res, "Trying to read directory?");
+			return;
+		}
+		let shasum = crypto.createHash('sha1');
+		shasum.update(ret);
+		let hexsum = shasum.digest('hex');
+		okay(res);
+		res.end(hexsum);
+	}//»
+*/
 const handle_request=async(req, res, url, args)=>{//«
 	"use strict";
 	let meth = req.method;
 	let body, path, enc, pos;
 	let marr;
 	if (meth == "GET") {//«
-		if (url=="/") {okay(res, "text/html");return res.end(BASE_PAGE);}
+		if (url=="/") {
+			if (args.path){//«
+				let decpath = decodeURIComponent(args.path);
+				let usemime=null;
+				marr = decpath.match(/\.([a-z0-9]+)$/);
+				if (marr&&marr[1]) usemime = ext_to_mime[marr[1]];
+				if (!usemime) usemime = "application/octet-stream";
+				let localpath = WWWPATH+decpath;
+	//			let localpath = LOCAL_PATH+arg_hash.path;
+				let str;
+	//			let esc_path = localpath.replace(/[ \x22\x27\x5b\x60#~{<>$|&!;()]/g, "\\$&");
+				let esc_path = "'"+localpath.replace(/\x27/g, "\\$&")+"'";
+log("Getting: "+localpath);
+				let stats = null;
+				try {
+					stats = fs.statSync(localpath)
+				}	
+				catch(e){
+log(e);
+				}
+				if (!stats) return nogo(res, decpath+": not found");
+				
+				if (!stats.isFile()) {
+					if (stats.isDirectory()) return nogo(res, decpath+": is a directory");
+					return nogo(res, decpath+": is not a regular file");
+				}
+				let nBytes = stats.size
+				if (arg_hash.getsize) {
+					okay(res);
+					res.end(nBytes+"");
+				}
+				return;
+			}//»
+			okay(res, "text/html");return res.end(BASE_PAGE);
+		}
 		if (url.match(/^\/(desk|shell)$/)) return res.end(OS_HTML);
 		if (url.match(/^\/_/)){
 			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
 			else if (url == "/_getapp") res.end(JSON.stringify(await readdir(APPPATH, {getDir:true, getRaw:true}, args.path)));
-			else if (url == "/_getexamples") res.end(JSON.stringify(await readdir(EXAMPLESPATH, {getRaw: true})));
-else if (url=="/_generateServiceWorker"){
-
-const SVC_WORKER_TOP = `
-self.addEventListener('install', function(event) {
-//if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
-//  return; 
-//}     
-  event.waitUntil(
-    caches.open('desk-sw-v1').then(function(cache) {
-      return cache.addAll([
-`
-
-const SVC_WORKER_BOT = `
-      ]);
-    })
-  );
-});
-
-self.addEventListener('fetch', function(event) {
-if (event.request.cache === 'only-if-cached' && event.request.mode !== 'same-origin') {
-    return;
-}
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
-    })
-  );
-});
-`
-
-/*
-res.headers["Content-Type"] = "application/javascript";
-res.write(SVC_WORKER_TOP+"\n'"+urllib.unquote(path)+"'\n"+SVC_WORKER_BOT)
-*/
-log(SVC_WORKER_TOP+decodeURIComponent(args.path)+SVC_WORKER_BOT);
-res.end();
-}
+			else if (url=="/_getdir"){//«
+				let path = decodeURIComponent(args.path);
+//				let recur = args.all;
+				let comarg = "-Lp";
+				if (args.all) comarg += "R";
+				comarg += "gG";
+				if (path && !path.match(/\.\./)) {
+					if (path == "/") path = WWWPATH;
+					else path = WWWPATH + "/" + path;
+					hard_spawn("ls", [comarg, '--time-style=+%s' ,path], function(ret) {
+						if (ret == null) nogo(res);
+						else {
+							okay(res);
+							res.end(ret);
+						}   
+					}, true); 
+					return;
+				}   
+				else nogo(res);
+			}//»
 			else if (url == "/_ip") {
 				let rv = await fetch("https://ifconfig.me/ip");
 				if (!(rv && rv.ok)) return nogo(res, "Could not get ip address");

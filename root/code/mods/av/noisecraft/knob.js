@@ -1,5 +1,6 @@
 
 //Imports«
+
 import { assert } from './utils.js';
 import { Eventable } from './eventable.js';
 import { Dialog } from './dialog.js';
@@ -12,9 +13,9 @@ export class Knob extends Eventable {//«
  * Reusable knob control component
  * */
 
-    constructor(minVal, maxVal, value, deviceId, controlId){//«
+    constructor(minVal, maxVal, value, deviceId, controlId, main){//«
         super();
-
+		this.main = main;
         this.minVal = minVal;
         this.maxVal = maxVal;
         this.value = value;
@@ -237,8 +238,7 @@ export class Knob extends Eventable {//«
      * Create a dialog to bind this knob to a MIDI control number
      * */
         console.log('bind MIDI');
-
-        var dialog = new Dialog('MIDI Control Mapping');
+        var dialog = new Dialog('MIDI Control Mapping', this.main);
 
         dialog.appendChild(document.createTextNode(
             'Move a knob or fader on your MIDI controller to map the ' +

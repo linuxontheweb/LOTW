@@ -451,7 +451,8 @@ const make_desktop = () => {//«
 	desk.type = "desk";
 	desk.tcol = "#000";
 	desk.pos = "relative";
-	desk.over = "hidden";
+//	desk.over = "hidden";
+	desk.over = "scroll";
 	desk.w = winw();
 	desk.h = winh();
 	desk.z = min_win_z;
@@ -486,7 +487,7 @@ const make_desktop = () => {//«
 	desk_imgdiv.style.backgroundPosition="center";
 
 	DDD = make('div');
-	DDD.pos = 'absolute';
+	DDD.pos = 'fixed';
 	DDD.bor = '1px solid white';
 	DDD.bgcol = 'gray';
 	DDD.op = 0.5;
@@ -539,7 +540,7 @@ const make_desktop = () => {//«
 	adiv.add(area);
 	area.w=1;
 	desk.add(adiv);
-	desk.area = area;
+//	desk.area = area;
 	body.add(desk);
 	body.add(background_div);
 	body.add(desk_coldiv);
@@ -585,6 +586,7 @@ CUR.setpos=(x,y,icn)=>{
 	if (CUR.isdesk()) {
 		CUR.x = CUR.xoff()+IGSX*x;
 		CUR.y = CUR.yoff()+IGSY*y;
+		CUR.scrollIntoViewIfNeeded();
 		return;
 	}
 	if (!icn) return;
@@ -596,6 +598,7 @@ CUR.set=()=>{
 	if (CUR.isdesk()){
 		CUR.x=desk_grid_start_x;
 		CUR.y=desk_grid_start_y;
+		CUR.scrollIntoViewIfNeeded();
 	}
 	else{
 		let got = CUR.main.lasticon;
@@ -611,6 +614,7 @@ CUR.zero=()=>{
 	if (CUR.isdesk()){
 		CUR.x=desk_grid_start_x;
 		CUR.y=desk_grid_start_y;
+		CUR.scrollIntoViewIfNeeded();
 	}
 	else{
 		CUR.x=CUR_FOLDER_XOFF;
@@ -856,7 +860,7 @@ CUR.select=(if_toggle,if_open)=>{
 		if (!CDL) return;
 		CDL.reset();
 	};
-	desk.onscroll=e=>{desk.scrollTop=0;};
+//	desk.onscroll=e=>{desk.scrollTop=0;};
 //*/
 	desk.onmousemove = e => {//«
 		ev = e;
@@ -1147,7 +1151,7 @@ drag_timeout = setTimeout(()=>{
 			Desk.CWIN = null;
 		}
 		if (e.button===0) DDIE = e;
-		desk.area.focus();
+//		desk.area.focus();
 		CDICN = null;
 	};//»
 	desk.onclick = e => {//«
@@ -1295,7 +1299,7 @@ bar.padb=1;
 bar.h=26;
 if (qobj.nobar) bar.dis="none";
 else bar.dis="flex";
-bar.pos="absolute";
+bar.pos="fixed";
 bar.b=0;
 bar.w="100%";
 bar.op=0;
@@ -1382,13 +1386,14 @@ let TASKBAR_BOR_WID="2.5px";
 let st = start_button;//«
 st.padt=st.padb=3;
 st.padr=st.padl=5;
-st.fw="bold";
-st.tcol="#bbb";
+//st.fw="bold";
+st.tcol="#aaa";
+st.ff="arial";
 //st.bgcol="#272727";
 st.dis="flex";
 st.ali="center";
 st.jsc="center";
-st.fs=15;
+st.fs=16;
 st.innerText="\u{1f30e}\u{202f}Begin";
 st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;
 st.onmousedown=()=>{st.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;};
@@ -1925,6 +1930,16 @@ if (icon.parwin===desk){
 		oldarr[ind] = undefined;
 	} else console.error("The icon was not in the icons array!", icon);
 }//»
+const check_icon_loc=(icn)=>{
+	let r = icn.getBoundingClientRect();
+	if (r.right > winw()){
+//		desk.scrollLeft = r.right;
+//		setTimeout(()=>{desk.scrollLeft = r.right;},0);
+	}
+	if (r.bottom > winh()){
+//		setTimeout(()=>{desk.scrollTop = r.bottom;},0);
+	}
+};
 const place_in_icon_slot = (icon, pos, if_create, if_load) => {//«
 	let startx = desk_grid_start_x;
 	let starty = desk_grid_start_y;
@@ -1961,6 +1976,7 @@ const place_in_icon_slot = (icon, pos, if_create, if_load) => {//«
 			icon.z = ICON_Z;
 			icon.x=desk_grid_start_x + (col * IGSX);
 			icon.y=desk_grid_start_y + (row * IGSY);
+			check_icon_loc(icon);
 			if (dosave) icon.save();
 			return;
 		}
@@ -1987,10 +2003,14 @@ log(icon);
 			let ynum = Math.floor(i / elem.cols);
 			x = startx + (xnum * IGSX);
 			y = starty + (ynum * IGSY);
+//if (x > winw() || y > winh()){
+//cerr("OFFSCREEN 2", icon);
+//}
 			icon.col = xnum;
 			icon.row = ynum;
 			icon.x = x;
 			icon.y = y;
+			check_icon_loc(icon);
 			arr[i] = icon;
 			icon.slot = i;
 			icon.z = ICON_Z;
@@ -2139,7 +2159,8 @@ const make_window = (arg) => {//«
 	}
 	else win.app = app;
 	win.type = "window";
-	if (!is_embedded) win.pos = "absolute";
+//	if (!is_embedded) win.pos = "absolute";
+	if (!is_embedded) win.pos = "fixed";
 	if (!win.nowindecs) {
 		win.bor = "1px solid #333";
 	}
@@ -3560,7 +3581,7 @@ const window_off = (win) => {//«
 	win.style.boxShadow = "";
 	if (win.obj && win.obj.onblur) win.obj.onblur();
 	if (win == Desk.CWIN) Desk.CWIN = null;
-	desk.area.focus();
+//	desk.area.focus();
 	if (win.is_minimized) {
 		win._button.onmouseup();
 		win.dis="none";
@@ -4189,7 +4210,7 @@ const get_icons_by_path = (patharg, extarg) => {//«
 };
 this.get_icons_by_path = get_icons_by_path;
 //»
-const focus_editing=e=>{if(e)nopropdef(e);if(CEDICN)CEDICN.label_div.area.focus()}
+const focus_editing=e=>{if(e)nopropdef(e);if(CEDICN)CEDICN.area.focus()}
 const check_if_newpath_is_in_itself = (oldpath, newpath) => {//«
 	if (newpath.length > oldpath.length && newpath.slice(0, oldpath.length) === oldpath && newpath[oldpath.length] === "/") {
 		return true;
@@ -5691,7 +5712,8 @@ open a print dialog if you never print anything or even have a printer!)
 		"a_C":1
 	};
 	if (prevent[kstr]) e.preventDefault();
-	if (act && act != desk.area && act_type && act_type.match(/^(text|password|number)/)) text_inactive = false; /*Prevent Default Detection(To stop unwanted browser actions like unloading)*/
+//	if (act && act != desk.area && act_type && act_type.match(/^(text|password|number)/)) text_inactive = false; /*Prevent Default Detection(To stop unwanted browser actions like unloading)*/
+	if (act && act_type && act_type.match(/^(text|password|number)/)) text_inactive = false; /*Prevent Default Detection(To stop unwanted browser actions like unloading)*/
 	if (text_inactive && notext_prevdef[kstr]) e.preventDefault();
 	
 
@@ -5883,7 +5905,7 @@ return;
 			else if (kstr=="ENTER_") return CUR.select();/*Simple select*/
 			else if (kstr=="ENTER_A") return CUR.select(null,true);/*Force open and deselect*/
 			else if (kstr=="SPACE_") {
-				if (cwin) e.preventDefault();
+//				if (cwin) e.preventDefault();
 				return CUR.select(true);/*Toggles the selection status*/
 			}
 		}
@@ -6213,8 +6235,29 @@ const handle_ESC = (if_alt) => {//«
 	if (windows_showing) toggle_show_windows();
 };//»
 
-const desk_macros={"abc":{c:'sleep 1;echo "Hello from Macronator XYZ!!!";sleep 1;echo "End it yend it!"',n:"Macro XYZ"}};
-this.set_macros=()=>{Core.set_macros(desk_macros);};
+//const desk_macros={"abc":{c:'sleep 1;echo "Hello from Macronator XYZ!!!";sleep 1;echo "End it yend it!"',n:"Macro XYZ"}};
+//this.set_macros=()=>{Core.set_macros(desk_macros);};
+
+this.onmidi = e => {//«
+	let dat = e.data;
+	let which = dat[0];
+	let cwin = Desk.CWIN;
+	if (!cwin) return;
+	let obj = cwin.obj;
+	if (obj.onmidi) obj.onmidi(dat);
+	if (which == 176 && obj.onmidiknob) obj.onmidiknob({
+		knob: dat[1],
+		val: dat[2]
+	});
+	else if (which == 144 && obj.onmidikeydown) obj.onmidikeydown({
+		key: dat[1],
+		val: dat[2]
+	});
+	else if (which == 128 && obj.onmidikeyup) obj.onmidikeyup({
+		key: dat[1],
+		val: 0
+	});
+};//»
 
 //»
 //Menu«
@@ -6373,7 +6416,7 @@ wrapper.onmousedown = e => {//«
 	let par = icon.parwin;
 	if (par === desk) {
 		window_off(Desk.CWIN);
-		desk.area.focus();
+//		desk.area.focus();
 	}
 	else window_on(par);
 	if (e.ctrlKey&&ICONS.includes(icon)) icon_off(icon,true);
@@ -6798,7 +6841,7 @@ this.init = async (init_str, cb) => {
 	},250);
 
 	cb();
-	desk.area.focus();//!!!!!!!!!!!!!!!!!  IMPORTANT  !!!!!!!!!!!!
+//	desk.area.focus();//!!!!!!!!!!!!!!!!!  IMPORTANT  !!!!!!!!!!!!
 
 }
 //»
@@ -6815,7 +6858,6 @@ this.init = async (init_str, cb) => {
 //OLD«
 /*
 
-this.onmidi=e=>{let dat=e.data;let which=dat[0];let cwin=Desk.CWIN;if(!cwin)return;let obj=cwin.obj;if(obj.onmidi)obj.onmidi(dat);if(which==176 && obj.onmidiknob)obj.onmidiknob({knob:dat[1],val:dat[2]});else if(which==144 && obj.onmidikeydown)obj.onmidikeydown({key:dat[1],val:dat[2]});else if(which==128 && obj.onmidikeyup)obj.onmidikeyup({key:dat[1],val:0});};
 
 const make_drop_icon=(extarg,where,name_arg)=>{let icon=automake_icon(extarg,name_arg,where);icon.off();icon.disabled=true;add_drop_icon_overdiv(icon);return icon;};
 

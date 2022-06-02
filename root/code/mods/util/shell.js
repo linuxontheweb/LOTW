@@ -1,3 +1,5 @@
+//«
+//«
 /*
 
 !!!!! NEW PARAM TO CALL COM !!!!!
@@ -78,6 +80,7 @@ $ dl path/to/somefile.ext
 ...which should download it as somefile.ext
 
 */
+//»
 
 /*RUNJSSCRIPT: This is the heart of the matter«
 
@@ -110,6 +113,7 @@ $ bcat
 ...that is, without arguments, it reads from the terminal's stdin.
 
 »*/
+//»
 
 //5 minutes before "secret" strings get undefined in memory
 const MAX_MS_FOR_SECRET_VAR=5*60*1000;
@@ -3978,35 +3982,167 @@ const do_ls = (args)=>{
 
 builtins = {//«
 
-'swon': async () => {
-	if (await capi.initSW()) return cbok("The service worker has been registered");
-	cberr("There was a problem registering the service worker");
-},
-'swoff':async()=>{if(await capi.initSW(true))return cbok("The service worker has been unregistered");cberr("There was a problem unregistering the service worker");},
+//Synth stuff«
 
-'example':async(args)=>{
-	let opts=failopts(args,{s:{l:1},l:{list:1}});
-	if (!opts) return;
-	if (opts.list||opts.l){
-		let rv = await fetch(`/_getexamples`)
-		if (!(rv && rv.ok)) return cberr(`???`);
-		let arr = await rv.json();
-		woutarr(arr);
-		cbok();
-		return;
-	}
-	let name = args.shift();
-	if (!name) return cberr("Need example name");
-	let rv = await fetch(`/www/examples/${name}`)
-	if (!(rv && rv.ok)) return cberr(`${name}: example not found`);
-	wout(await rv.text());
-	cbok();
+//Midi file«
+/*How to convert from ticks to seconds:«
+
+Question:
+I want to know how to convert MIDI ticks to actual playback seconds.
+
+For example, if the MIDI PPQ (Pulses per quarter note) is 1120, how would I
+convert it into real world playback seconds?
+
+Answer:
+The formula is 60000 / (BPM * PPQ) (milliseconds).
+
+Where BPM is the tempo of the track (Beats Per Minute).
+
+(i.e. a 120 BPM track would have a MIDI time of (60000 / (120 * 192)) or 2.604 ms for 1 tick.
+
+If you don't know the BPM then you'll have to determine that first. MIDI times
+are entirely dependent on the track tempo.
+
+»*/
+/*JSON Object«
+
+
+
+{
+  // the transport and timing data
+  header: {
+    name: String,                     // the name of the first empty track, 
+                                      // which is usually the song name
+    tempos: TempoEvent[],             // the tempo, e.g. 120
+    timeSignatures: TimeSignatureEvent[],  // the time signature, e.g. [4, 4],
+
+    PPQ: Number                       // the Pulses Per Quarter of the midi file
+                                      // this is read only
+  },
+
+  duration: Number,                   // the time until the last note finishes
+
+  // an array of midi tracks
+  tracks: [
+    {
+      name: String,                   // the track name if one was given
+
+      channel: Number,                // channel
+                                      // the ID for this channel; 9 and 10 are
+                                      // reserved for percussion
+      notes: [
+        {
+          midi: Number,               // midi number, e.g. 60
+          time: Number,               // time in seconds
+          ticks: Number,              // time in ticks
+          name: String,               // note name, e.g. "C4",
+          pitch: String,              // the pitch class, e.g. "C",
+          octave : Number,            // the octave, e.g. 4
+          velocity: Number,           // normalized 0-1 velocity
+          duration: Number,           // duration in seconds between noteOn and noteOff
+        }
+      ],
+
+      // midi control changes
+      controlChanges: {
+        // if there are control changes in the midi file
+        '91': [
+          {
+            number: Number,           // the cc number
+            ticks: Number,            // time in ticks
+            time: Number,             // time in seconds
+            value: Number,            // normalized 0-1
+          }
+        ],
+      },
+
+      instrument: {                   // and object representing the program change events
+        number : Number,              // the instrument number 0-127
+        family: String,               // the family of instruments, read only.
+        name : String,                // the name of the instrument
+        percussion: Boolean,          // if the instrument is a percussion instrument
+      },          
+    }
+  ]
+}
+//»*/
+/*
+'midi':async(args)=>{//«
+
+//Midi note to freq
+//Midi note 50 is the frequency at freqs[50]
+let freqs = [];
+for (let i=0; i <= 127; i++) freqs[i]= 13.75*(2**((i-9)/12));
+
+if (!await capi.loadMod("av.miditojson")) return cberr("Midi could not be loaded!");
+
+let mod = NS.mods["av.miditojson"].Midi;
+let path = args.shift();
+if (!path) return cberr("No path given!");
+let node = await pathToNode(path);
+if (!node) return cberr(`${path}: not found`);
+let t = node.root.TYPE;
+
+let rv = await readFile(node.fullpath);
+if (!(rv instanceof Blob)) return cberr("Did not get a blob!");
+let midi = new mod(await capi.toBuf(rv));
+let head = midi.header;
+let tracks = midi.tracks;
+let ppq = head.ppq;
+wout(`PPQ: ${ppq}`);
+wout(`Tracks: ${tracks.length}`);
+let temps = head.tempos;
+wout("Tempos (ms per tick):");
+for (let i=0; i < temps.length; i++){
+//The formula is 60000 / (BPM * PPQ) (milliseconds).
+let tmp = temps[i];
+//log(tmp);
+let ms_per_tick = 60000/(tmp.bpm*ppq);
+wout(`${i}) ${ms_per_tick}`);
+
+}
+log(head);
+log(tracks);
+
+//}
+//else return cberr(`'${t}: not yet implemented'`);
+
+cbok();
+
+},//»
+*/
+//»
+
+/*
+'midiup':async()=>{
+	if (await capi.initMidi()) return cbok();
+	return cberr("Midi could not be enabled!");
 },
+'synth':()=>{
+//	termobj.ENV['?']=0;
+	termobj.init_app_mode("synth", 
+		ret=>{//«
+//			if (servobj.killed) {
+//				termobj.app_line_out("Killed");
+//				return termobj.end_app_mode();
+//			}
+			let gotcom = ret.trim();
+			if (gotcom) wout(`OK: ${gotcom}`);
+			termobj.response_end();
+		},//» 
+		cbok
+	)
+},
+
+»*/
+///*
 'ip':async(args)=>{
 	let rv = await fetch("https://ifconfig.me/ip")
 	if (!(rv && rv.ok)) return cberr("Could not get ip address");
 	cbok(await rv.text());
 },
+//*/
+
 'id':()=>{
 	wout(termobj.winid);
 	cbok();
@@ -5040,6 +5176,12 @@ run_script(runcom, retval => {
 }
 
 /*Old«
+
+'swon': async () => {
+	if (await capi.initSW()) return cbok("The service worker has been registered");
+	cberr("There was a problem registering the service worker");
+},
+'swoff':async()=>{if(await capi.initSW(true))return cbok("The service worker has been unregistered");cberr("There was a problem unregistering the service worker");},
 
 'comstr':(args)=>{//«
 	let opts = failopts(args,{LONG:{nowrap:1},SHORT:{}});
