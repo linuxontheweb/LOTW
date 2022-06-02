@@ -4066,7 +4066,7 @@ const icon_dblclick = (icon, e, win_cb) => {//«
 			let gotext = icon.ext;
 			let link = icon.link;
 			let doopen = () => {//«
-				path_to_obj(icon.path, parobj => {
+				path_to_obj(icon.path, async parobj => {
 					const noopen = (mess) => {
 						icon.ready.error = "File not found";
 						let str = "The file could not be opened:&nbsp;" + fullpath;
@@ -4085,6 +4085,12 @@ return;
 							icon.ready.state = "File loaded";
 							open_icon_app(icon, ret, gotext, null, try_force_open);
 						},null,null,DSK);
+					}
+					else if (roottype == "www") {
+						let rv = await fetch(fullpath);
+						if (!rv.ok) return poperr("Could not fetch the data!");
+						icon.ready.state = "File loaded";
+						open_icon_app(icon, await rv.arrayBuffer(), gotext, null, try_force_open);
 					}
 					else if (roottype == "local") {
 						let name;

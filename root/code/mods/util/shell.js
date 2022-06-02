@@ -4471,11 +4471,10 @@ cerr("Dropping", ret);
 	if (!path) return cberr("No path!");
 	let fent = await pathToNode(path);
 	if (!fent) return cberr(path + ":\x20file not found");
-//if 
 	if (!fent.fullpath){
 log(fent);
-cberr("No path of the file entry!");
-return;
+		cberr("No path of the file entry!");
+		return;
 	}
 	_Desk.open_file_by_path(fent.fullpath, null, opts);
 	cbok();
