@@ -5111,6 +5111,9 @@ const open_file_by_path = (patharg, cb, opt={}) => {//«
 		if (cb) cb(true)
 	};
 	let objpath = fs.get_path_of_obj;
+//log("OPEN",patharg);
+//if ()
+//if (!patharg) throw new Error();
 	path_to_obj(patharg, (ret, lastdir, gotpath) => {
 		if (!ret) {
 			let marr;

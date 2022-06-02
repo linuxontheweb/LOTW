@@ -323,7 +323,7 @@ const path_to_obj = (str, allcb, if_root, if_get_link, dsk, alliter) => {//«
 this.ptw = path_to_obj;
 this.path_to_obj = path_to_obj;
 //»
-const normalize_path = (path, cwd) => {
+const normalize_path = (path, cwd) => {//«
 	if (!(path.match(/^\x2f/) || (cwd && cwd.match(/^\x2f/)))) {
 		cerr("normalize_path():INCORRECT ARGS:", path, cwd);
 		return null;
@@ -345,7 +345,7 @@ const normalize_path = (path, cwd) => {
 	return newpath;
 }
 this.normalize_path = normalize_path;
-
+//»
 const make=(which)=>{return document.createElement(which);}
 
 const get_fullpath = (path, noarg, cur_dir) => {
@@ -1964,7 +1964,7 @@ return;
 //Init/Populate«
 
 const get_tree=(which,type)=>{
-	let dir={NAME:which,TYPE:type,KIDS:{},APP:FOLDER_APP,sys:true};
+	let dir={NAME:which,TYPE:type,KIDS:{},APP:FOLDER_APP,sys:true,fullpath:`/${which}`};
 	dir.root=dir;
 	dir.KIDS['.']=dir;
 	return dir;
@@ -2030,7 +2030,8 @@ this.make_all_trees = async(allcb, rootarg, fsarg) => {//«
 				NAME: name,
 				KIDS: {},
 				TYPE: "fs",
-				is_root: true
+				is_root: true,
+				fullpath: `/${name}`
 			};
 			return obj;
 		};//»

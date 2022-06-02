@@ -118,7 +118,7 @@ let fs_type = "temporary";
 let use_fs_type;
 //let fs_type, use_fs_type;
 let lst = localStorage;
-const root = {NAME: "/", APP: FOLDER_APP, KIDS: {}, treeroot: true, TYPE: "fs", sys: true};
+const root = {NAME: "/", APP: FOLDER_APP, KIDS: {}, treeroot: true, TYPE: "fs", sys: true, fullpath: "/"};
 root.KIDS['.'] = root;
 root.KIDS['..'] = root;
 root.root = root;

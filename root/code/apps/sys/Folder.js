@@ -1,5 +1,14 @@
+/*TODO: NEED A FOLDER PICKER FOR IMPLEMENTING "SAVE AS" FUNCTIONALITY TODO
 
+- Basically just open this app by passing a "folders only" option. 
+- When navigating, need to keep the same window (don't open a new one).
+- Need to be able to navigate "up" to the parent folder.
+
+*/
 export const app = function(arg) {
+
+//let folders_only = true;
+let folders_only = false;
 
 //Imports«
 
@@ -69,6 +78,7 @@ let kids;
 let curnum;
 let observer;
 //»
+
 //Funcs«
 
 const reload = ()=>{//«
@@ -91,9 +101,18 @@ kids = dir.KIDS;
 let keys = kids._keys;
 keys.splice(keys.indexOf("."),1);
 keys.splice(keys.indexOf(".."),1);
+if (folders_only){
+	let arr = [];
+	for (let k of keys){
+//log(kids[k].APP, FOLDER_APP);
+		if(kids[k].APP===FOLDER_APP) arr.push(k);
+	}
+	keys = arr;
+}
 keys.sort();
 curnum = keys.length
-
+num_entries = keys.length;
+stat_num();
 let s = '';
 for (let i=0; i < curnum; i++){
 	s+=`<div data-name="${keys[i]}" class="icon"></div>`;
@@ -108,38 +127,31 @@ const options = {
 observer = new IntersectionObserver((ents)=>{
 	ents.forEach(ent => {
 		let d = ent.target;
-		if (ent.isIntersecting) {
-//			let icn = makeIcon(kids[d.dataset.name], d, observer);
-//			icn.parwin = topwin;
-			d.show();
-		}
-		else {
-			d.hide();
-//			d.innerHTML="";
-		}
+		if (ent.isIntersecting) d.show();
+		else d.hide();
 	});
 }, options);
 
 for (let kid of icondv.children) {
-//log(kid.dataset.name);
-kid.show = ()=>{
-	let icn = makeIcon(kids[kid.dataset.name], kid, observer);
-	icn.parwin = topwin;
-	kid.showing = true;
-};
-kid.hide = ()=>{
-	kid.innerHTML="";
-	kid.showing = false;
-};
-	observer.observe(kid);
-}
-is_loading = false;
+
+	kid.show = ()=>{
+		let icn = makeIcon(kids[kid.dataset.name], kid, observer);
+		icn.parwin = topwin;
+		kid.showing = true;
+	};
+	kid.hide = ()=>{
+		kid.innerHTML="";
+		kid.showing = false;
+	};
+		observer.observe(kid);
+	}
+	is_loading = false;
 
 }//»
 const stat_num=()=>{//«
-if (!num_entries) stat("Empty");
-else if (num_entries==1) stat("1 entry");
-else stat(`${num_entries} entries`);
+	if (!num_entries) stat("Empty");
+	else if (num_entries==1) stat("1 entry");
+	else stat(`${num_entries} entries`);
 };//»
 const init=async()=>{//«
 	dir = await fs.pathToNode(path);
@@ -151,8 +163,8 @@ else cwarn("Opening in 'app mode'");
 	if (!dir.done){
 		stat("Getting entries...");
 		let cb=(ents)=>{
-			num_entries+=ents.length;
-			stat_num();
+//			num_entries+=ents.length;
+//			stat_num();
 		};
 		await fs.populateDirObjByPath(path, {par:dir,streamCb:cb});
 		dir.done=true;
@@ -199,24 +211,13 @@ cur.loc(icn.offsetLeft+2, icn.offsetTop+2);
 
 }//»
 
-this.onfocus=()=>{
-Main.focus();
-};
-this.onblur=()=>{
-Main.blur();
-};
-this.onload=()=>{
-init();
-};
-this.update=()=>{
-	stat(`${dir.KIDS._keys.length-2} entries`);
-};
-
-this.add_icon=(icn)=>{
-Main.scrollTop=0;
-
-};
+this.onfocus=()=>{Main.focus();};
+this.onblur=()=>{Main.blur();};
+this.onload=()=>{init();};
+this.update=()=>{stat(`${dir.KIDS._keys.length-2}entries`);};
+this.add_icon=(icn)=>{Main.scrollTop=0;};
 this.stat=stat;
+
 //»
 
 Main.focus();

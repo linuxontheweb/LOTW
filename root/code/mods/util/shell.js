@@ -4463,7 +4463,23 @@ cerr("Dropping", ret);
 'shift':args=>{if(args.length>1)return cberr("too many arguments");let num;if(!args.length)num=1;else{let numstr=args.shift();num=strnum(numstr);if(!isnum(num))return cberr(numstr+":\x20numeric argument required");if(num<0)return cberr(numstr+":\x20shift count out of range");}if(!global_args){if(num===0)return cbok();else return cberr();}for(let i=0;i<num;i++){if(global_args.shift()===undefined)return cberr();}return cbok();},
 'true': cbok,
 'close':args=>{if(!Desk)return cberr(ENODESK);let id=args.shift();if(!id)return cberr("No app given!");if(!id.match(/^win_\d+$/))return cberr("Invalid window id");let win=document.getElementById(id);if(!win)return cberr("Nothing found");win.force_kill();cbok();},
-'open':async args=>{let opts=getwinargopts(args);if(!opts)return;if(!_Desk)return cberr(ENODESK);let path=args.shift();if(!path)return cberr("No path!");let fent=await pathToNode(path);if(!fent)return cberr(path+":\x20file not found");_Desk.open_file_by_path(fent.fullpath,null,opts);cbok();},
+'open': async args => {
+	let opts = getwinargopts(args);
+	if (!opts) return;
+	if (!_Desk) return cberr(ENODESK);
+	let path = args.shift();
+	if (!path) return cberr("No path!");
+	let fent = await pathToNode(path);
+	if (!fent) return cberr(path + ":\x20file not found");
+//if 
+	if (!fent.fullpath){
+log(fent);
+cberr("No path of the file entry!");
+return;
+	}
+	_Desk.open_file_by_path(fent.fullpath, null, opts);
+	cbok();
+},
 'app': async args => {
 	const openit=async(usearg)=>{
 		if (!await _Desk.openApp(which, opts.FORCE, opts.WINARGS, usearg)) return cberr();
