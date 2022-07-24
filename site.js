@@ -6,14 +6,19 @@
 
 
 //Imports«
+
 const spawn = require('child_process').spawn;
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
+const zlib = require('zlib');
 
 //»
 
 //Var«
+
+const FS_CACHE = {};
+const GZIP_CACHE = {};
 
 //SSL/HTTPS«
 
@@ -133,7 +138,9 @@ const APPPATH = `${BASEPATH}/root/code/apps`;
 let hostname;
 let use_port = process.env.LOTW_PORT;
 let port = use_port||8080;
+let is_live = false;
 if (process.env.LOTW_LIVE){
+	is_live = true;
 	hostname="0.0.0.0";
 	port = 443;
 }
@@ -182,8 +189,8 @@ const mime_from_path=(path, force_bin)=>{//«
 	else if (force_bin) return "application/octet-stream";
 	else return "text/plain"
 }//»
-const okay=(res, usemime)=>{//«
-	header(res, 200, usemime);
+const okay=(res, usemime, useenc)=>{//«
+	header(res, 200, usemime, useenc);
 }//»
 const okaybin=(res)=>{//«
 	header(res, 200, "application/octet-stream");
@@ -193,13 +200,13 @@ const nogo=(res, mess)=>{//«
 	if (!mess) mess = "NO";
 	res.end(mess+"\n");
 }//»
-const header=(res, code, mimearg)=>{//«
+const header=(res, code, mimearg, encodingarg)=>{//«
 	let usemime = "text/plain";
 	if (mimearg) usemime = mimearg;
-	if (code == 200) {
-		res.writeHead(200, {'Content-Type': usemime, 'Access-Control-Allow-Origin': "*"});
-	}
-	else res.writeHead(code, {'Content-Type': usemime, 'Access-Control-Allow-Origin': "*"});
+	let o = {'Content-Type': usemime, 'Access-Control-Allow-Origin': "*"};
+	if (encodingarg) o['Content-Encoding'] = encodingarg;
+	if (code == 200) res.writeHead(200, o);
+	else res.writeHead(code, o);
 }//»
 const readdir=(path, opts={}, pattern)=>{//«
 
@@ -331,9 +338,12 @@ log(e);
 			}//»
 			okay(res, "text/html");return res.end(BASE_PAGE);
 		}
-		if (url.match(/^\/(desk|shell)$/)) return res.end(OS_HTML);
+		if (url.match(/^\/(desk|shell|.+\.app)$/)) return res.end(OS_HTML);
 		if (url.match(/^\/_/)){
-			if (url == "/_getbin") res.end(JSON.stringify(await readdir(BINPATH)));
+			if (url == "/_getbin") {
+				okay(res);
+				res.end(JSON.stringify(await readdir(BINPATH)));
+			}
 			else if (url == "/_getapp") res.end(JSON.stringify(await readdir(APPPATH, {getDir:true, getRaw:true}, args.path)));
 			else if (url=="/_getdir"){//«
 				let path = decodeURIComponent(args.path);
@@ -368,6 +378,7 @@ log(e);
 		let dir = parts.shift();
 		if (!(dir&&OKAY_DIRS.includes(dir))) return nogo(res,"Not found");
 		let usemime = "application/octet-stream";
+		let useenc;
 		let str;
 		let ext_to_mime = {
 			"js": "application/javascript",
@@ -381,29 +392,47 @@ log(e);
 		}
 		if (marr = url.match(/\.(js|html|json|txt|sh|mf|synth)$/)) {
 			usemime = ext_to_mime[marr[1]];
-			try {
-				str = fs.readFileSync("."+decodeURIComponent(url), 'utf8');
+			if (is_live && FS_CACHE[url]) str = FS_CACHE[url];
+			else {
+				try {
+					str = fs.readFileSync("."+decodeURIComponent(url), 'utf8');
+					FS_CACHE[url] = str;
+				}
+				catch(e) {
+					str=null
+				}
 			}
-			catch(e) {
-				str=null
+			if (is_live && req.headers['accept-encoding'].match(/\bgzip\b/)){
+				if (GZIP_CACHE[url]){
+					str = GZIP_CACHE[url];
+				}
+				else {
+					str = zlib.gzipSync(str);
+					GZIP_CACHE[url] = str;
+				}
+				useenc = "gzip";
 			}
 		}
 		else {
 			if (marr = url.match(/\.(wav|gz)$/)) usemime = ext_to_mime[marr[1]];
-			try {
-				str = fs.readFileSync("."+decodeURIComponent(url));
+			if (is_live && FS_CACHE[url]) str = FS_CACHE[url];
+			else {
+				try {
+					str = fs.readFileSync("."+decodeURIComponent(url));
+					FS_CACHE[url] = str;
+				}
+				catch(e) {
+					str = null
+				}
 			}
-			catch(e) {
-				str = null
-			}
+
 		}
 		if (!str) {
 			nogo(res, "404: File not found: " + url);
 //debug("Not found");
 			return;
 		}
-//debug("OK: " + (str.length) + " bytes");
-		okay(res, usemime);
+		okay(res, usemime, useenc);
 		res.end(str);
 	}//»
 	else if (meth == "POST") nogo(res);
@@ -411,7 +440,6 @@ log(e);
 }//»
 
 const app =(req,res)=>{//«
-
 	let url_arr = req.url.split("?");
 	let len = url_arr.length;
 	if (len == 1 || len == 2) {

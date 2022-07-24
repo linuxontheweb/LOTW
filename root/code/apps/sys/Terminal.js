@@ -85,6 +85,7 @@ const DEL_MODS=[
 //	"math.trading",
 //	"sys.idb",
 //	"iface.net",
+	"av.voice.pinktrombone",
 	"sys.fs",
 	"util.shell",
 //	"util.esmangle",
@@ -117,7 +118,6 @@ export const app = function (arg) {
 let fsapi;
 const {Core, Main, NS}=arg;
 
-const dsk = arg.DSK;
 const init_str = arg.INIT;
 const init_cb = arg.INIT_CB;
 let did_init = false;
@@ -137,7 +137,6 @@ termobj.topwin = topwin;
 termobj.num_prompts=0;
 
 
-this.DSK = dsk;
 
 //»
 //Var«
@@ -317,7 +316,7 @@ this.onkill = (if_dev_reload)=>{//«
 		let fobj = termobj.file_objects[k];
 		if (fobj.kill) fobj.kill();
 	}
-	Core.set_appvar(topwin, "BUFFER", buffer, dsk);
+	Core.set_appvar(topwin, "BUFFER", buffer);
 	execute_kill_funcs();
 
 if (if_dev_reload) {
@@ -331,6 +330,9 @@ this.close=_=>{//«
 		topwin.force_kill();
 	}
 }//»
+this.onappinit=()=>{
+	topwin.attset("did-init","");
+};
 this.onfocus=()=>{//«
 	topwin_focused=true;
 	if (cur_scroll_command) insert_cur_scroll();
@@ -1143,7 +1145,7 @@ this.init_app_mode = async(which, cb, appcb, use_prompt)=>{//«
 	}
 	else app_prompt = which+"> ";
 	buffer_hold = buffer;
-	buffer = await capi.getHistory(which, false, dsk);
+	buffer = await capi.getHistory(which, false);
 	term_mode = which;
 	sleeping = null;
 	let parser_hold = cur_shell;
@@ -1614,7 +1616,7 @@ const execute=(str, if_init, halt_on_fail)=>{//«
 	getch_loop_cb = null;
 	termobj.file_objects = {};
 	termobj.dirty = {};
-	ENV['USER'] = Core.get_username(dsk);
+	ENV['USER'] = Core.get_username();
 	kill_funcs = [];
 	cur_shell = shell;
 	if (add_com) {
@@ -1778,7 +1780,7 @@ const insert_cur_scroll=()=>{//«
 };//»
 const get_dir_contents=async(dir, pattern, cb)=>{//«
 	if (dir===null) throw new Error("get_dir_contents() no dir!");
-	let ret = await fsapi.pathToNode(dir,{root:root_state,dsk:dsk});
+	let ret = await fsapi.pathToNode(dir,{root:root_state});
 	if (!(ret&&ret.APP==FOLDER_APP)) return cb([]);
 	let type = ret.root.TYPE;
 	let kids=ret.KIDS;
@@ -1813,7 +1815,7 @@ const get_dir_contents=async(dir, pattern, cb)=>{//«
 		cb(match_arr);
 	};//»
 	if (type=="fs"&&!ret.done) {
-		let ret2 = await fsapi.popDir(ret,{DSK:dsk});
+		let ret2 = await fsapi.popDir(ret,{});
 		if (!ret2) return cb([]);
 		ret.done = true;
 		ret.KIDS = ret2;
@@ -1828,8 +1830,7 @@ cwarn("AWAITING REMOTE DIR LOOKUP: "+dir);
 				}
 				awaiting_remote_tab_completion = true;
 //FS555
-				let ret2 = await fsapi.popDir(ret,{DSK:dsk});
-//				fs.populate_rem_dirobj(null,ret2=>{}, ret, {DSK:dsk,LOCAL:(type==="local")});
+				let ret2 = await fsapi.popDir(ret,{});
 				if (!ret2) {
 					awaiting_remote_tab_completion = false;
 					return cb([]);
@@ -1842,8 +1843,7 @@ cwarn("AWAITING REMOTE DIR LOOKUP: "+dir);
 		}
 		else{
 //FS666
-			let ret2 = await fsapi.popDir(ret,{DSK:dsk});
-//			fs.populate_dirobj(ret,ret2=>{},{DSK:dsk});
+			let ret2 = await fsapi.popDir(ret);
 			if (!ret2) return cb([]);
 			ret.KIDS = ret2;
 			domatch();
@@ -1873,7 +1873,7 @@ const response_end=(if_nopush, which, if_force)=>{//«
 	scroll_into_view();
 	sleeping = null;
 	bufpos = 0;
-	Core.save_shell_com(last_com_str, last_mode, dsk);
+	Core.save_shell_com(last_com_str, last_mode);
 	setTimeout(()=>{cur_shell = null;},10);
 	render();
 };
@@ -2192,9 +2192,8 @@ return;
 			if (type==FOLDER_APP) {
 				handle_letter_press("/");//"/"
 //FS777
-				let rv = await fsapi.populateDirObjByPath(use_dir+"/"+str,{root:root_state,dsk:dsk});
+				let rv = await fsapi.populateDirObjByPath(use_dir+"/"+str,{root:root_state});
 				if (!rv) return cerr(NS.error.message);
-//				fs.populate_dirobj_by_path(use_dir+"/"+str,(rv,err)=>{if (err) return cerr(err);}, root_state, dsk);
 			}
 ///*
 			else if (type=="AppDir"){
@@ -2210,7 +2209,7 @@ cwarn("handle_tab():  GOWDA LINK YO NOT FULLPATH LALA");
 				}
 				else {
 //FS888
-					let obj = await fsapi.pathToNode(link, {root:root_state, dsk:dsk});
+					let obj = await fsapi.pathToNode(link, {root:root_state});
 					if (obj&&obj.APP==FOLDER_APP) handle_letter_press("/");
 					else {
 						if (!lines[cy()][cx()]) handle_letter_press(" ");
@@ -3056,10 +3055,12 @@ const handle=(sym, e, ispress, code, mod)=>{//«
 
 	if (!ispress) {//«
 		if (sym == "=_C") {
+			e.preventDefault();
 			set_new_fs(gr_fs+1);
 			return;
 		}
 		else if (sym == "-_C") {
+			e.preventDefault();
 			if (gr_fs-1 <= min_fs) return;
 			set_new_fs(gr_fs-1);
 			return;
@@ -3215,7 +3216,7 @@ const start=async()=>{//«
 
 (async()=>{
 
-let gotbuf = Core.get_appvar(topwin, "BUFFER", dsk);
+let gotbuf = Core.get_appvar(topwin, "BUFFER");
 if (!gotbuf) gotbuf = await capi.getHistory("shell");
 buffer = gotbuf;
 

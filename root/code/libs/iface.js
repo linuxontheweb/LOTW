@@ -91,7 +91,7 @@ const {
 const NS = window[__OS_NS__];
 const fsapi=NS.api.fs;
 const capi = Core.api;
-const _Desk=(termobj.dsk&&termobj.dsk.Desk)||Desk;
+const _Desk = Desk;
 
 //»
 

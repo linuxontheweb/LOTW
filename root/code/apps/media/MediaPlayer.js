@@ -101,6 +101,10 @@ there..
 
 »*/
 
+export const app = function(arg) {
+
+const {Core, Main, NS}=arg;
+const{log,cwarn,cerr,api:capi, globals, Desk}=Core;
 //Imports«
 //let Desk = arg.DESK;
 //let Core = arg.CORE
@@ -117,11 +121,11 @@ let isnum = _.isnum;
 let center = _.center;
 let make = _.make;
 
-let log = Core.log;
+//let log = Core.log;
 let wout = log;
 let xget = Core.xget;
-let cerr = Core.cerr;
-let cwarn = Core.cwarn;
+//let cerr = Core.cerr;
+//let cwarn = Core.cwarn;
 //const cwarn=()=>{}
 let cwrn=Core.cwarn;
 let ks2str = util.keysym_to_str;
@@ -1917,7 +1921,6 @@ return poperr("Unsupported fs type: "+rtyp);
 
 //»
 
-
 //CB«
 
 this.set_elem=(elem)=>{//«
@@ -2006,3 +2009,4 @@ if (arg&&arg.file) load_file(arg.file);
 
 //load_url(Core.loc_url("/"+arg.file));
 
+}

@@ -186,9 +186,9 @@ const menu_loc_from = (menuobj, item) => {//«
 		y: newy
 	};
 }//»
-const ContextMenu=function(elem, loc, type, prevelem, dsk, if_internal) {//«
+const ContextMenu=function(elem, loc, type, prevelem, noarg, if_internal) {//«
 	let killed = false;
-	let _Desk = (dsk&&dsk.Desk) || Desk;
+	let _Desk = Desk;
 	let self = this;
 	let menu = make('div');
 	menu.style.userSelect="none";
@@ -252,14 +252,10 @@ const ContextMenu=function(elem, loc, type, prevelem, dsk, if_internal) {//«
 		if (kid) kid.on();
 	};
 
-	this.adjust_y = function(dsk) {
+	this.adjust_y = function() {
 		if (type == "desk") {
 			let y = 0;
 			let winh=window.innerHeight;
-			if (dsk) {
-				y = dsk.topwin.main.getBoundingClientRect().top;
-				winh = dsk.topwin.main.getBoundingClientRect().height;
-			}
 			let _h = menu.getBoundingClientRect().height;
 			if (menu.y + _h > winh) {
 				menu.y = winh - _h;
@@ -318,7 +314,7 @@ const ContextMenu=function(elem, loc, type, prevelem, dsk, if_internal) {//«
 				self.curitem = curitem;
 				let olditem = curitem;
 				if (curitem) curitem.off();
-				let newmenu = new ContextMenu(elem, menu_loc_from(self, olditem, dsk), type, menu, dsk, true);
+				let newmenu = new ContextMenu(elem, menu_loc_from(self, olditem), type, menu, null, true);
 				newmenu.kill_cb = _Desk.desk_menu.kill_cb;
 				_Desk.desk_menu = newmenu;
 				for (let i = 0; i < val.length; i += 2) {
@@ -327,7 +323,7 @@ const ContextMenu=function(elem, loc, type, prevelem, dsk, if_internal) {//«
 				}
 				newmenu.par = self;
 				self.kid = newmenu;
-				newmenu.adjust_y(dsk);
+				newmenu.adjust_y();
 			}
 		};
 		let div = make('div');
@@ -466,20 +462,19 @@ const ContextMenu=function(elem, loc, type, prevelem, dsk, if_internal) {//«
 	menu.z = CG_zIndex+1;
 	menu.prevelem = prevelem;
 
-	((dsk&&dsk.body)||document.body).add(menu);
+	document.body.add(menu);
 }
 this.ContextMenu = ContextMenu;
 //»
-const wincontext=(loc, win, dsk)=>{//«
+const wincontext=(loc, win)=>{//«
 	let obj = win.obj;
 	if (!(obj && obj.get_context)) return;
 	let arr = obj.get_context();
 	if (!isarr(arr)) return;
 	if (obj.onblur) obj.onblur();
 	let rect = win.getBoundingClientRect();
-	let menu = new ContextMenu(win, loc, "win", null, dsk);
-	if (dsk) dsk.Desk.desk_menu = menu;
-	else Desk.desk_menu = menu;
+	let menu = new ContextMenu(win, loc, "win");
+	Desk.desk_menu = menu;
 	let app = win.app;
 	let name = app.split(".").pop();
 	let i=0;
@@ -494,7 +489,7 @@ const wincontext=(loc, win, dsk)=>{//«
 			}});
 		});
 	}
-	menu.adjust_y(dsk);
+	menu.adjust_y();
 };//»
 this.wincontext=wincontext;
 
@@ -552,7 +547,7 @@ const popok = (str, opts={}) => {
 }
 this.popok = popok;
 api.popok=popok;
-const poperr = (str, opts = {}, dsk) => {
+const poperr = (str, opts = {}) => {
 	return make_popup({
 		STR: str,
 		TYP: "error",
@@ -560,7 +555,7 @@ const poperr = (str, opts = {}, dsk) => {
 		WIN: opts.win,
 		CB: opts.cb,
 		TIT: opts.title
-	},dsk);
+	});
 }
 this.poperr = poperr;
 //api.poperr=poperr;
@@ -570,16 +565,14 @@ api.poperr = (str, opts={})=>{
 		poperr(str, opts);
 	});
 }
-//const popup = (str, if_sel, dsk) => {
-//const popup = (str, if_sel, opts={}, dsk) => {
-const popup = (str, opts={}, dsk) => {
+const popup = (str, opts={}) => {
 	return make_popup({
 		TIT: opts.title,
 		STR: str,
 		SEL: opts.sel,
 		WIN: opts.win,
 		CB: opts.cb
-	}, dsk);
+	});
 }
 this.popup=popup;
 api.popup=popup;
@@ -916,9 +909,9 @@ const mkpopup_tdiv = (str, opts={}) => {
 }
 
 
-const make_popup = (arg, dsk) => {//«
+const make_popup = (arg) => {//«
 	const popup_dequeue = () => {
-		make_popup(_popup_queue.shift(), dsk);
+		make_popup(_popup_queue.shift());
 	}
 	const mkbut=(txt, if_active)=>{
 		let d = mkdv();
@@ -970,16 +963,8 @@ const make_popup = (arg, dsk) => {//«
 	let cur_tab_index = 1;
 	let active_button;
 	let w = arg.WIN;
-	let _Desk;
-	let _popup_queue;
-	if (dsk){
-		_Desk = dsk.Desk;
-		_popup_queue = dsk.popup_queue;
-	}
-	else {
-		_Desk = Desk;
-		_popup_queue = popup_queue;
-	}
+	let _Desk = Desk;
+	let _popup_queue = popup_queue;
 	if (!w) {
 		if (_Desk.CPR && _Desk.CPR !== true) {
 			_popup_queue.push(arg);
@@ -1081,10 +1066,8 @@ const make_popup = (arg, dsk) => {//«
 		div.z=10000000;
 		w.add(div);
 	}
-	else {
-		if (dsk) dsk.body.add(div);
-		else document.body.add(div);
-	}
+	else document.body.add(div);
+	
 	div.ael('dblclick', e => {
 		e.stopPropagation()
 	});

@@ -1,12 +1,27 @@
+
+let BGCOLOR = "#070707";
 /*Gamepad
 
 let gp = navigator.getGamepads()[0]
 let buts = gp.buttons
+0 B
+1 A
+2 Y
+3 X
+4 Left Top
+5 Right Top
+6 Left Bot
+7 Right Bot
+8 Select
+9 Start
+10 Left Joystick down
+11 Right Joystick down
 
-buts[12] //UP
-buts[13] //DOWN
-buts[14] //LEFT
-buts[15] //RIGHT
+Arrows
+12 //UP
+13 //DOWN
+14 //LEFT
+15 //RIGHT
 
 */
 
@@ -32,24 +47,6 @@ const stat=(s)=>{statbar.innerHTML=s;};
 let did_init = false;
 let memory_interval;
 let _;
-/*«
-let Core = arg.CORE;
-_=Core;
-
-let log = _.log;
-let cwarn = _.cwarn;
-
-let globals = Core.globals;
-_=globals;
-
-let WDG = _.widgets;
-let poperr = WDG.poperr;
-
-let fs = globals.fs;
-let util = globals.util;
-_=util;
-let make = _.make;
-»*/
 
 let audio_ctx = globals.audio_ctx;
 if (!audio_ctx) {
@@ -65,7 +62,11 @@ outgain.gain.setValueAtTime(0, audio_ctx.currentTime);
 //VAR«
 
 let bUP,bDOWN,bLEFT,bRIGHT;
+let bB, bA, bY, bX;
+let bSelect, bStart;
 let UP,DOWN,LEFT,RIGHT;
+let B ,A;
+let SELECT, START;
 
 let gp;
 // = globals.gamepad;
@@ -176,14 +177,13 @@ var running = true;
 var emulator = null;
 var gamepad_kill_cb=null;
 //»
-
 //DOM«
 var canvas;
 //var main = arg.MAIN;
 //var topwin = arg.TOPWIN;
 var w = main.clientWidth;
 var h = main.clientHeight;
-main.bgcol="#171717";
+main.bgcol=BGCOLOR;
 _ = main.style;
 _.display="flex";
 _.alignItems="center";
@@ -343,13 +343,19 @@ const resize=()=>{//«
 	}
 }//»
 
-const set_buttons = () => {
+const set_buttons = () => {//«
 	let buts = gp.buttons;
+	bB = buts[2];
+	bA = buts[0];
+	bSelect = buts[8];
+	bStart = buts[9];
+//	bY = buts[2];
+//	bX = buts[3];
 	bUP = buts[12];
 	bDOWN = buts[13];
 	bLEFT = buts[14];
 	bRIGHT = buts[15];
-};
+};//»
 
 //»
 
@@ -359,6 +365,7 @@ this.poll_gp =()=>{//«
 
 gp  = navigator.getGamepads()[0];
 if (!gp) return;
+/*
 let ew = gp.axes[2];
 if (ew > EW_THRESH){
 	if (LEFT) emulator.fire("L",false);
@@ -397,9 +404,54 @@ else{
 	if (UP) emulator.fire("U",false);
 	DOWN=UP=false;
 }
+*/
 
-/*
 set_buttons();
+
+if (bStart.pressed){
+	if (!START) {
+		emulator.fire("Start",true);
+		START=true;
+	}
+}
+else {
+	if (START) emulator.fire("Start",false);
+	START = false;
+}
+
+if (bSelect.pressed){
+	if (!SELECT) {
+		emulator.fire("Select",true);
+		SELECT=true;
+	}
+}
+else {
+	if (SELECT) emulator.fire("Select",false);
+	SELECT = false;
+}
+
+if (bB.pressed){
+	if (!B) {
+		emulator.fire("B",true);
+		B=true;
+	}
+}
+else {
+	if (B) emulator.fire("B",false);
+	B = false;
+}
+
+if (bA.pressed){
+	if (!A) {
+		emulator.fire("A",true);
+		A=true;
+	}
+}
+else {
+	if (A) emulator.fire("A",false);
+	A = false;
+}
+
 if (bDOWN.pressed){
 	if (!DOWN) {
 		emulator.fire("D",true);
@@ -445,6 +497,9 @@ else {
 	if (RIGHT) emulator.fire("R",false);
 	RIGHT = false;
 }
+
+
+/*
 	fs.get_all_gp_events(true);
 	try{
 		if (did_read) {
@@ -456,6 +511,7 @@ else {
 	catch(e){}
 */
 }//»
+
 this.onloadfile = load_init;
 this.onappinit=()=>{//«
 //topwin.title="Nineteendo";
@@ -530,6 +586,7 @@ this.onkeydown = function(e,sym) {//«
 		emulator.toggleSilentMode();
 	}
 	else if (kb_map && (marr=sym.match(/^(.+)_$/)) && kb_map[marr[1]]) {
+//if (sym==="SPACE_") e.preventDefault();
 //		let but = str_to_but[kb_map[marr[1]]];
 //log(marr[1]);
 		let but = kb_map[marr[1]];

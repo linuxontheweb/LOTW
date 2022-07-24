@@ -34,12 +34,9 @@ const {
 const{
 isEOF
 }=Core.api;
-let dsk;
 let _Desk;
-if (termobj) {
-	dsk = termobj.DSK;
-	_Desk = (dsk&&dsk.Desk) || Desk;
-}
+if (termobj) _Desk = Desk;
+
 const NUM=Number.isFinite;
 //»
 
@@ -266,7 +263,7 @@ else {
 					if (util.isstr(ret)) cbok(ret);
 					else cbok();
 				}
-			}, dsk);
+			});
 		};//»
 		if (!_Desk) return cberr(ENODESK);
 		let opts = failopts(args,{//«

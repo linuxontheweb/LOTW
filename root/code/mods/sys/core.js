@@ -6,6 +6,9 @@ const NS = window[__OS_NS__];
 
 const Core = function(qobj){
 
+const LINK_EXT = "_lnk";
+const LINK_RE = new RegExp("."+LINK_EXT+"$");
+
 //Official Application/Extension Registry«
 const ALL_EXTENSIONS=[];
 
@@ -20,12 +23,13 @@ const APP_ARR=[//«
     "audio.Synth",
 	"util.ImageView",
 	"media.MediaPlayer",
-    "audio.Noisecraft"
+	"games.SNES"
+//    "audio.Noisecraft"
 ];//»
 
 //Extension points to the array position above
 const EXT_TO_APP_MAP={//«
-	lnk:0,
+	[LINK_EXT]:0,
 	app:1,
     txt:2,
     js:2,
@@ -44,9 +48,34 @@ const EXT_TO_APP_MAP={//«
 	webm:7,
 	mp4:7,
 	m4a:7,
-	ncft: 8
+	smc: 8
+//	ncft: 8
 };//»
 for (let k in EXT_TO_APP_MAP) ALL_EXTENSIONS.push(k);
+
+const APPICONS={//«
+//	Folder:"1f5c2",
+	Folder:"1f4c1",
+	Hello:"1f64b",
+	TextView:"1f4dd",
+	BinView:"1f51f",
+	Terminal:"1f5b3",
+	Synth:"1f39b",
+	Noisecraft:"1f3b9",
+	XSynth:"1f39a",
+	Arcade:"1f579",
+	SNES:"1f579",
+	Unzip:"1f5dc",
+	Mail:"1f4ec",
+	Help:"26a1",
+	About:"1f4ca",
+	Login:"1f464",
+	Forum:"1f5e3",
+	Hello:"1f64b",
+	MediaPlayer:"1f3a6",
+	HelloWorld:"270b",
+	ImageView:"1f304"
+}//»
 
 //»
 //Var«
@@ -318,6 +347,9 @@ ctx: ctx
 //»
 const globals = {//«
 //	audio:AUDIO,
+	memory:[],
+	LINK_EXT: LINK_EXT,
+	LINK_RE: LINK_RE,
 	emulators:{},
 	FOLDER_APP: FOLDER_APP,
 	TEXT_APP: TEXT_APP,
@@ -358,32 +390,11 @@ globals.name = {
 //API«
 
 //const copydiv=mk('div');
-const APPICONS={//«
-	Folder:"1f5c2",
-	Hello:"1f64b",
-	TextView:"1f4dd",
-	BinView:"1f51f",
-	Terminal:"1f5b3",
-	Synth:"1f39b",
-	Noisecraft:"1f3b9",
-	XSynth:"1f39a",
-	Arcade:"1f579",
-	Unzip:"1f5dc",
-	Mail:"1f4ec",
-	Help:"26a1",
-	About:"1f4ca",
-	Login:"1f464",
-	Forum:"1f5e3",
-	Hello:"1f64b",
-	MediaPlayer:"1f3a6",
-	HelloWorld:"270b",
-	ImageView:"1f304"
-}//»
 const getAppIcon=(arg,opts={})=>{
 //	if (!arg) return APPICONS.BinView;
 	let app = arg.split(".").pop();
 	let ch = APPICONS[app];
-	if (!ch) return "?";
+	if (!ch) return app[0];
 	if (opts.html) return `&#x${ch};`;
 //	return `\\u{${ch}}`;
 	return eval(`"\\u{${ch}}"`);
@@ -480,11 +491,11 @@ const getNameExt = (fullname, if_fullpath, if_in_parts) => {//«
 	let marr;
 	let ext = "";
 	let name;
-	if ((marr = fullname.match(/\.([a-z][a-z0-9]*)$/))) {
-		let tryext = marr[1].lc();
+	if ((marr = fullname.match(/\.([_a-zA-Z][_a-zA-Z0-9]*)$/))) {
+		let tryext = marr[1];
 		if (globals.all_extensions.includes(tryext)) {
 			ext = tryext;
-			name = fullname.replace(/\.([a-z][a-z0-9]*)$/, "");
+			name = fullname.replace(/\.([_a-zA-Z][_a-zA-Z0-9]*)$/, "");
 		} else name = fullname;
 	} else name = fullname;
 	if (if_in_parts) return [fullpath, name, ext];
@@ -543,7 +554,11 @@ let ctx = new AudioContext();
 const Mixer = function() {
     let plugs = [];
     const master = ctx.createGain();
-    master.connect(ctx.destination);
+	const compressor = ctx.createDynamicsCompressor();
+//	compressor.threshold.value=-50;
+	master.connect(compressor);
+	compressor.connect(ctx.destination);
+//    master.connect(ctx.destination);
     const Plug = function(elm) {
         let gain = ctx.createGain();
         elm.connect(gain);
@@ -571,6 +586,7 @@ const Mixer = function() {
         plugs.push(plug);
         return plug;
     };
+	this.plugin=this.plug_in;
 };
 return {
 mixer: new Mixer(),
@@ -617,14 +633,7 @@ evt2Sym: e => {
 	if (e.ctrlKey) mod_str = "C";
 	if (e.altKey) mod_str += "A";
 	if (e.shiftKey) mod_str += "S";
-	let code = e.keyCode;
-	let chr;
-    let k = e.key;
-    if (k.length==1) chr = k.toLowerCase();
-    else chr = KC[code];
-//	if (code >= 97 && code <= 122) code -= 32;
-//	return (KC[code] + "_" + mod_str);
-	return (chr + "_" + mod_str);
+	return (KC[e.keyCode] + "_" + mod_str);
 },
 gbid:gbid,
 isNum:isNum,
@@ -1050,6 +1059,7 @@ const load_mod = async(modname, cb, opts = {})=>{//«
 			NS[which][modname] = com;
 		}
 		if (opts.noWrap) return cb(true);
+		NS[which][modname]._script = scr;
 		if (call) NS[which][modname]();
 		cb(true);
 	};
@@ -1209,11 +1219,9 @@ this.kill_job = idarg => {
 
 this.save_hook=path=>{let arr=path.split("/");if(!arr[arr.length-1])arr.pop();let fname=arr.pop();fs.add_new_kid(arr.join("/"),fname,_=>{});}
 
-const get_history = (which, cb, if_getonly, dsk) => {
+const get_history = (which, cb, if_getonly) => {
 	let gothist;
-	let _historys;
-	if (dsk) _historys = dsk.historys;
-	else _historys = historys;
+	let _historys = historys;
 	gothist = _historys[which];
 	if (gothist) return cb(gothist.slice(0));
 	let hist_fname = "/var/history/" + which + ".txt";
@@ -1228,7 +1236,6 @@ const get_history = (which, cb, if_getonly, dsk) => {
 			_historys[which] = [];
 		}
 		let iter_str = which + "_ITER";
-		if (dsk) iter_str = `test_${iter_str}`;
 		let iter = lst[iter_str];
 		let hist = _historys[which];
 		if (iter) {
@@ -1242,35 +1249,30 @@ const get_history = (which, cb, if_getonly, dsk) => {
 			fs.save_fs_by_path(hist_fname, hist.join("\n"), (ret2, err) => {
 				lst[iter_str] = "-1";
 				cb(hist.slice(0));
-			},{DSK: dsk});
+			},{});
 		} else cb(hist.slice(0));
-	},{DSK:dsk});
+	},{});
 }
 this.get_history = get_history;
-this.api.getHistory=(which,getonly,dsk)=>{return new Promise((y,n)=>{get_history(which,y,getonly,dsk);});};
-const set_local_storage=(k,v, dsk)=>{
+this.api.getHistory=(which,getonly)=>{return new Promise((y,n)=>{get_history(which,y,getonly);});};
+const set_local_storage=(k,v)=>{
 	k=`${FSPREF}-${k}`;
-	if (dsk) k = `test-${k}`;
 	localStorage[k]=v;
 };
 this.set_local_storage=set_local_storage;
-const get_local_storage=(k, dsk)=>{
+const get_local_storage=(k)=>{
 	k=`${FSPREF}-${k}`;
-	if (dsk) k = `test-${k}`;
 	return localStorage[k];
 };
 this.get_local_storage=get_local_storage;
-const del_local_storage=(k,dsk)=>{
+const del_local_storage=(k)=>{
 	k=`${FSPREF}-${k}`;
-	if (dsk) k = `test-${k}`;
 	delete localStorage[k];
 };
 this.del_local_storage=del_local_storage;
 
-this.save_shell_com = (comarg, which, dsk) => {
-	let _historys;
-	if (dsk) _historys = dsk.historys;
-	else _historys = historys;
+this.save_shell_com = (comarg, which) => {
+	let _historys = historys;
 	if (!_historys[which]) _historys[which]=[];
 	let MAX_COM_LEN = 1000;
 	if (!comarg) return;
@@ -1282,11 +1284,7 @@ this.save_shell_com = (comarg, which, dsk) => {
 		return;
 	}
 	let iter_str = which + "_ITER";
-	if (dsk) iter_str = `test_${iter_str}`;
-	if (dsk){
-		if (!comarg || (dsk.last_history_com === comarg)) return;
-	}
-	else if (!comarg || (last_history_com === comarg)) return;
+	if (!comarg || (last_history_com === comarg)) return;
 	let lst = localStorage;
 	let str = lst[iter_str];
 	if (!str) str = "-1";
@@ -1295,8 +1293,7 @@ this.save_shell_com = (comarg, which, dsk) => {
 	lst[which + ":" + iter] = comarg;
 	lst[iter_str] = iter + "";
 	_historys[which].push(comarg);
-	if (dsk) dsk.last_history_com = comarg;
-	else last_history_com = comarg;
+	last_history_com = comarg;
 
 }
 
@@ -1584,9 +1581,13 @@ const set_users=(arg)=>{users=arg;set_local_storage("users",JSON.stringify(arg))
 this.set_users=set_users;
 const get_term_prompt=num=>{let str=SYSNAME+"\x20(tty#"+num+")";if(qobj.nosyslock)str=str+"\nYou are in 'no system lock' mode... please be cautious!";return str;}
 const dodev=()=>{if(is_offline)return false;return dev_mode;}
-const set_appvar=(win,key,val,dsk)=>{let g;if(dsk)g=dsk.globals;else g=globals;g.AppVars[win.app+"-"+key]=val;}
+const set_appvar = (win, key, val) => {
+	globals.AppVars[win.app + "-" + key] = val;
+}
 this.set_appvar = set_appvar;
-const get_appvar=(win,key,dsk)=>{let g;if(dsk)g=dsk.globals;else g=globals;return g.AppVars[win.app+"-"+key];}
+const get_appvar = (win, key) => {
+	return globals.AppVars[win.app + "-" + key];
+}
 this.get_appvar = get_appvar;
 
 const getkeys=(obj)=>{let arr=Object.keys(obj);let ret=[];for(let i=0;i<arr.length;i++){if(obj.hasOwnProperty(arr[i]))ret.push(arr[i]);}return ret;}
@@ -1788,8 +1789,10 @@ let marr;
 if (winpath=="/shell") is_shell = true;
 else if (winpath == "/desk") is_desk = true;
 else if (marr = winpath.match(/^\/(.+)\.app$/)) {
-	is_app=marr[1].replace(/\x2f/g,".");
-	app_path = `${marr[1]}.js`;
+//	is_app=marr[1].replace(/\x2f/g,".");
+	is_app=marr[1];
+//	is_app = true;
+	app_path = `${marr[1].replace(/\./g,"/")}.js`;
 }
 else {
 console.error("Path no good: " + winpath);
@@ -1811,13 +1814,11 @@ let SYSTEM_IS_LOCKED = false;
 let use_init_func;
 
 
-Core.sysfstype=dsk=>{
-	if (!dsk) return (use_fs_type ||fs_type);
-	return dsk.fs_type;
+Core.sysfstype=()=>{
+	return (use_fs_type ||fs_type);
 };
-Core.sysfsbranch=dsk=>{
-	if (!dsk) return FSBRANCH;
-	return dsk.fs_branch;
+Core.sysfsbranch=()=>{
+	return FSBRANCH;
 };
 
 /*
@@ -2148,6 +2149,7 @@ const init_term = async () => {//«
 			doit();
 		});
 	};
+
 	let scr = make('script');
 	const term_app_path = '/root/code/apps/sys/Terminal.js';
 	scr.onload=async()=>{
@@ -2162,6 +2164,7 @@ const init_term = async () => {//«
 	scr.type="module";
 	scr.src = term_app_path;
 	document.head.add(scr);
+
 
 };//»
 const init_desk = async () => {//«
@@ -2249,7 +2252,7 @@ const init_app = async() => {//«
 			let keypress = obj.onkeypress||noop;
 			let keyup = obj.onkeyup||noop;
 			let rs_handler = obj.onresize;
-			document.onkeydown = e => {
+			document.onkeydown = e => {//«
 				let code = e.keyCode;
 				if (code == KC.ALT || code == KC.CTRL || code == KC.SHIFT) {}
 				let mod_str = "";
@@ -2283,10 +2286,9 @@ const init_app = async() => {//«
 					return;
 				}
 				keydown(e, kstr);
-			};
+			};//»
 			document.onkeyup = keyup;
 			document.onkeypress = keypress;
-
 			if (rs_handler) {
 				window.onresize = () => {
 					win.main.w = winw();
@@ -2294,15 +2296,35 @@ const init_app = async() => {//«
 					rs_handler(null, null, true);
 				};
 			}
+			obj.onappinit && obj.onappinit(true);
 			init_end();
 		};//»
 		const end = () => {
 			initlog("Could not load:" + is_app, true);
 		};
+
+		let scr = make('script');
+		const fullpath = `/root/code/apps/${app_path}`;
+	
+//cwarn(fullpath);
+		scr.onload=async()=>{
+			const { app } = await import(fullpath);
+			NS.apps[is_app] = app;
+			start();
+		};
+		scr.onerror = e => {
+			initlog("The app could not be loaded!", true);
+			throw new Error(e);
+		};
+		scr.type="module";
+		scr.src = fullpath;
+		document.head.add(scr);
+/*
 		let rv = await fetch(sys_url("/apps/"+app_path));
 		if (!(rv&&rv.status==200)) return;
 		const app_str = `window[__OS_NS__].apps["${is_app}"] = function (arg,NS,globals,Core,Desk,Main){(async()=>{"use strict";${await rv.text()}\n})()}`;
 		make_script(URL.createObjectURL(new Blob([app_str],{type:"application/javascript"})), start, end);
+*/
 	}
 //»
 
@@ -2373,6 +2395,7 @@ if ('BroadcastChannel' in window) {
 		else if (mess=="ack:"+FSPREF) {
 //			globals.noevents = true;
 //			SYSTEM_IS_LOCKED = true;
+cwarn("READONLY");
 			globals.read_only = true;
 /*
 			document.onkeydown=e=>{

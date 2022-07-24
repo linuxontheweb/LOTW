@@ -1,3 +1,8 @@
+/*Change: July 13, 2022 9am @TSPOIKRBH
+Escaping spaces in arguments (like in filenames) with backslashes was not working. The escapes were
+being stripped out and multiple arguments were sent to the command. Hopefully, the fix @TSPOIKRBH fixes
+it!
+*/
 //«
 //«
 /*
@@ -152,15 +157,11 @@ So now: if_send_eof == true
 //Imports«
 const NUM=Number.isFinite;
 //const termobj=arg;
-const dsk = termobj.DSK;
 
 const{refresh}=termobj;
 //let refresh = termobj.refresh;
 const{NS,Desk,globals,mime_of_path,text_mime,xget,xgetobj,log,cwarn,cerr,check_job_id}=Core;
 
-let _Desk;
-if (dsk) _Desk = dsk.Desk;
-else _Desk = Desk;
 
 const capi = Core.api;
 const{isEOF:iseof,getKeys:getkeys}=capi;
@@ -186,7 +187,7 @@ const atbc = (arg, cb)=>{arg2con(arg, cb, true);} //"Arg To Bin Contents"
 const gettextfile=(path,cb)=>{let fullpath=get_fullpath(path);if(!fullpath)return cb();fs.get_fs_by_path(fullpath,cb,{ROOT:is_root});}
 const path_to_obj = (str, cb, if_getlink) => {
 	if (!str.match(/^\x2f/)) str = (cur_dir + "/" + str).regpath();
-	fs.path_to_obj(str, cb, is_root, if_getlink, dsk);
+	fs.path_to_obj(str, cb, is_root, if_getlink);
 }
 const pathToNode = (str, if_getlink) => {
 	return new Promise((Y, N) => {
@@ -194,12 +195,11 @@ const pathToNode = (str, if_getlink) => {
 		fs.path_to_obj(str, rv => {
 			if (!rv) return Y(false);
 			Y(rv);
-		}, is_root, if_getlink, dsk);
+		}, is_root, if_getlink);
 	});
 };
 const ptw = path_to_obj;
 const readFile=(path,opts={})=>{
-	opts.DSK=dsk;
 	if (!path.match(/^\x2f/)) path = (cur_dir + "/" + path).regpath();
 	return fsapi.readFile(path,opts);
 };
@@ -1479,8 +1479,9 @@ const do_red = async (com, redir_arr, cbarg, background_id) => {
 					if (rop == ">>") aflag = true;
 					if (!fdstr) fdnum = 1;
 				}
-				if (wflag && fname.match(/\.lnk$/)){
-					com.error_message = fname + ":\x20Cannot write to '.lnk' extension";
+//				if (wflag && fname.match(/\.__LINK__$/)){
+				if (wflag && globals.LINK_RE.test(fname)){
+					com.error_message = `${fname}:\x20Cannot write to '${globals.LINK_EXT}' extension`;
 					do_red(com, redir_arr, cbarg);
 					return;
 				}
@@ -1964,7 +1965,12 @@ return new Promise((exp_cb,N)=>{
 			ret.push(tok);
 			next();
 		} else if (type == "esc") {
-			ret.push(tok.esc);
+//TSPOIKRBH
+if (tok.esc === "\x20"){
+if (ret.length && isstr(ret[ret.length-1]))
+ret[ret.length-1]+=" ";
+}
+			else ret.push(tok.esc);
 			next();
 		} else if (type == "word") {
 			tilde_expansion(tok);
@@ -2550,6 +2556,7 @@ else if (opcode == "c_op") {//«
 	return;
 }//»
 else if (opcode == "com") { //«
+//jlog(obj);
 	let heredoc = null;
 	let herestring = null;
 	let com0 = obj.com[0];
@@ -3414,7 +3421,6 @@ const read_stdin = (cb, opts={}) => {
 }
 
 const read_file_args_or_stdin = (args, cb, opts={}) => { /*SHELLNOTES:8*/
-	opts.DSK = termobj.DSK;
 	if (!(args && args.length)) return read_stdin(cb, opts);
 	let allow_obj = opts.OBJOK;
 	let iter = -1;
@@ -3872,8 +3878,7 @@ const com_ls=(args, cbarg)=>{//«
 				addslashes: addslashes,
 				getall: get_all,
 				forceget: forceget,
-				newlinemode: newlinemode,
-				DSK: dsk
+				newlinemode: newlinemode
 			});
 		};
 		const dopath = () => {
@@ -3932,8 +3937,7 @@ const com_ls=(args, cbarg)=>{//«
 						}, {
 							LONG: true,
 							HASH: if_hash,
-							DBVIEW: dbview,
-							DSK: dsk
+							DBVIEW: dbview
 						});
 					} else kidsout(ret.KIDS);
 				} else {
@@ -3959,8 +3963,7 @@ const com_ls=(args, cbarg)=>{//«
 								fileout();
 							}, {
 								LONG: true,
-								HASH: if_hash,
-								DSK: dsk
+								HASH: if_hash
 							});
 						} else fileout();
 					} else fileout();
@@ -4136,6 +4139,47 @@ cbok();
 
 »*/
 ///*
+
+/*//«
+'pink':async(args)=>{
+
+if (!await capi.loadMod("av.voice.pinktrombone")) return cberr("PinkTrombone could not be loaded!");
+
+let mod = NS.mods["av.voice.pinktrombone"];
+let pt = make('pink-trombone');
+try{
+let got = await pt.setAudioContext();
+}catch(e){
+log(e);
+cberr(e);
+return;
+}
+pt.enableUI();
+log(pt.UI);
+////for (let p in pt){
+//if (pt.hasOwnProperty(p)) log(p);
+//}
+
+//pt.connect();
+//pt.newConstriction();
+//pt.start();
+//log(pt.constrictions);
+//log(await pt.getProcessor());
+//log(pt.parameters);
+//log(pt.pinkTrombone);
+//log(pt.setupAudioGraph);
+//log(pt.prototype);
+//log(mod);
+
+cbok();
+
+},
+//»*/
+
+'midiup':async()=>{
+	if (await capi.initMidi()) return cbok();
+	return cberr("Midi could not be enabled!");
+},
 'ip':async(args)=>{
 	let rv = await fetch("https://ifconfig.me/ip")
 	if (!(rv && rv.ok)) return cberr("Could not get ip address");
@@ -4311,8 +4355,49 @@ cerr("Dropping", ret);
 		doit();
 	});
 },
-'setdeskpath':async args=>{let opts=failopts(args,{SHORT:{d:1},LONG:{default:1}});if(!opts)return;let def=opts.default || opts.d;let path=args.shift();if(path && def)return cberr("path given,but 'default' arg specified");if(def)path='/home/'+Core.get_username()+"/Desktop";if(!path)return cberr("No path given(use '--default' to set it to ~/Desktop)");let obj=await pathToNode(path);if(!obj)return cberr(path+":\x20not found");if(obj.APP !==FOLDER_APP)return cberr(path+":\x20not a directory");path=objpath(obj);if(!await _Desk.set_desk_path(path))return cberr("Could not set desktop path");cbok("OK");},
-'mkdir':args=>{let opts=failopts(args,{LONG:{kind:3,forceremote:1},SHORT:{r:1}});if(!opts)return;opts.DSK=dsk;if(!args.length){serr("no directory name given");return;}let iter=-1;let have_error=false;const domake=()=>{iter++;if(iter==args.length){if(have_error)cberr();else{cbok();if(Desk)Desk.update_folder_statuses();}return;}let fullpath=normpath(args[iter]);let fparts=path_to_par_and_name(fullpath,true);let parpath=fparts[0];let fname=fparts[1];fs.mk_fs_dir(parpath,fname,null,(ret,err)=>{if(err){werr(err);refresh();have_error=true;}domake();},null,is_root,opts);};domake();},
+'setdeskpath':async args=>{let opts=failopts(args,{SHORT:{d:1},LONG:{default:1}});if(!opts)return;let def=opts.default || opts.d;let path=args.shift();if(path && def)return cberr("path given,but 'default' arg specified");if(def)path='/home/'+Core.get_username()+"/Desktop";if(!path)return cberr("No path given(use '--default' to set it to ~/Desktop)");let obj=await pathToNode(path);if(!obj)return cberr(path+":\x20not found");if(obj.APP !==FOLDER_APP)return cberr(path+":\x20not a directory");path=objpath(obj);if(!await Desk.set_desk_path(path))return cberr("Could not set desktop path");cbok("OK");},
+'mkdir': args => {
+	let opts = failopts(args, {
+		LONG: {
+			kind: 3,
+			forceremote: 1
+		},
+		SHORT: {
+			r: 1
+		}
+	});
+	if (!opts) return;
+	if (!args.length) {
+		serr("no directory name given");
+		return;
+	}
+	let iter = -1;
+	let have_error = false;
+	const domake = () => {
+		iter++;
+		if (iter == args.length) {
+			if (have_error) cberr();
+			else {
+				cbok();
+				if (Desk) Desk.update_folder_statuses();
+			}
+			return;
+		}
+		let fullpath = normpath(args[iter]);
+		let fparts = path_to_par_and_name(fullpath, true);
+		let parpath = fparts[0];
+		let fname = fparts[1];
+		fs.mk_fs_dir(parpath, fname, null, (ret, err) => {
+			if (err) {
+				werr(err);
+				refresh();
+				have_error = true;
+			}
+			domake();
+		}, null, is_root, opts);
+	};
+	domake();
+},
 'cp': args=>{fs.com_mv(shell_exports, args, true);},
 'mv': args=>{fs.com_mv(shell_exports, args);},
 'rm': args => {
@@ -4339,8 +4424,7 @@ cerr("Dropping", ret);
 	}, {
 		CWD: cur_dir,
 		ROOT: is_root,
-		FULLDIRS: do_full_dirs,
-		DSK: dsk
+		FULLDIRS: do_full_dirs
 	});
 },
 'kill': args => {
@@ -4440,7 +4524,7 @@ cerr("Dropping", ret);
 			NOEND: true
 		});
 		cbok();
-		if (_Desk) _Desk.set_desktop_stats();
+		if (Desk) Desk.set_desktop_stats();
 	} else {
 		if (is_root) return cbok("Already root");
 		rv = await getLineInput("Password:\x20", true);
@@ -4464,9 +4548,10 @@ cerr("Dropping", ret);
 'true': cbok,
 'close':args=>{if(!Desk)return cberr(ENODESK);let id=args.shift();if(!id)return cberr("No app given!");if(!id.match(/^win_\d+$/))return cberr("Invalid window id");let win=document.getElementById(id);if(!win)return cberr("Nothing found");win.force_kill();cbok();},
 'open': async args => {
-	let opts = getwinargopts(args);
-	if (!opts) return;
-	if (!_Desk) return cberr(ENODESK);
+//	let opts = getwinargopts(args);
+//	if (!opts) return;
+	let opts = {};
+	if (!Desk) return cberr(ENODESK);
 	let path = args.shift();
 	if (!path) return cberr("No path!");
 	let fent = await pathToNode(path);
@@ -4476,26 +4561,51 @@ log(fent);
 		cberr("No path of the file entry!");
 		return;
 	}
-	_Desk.open_file_by_path(fent.fullpath, null, opts);
+	Desk.open_file_by_path(fent.fullpath, null, opts);
 	cbok();
 },
 'app': async args => {
-	const openit=async(usearg)=>{
-		if (!await _Desk.openApp(which, opts.FORCE, opts.WINARGS, usearg)) return cberr();
+	let usearg;
+	const openit=async()=>{
+		if (!await Desk.openApp(which, (opts.force||opts.f), null, usearg)) return cberr();
 		cbok();
 	};
-	let opts = getwinargopts(args);
+//	let opts = getwinargopts(args);
+//	if (!opts) return;
+	
+	let opts = failopts(args, {
+		s: {
+			s: 1,
+			a: 3,
+			f: 1
+		},
+		l: {
+			source: 1,
+			args: 3,
+			force: 1
+		}
+	});
 	if (!opts) return;
-	if (!_Desk) return cberr(ENODESK);
+	if (!Desk) return cberr(ENODESK);
 	let which = args.shift();
 	if (!which) return cberr("No app given!");
-	if (opts.SOURCE){
+	if (opts.source || opts.s){
 		let path = which.replace(/\./g, "/");
 		let rv = await fetch(`/root/code/apps/${path}.js`);
 		if (!rv.ok) return cberr(`${which}: not found`);
 		wout(await rv.text());
 		cbok();
 		return;
+	}
+	let gotarg = opts.args || opts.a;
+	if (gotarg){
+		try{
+			usearg = JSON.parse(gotarg);
+		}
+		catch(e){
+			cberr("Bad JSON in 'args' arg");
+			return;
+		}
 	}
 	let rdr = get_reader();
 	if (rdr.is_terminal) return openit();
@@ -4985,7 +5095,6 @@ else if (arr.length) {//«
 		shell_exports = {
 			getLineInput:getLineInput,
 			readFile:readFile,
-			dsk:dsk,
 			pathToNode:pathToNode,
 			wrap_line: wrap_line,
 			fmt: fmt,

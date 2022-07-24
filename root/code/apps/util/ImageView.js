@@ -1,7 +1,11 @@
 
+export const app = function(arg) {
+
 //Var«
 
-const{log,cwarn,cerr}=Core;
+const {Core, Main, NS}=arg;
+
+const{log,cwarn,cerr,globals}=Core;
 const{util}=globals;
 const{make}=util;
 const topwin = Main.top;
@@ -15,6 +19,7 @@ let did_load = false;
 //»
 
 //DOM«
+Main.over="auto";
 let textarea = make('textarea');
 textarea._noinput = true;
 textarea.width = 1;
@@ -88,3 +93,4 @@ setTimeout(()=>{
 
 //»
 
+}

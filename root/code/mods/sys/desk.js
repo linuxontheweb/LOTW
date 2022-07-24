@@ -1,4 +1,51 @@
+/*Perfectly centering stuff...
 
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+
+*/
+/*				XXX				Major change in early July 2022				XXX
+
+We are making the distinction between an APPOBJ (which the app module gets called with, and contains
+handles to Core, Main, and Top) and APPARGS (which is an object that gets called when the app is
+launched in "appmode" (meaning that it is not being called as a file with an extension). In other
+words, the app's this.onappinit method is called rather than the this.onloadfile method. The latter
+method takes a Uint8Array as its argument, and we want the former method to take whatever is
+valid JSON, i.e. retured from JSON.parse in the shell's 'app' command.
+
+What we are doing now is finding everywhere in this file that there is an APPOBJ args, and replacing it
+with APPARGS. The only issue with this is that there is an icon.path arg that did get passed along in 
+APPOBJ. This path information is SUPPOSED to be used in make_app_window() in order to find the app's
+somewhere within the browser's sandboxed file system, but since we've started to think about LOTW
+in the purely node.js/localhost sense, and making no distinction between such things as "dev_mode" 
+and "dev_env", we really are not using this information AT ALL.
+
+
+THIS BREAKS THE ATTEMPT IN audio.Synth to pass the node to XSynth like this:
+
+let win = await Desk.openApp("audio.XSynth", true, {WID:400,HGT:300}, {NODE: usenode});
+
+openApp looks like:
+
+this.openApp = (appname, force_open, winargs, appobj).
+
+
+*/
+/*!!! Errpr !!!
+
+I had a deeply embedded folder icon that I moved onto the desktop, which had a window connected to it.
+Window minimization status did not affect it.
+Then I tried moving icons from that folder into another folder that was on the desktop. But there was an error that
+said that the original (deeply embedded) directory path was not found. I guess the window path was 
+not updated!?!?
+
+Solution: @JEIOMPTY
+If the window is a folder, I called reload with a path argument, which causes the sys.Folder app
+to reset its internal 'path' variable and reinit the gui.
+
+*/
 //«
 
 //!!!!!!!!!!!!!     Commented out warning     !!!!!!!!!!!!!!«
@@ -86,12 +133,8 @@ export const mod = function(Core, arg) {
 //Imports/Decs«
 
 const Desk = this;
-const {DSK,lotw_mode,body}=arg;
+const {body}=arg;
 
-if (DSK) {
-	DSK.Desk = Desk;
-	Desk.DSK = DSK;
-}
 Desk.automate_mode = false;
 //Desk.automate_mode = true;
 const fsapi = NS.api.fs;
@@ -105,13 +148,12 @@ const{KC,kc,simulate,globals,log,cwarn,cerr,sys_url,xget}=Core;
 //const{menu:MENU,widgets:WDG,qobj,fs,stats,FSBRANCH,FSPREF,util, all_extensions}=globals;
 const{home_path, widgets:WDG,qobj,fs,stats,FSBRANCH,FSPREF,util, all_extensions,FOLDER_APP, TEXT_APP}=globals;
 const path_to_obj = (path, cb, if_root, getlink) => {
-	fs.path_to_obj(path, cb, if_root, getlink, DSK);
+	fs.path_to_obj(path, cb, if_root, getlink);
 };
 const populate_fs_dirobj = (path, cb, parobj, iflong) => {
-	fs.populate_fs_dirobj(path, cb, parobj, iflong, DSK);
+	fs.populate_fs_dirobj(path, cb, parobj, iflong);
 }
 const pathToNode=(path,opts={})=>{
-	opts.DSK=DSK;
 	return fsapi.pathToNode(path,opts);
 };
 
@@ -119,26 +161,26 @@ const{popup:_popup,poperr:_poperr,popok:_popok,make_popup:_make_popup}=WDG;
 //const popin = NS.api.widgets.popin;
 const WDGAPI = NS.api.widgets
 const popup = (s, opts) => {
-	_popup(s, opts, DSK);
+	_popup(s, opts);
 };
 const poperr = (s, opts) => {
-	_poperr(s, opts, DSK);
+	_poperr(s, opts);
 };
 const popok = (s, opts) => {
-	_popok(s, opts, DSK);
+	_popok(s, opts);
 };
-const make_popup = arg=>{return _make_popup(arg,DSK);};
+const make_popup = arg=>{return _make_popup(arg);};
 
 const{center,isnum,isobj,isarr,isint,isstr,mkdv,mksp,mkbut,make}=util;
 const NUM=Number.isFinite;
 const {dist,getNameExt,getKeys}=Core.api;
 
 
-const winx=()=>{if(DSK)return DSK.topwin.main.getBoundingClientRect().left;return 0;};
+const winx=()=>{return 0;};
 this.winx=winx;
-const winy=()=>{if(DSK)return DSK.topwin.main.getBoundingClientRect().top;return 0;};
+const winy=()=>{return 0;};
 this.winy=winy;
-const winw=()=>{if(DSK)return DSK.winw();return window.innerWidth;}
+const winw=()=>{return window.innerWidth;}
 this.winw = winw;
 const winh = (if_no_taskbar) => {
 	if (taskbar_hidden||if_no_taskbar) return window.innerHeight;
@@ -158,8 +200,9 @@ this.winh = winh;
 //let CYCLE_MIN_WINS = false;
 let PREV_DEF_ALL_KEYS = false;
 let CYCLE_MIN_WINS = true;
-//let cur_showing = false;
-let cur_showing = true;
+let init_with_cur_showing = true;
+//let init_with_cur_showing = false;
+let cur_showing = false;
 let taskbar_hidden;
 let taskbar_expert_mode;
 
@@ -265,7 +308,7 @@ let CUR_FOLDER_XOFF = 5;
 let CUR_FOLDER_YOFF = 5;
 
 let DEF_BG_IMG_OP = 0.3;
-let DESK_ICON_BOR = "2px solid #ff7";
+let DESK_ICON_BOR = "2px solid #dd5";
 let DESK_ICON_BG = "rgba(255,255,200,0.33)";
 let FOLDER_ICON_BOR = DESK_ICON_BOR;
 //let FOLDER_ICON_BOR = "2px solid gold";
@@ -313,7 +356,7 @@ let WDZ_COL = "#33f";
 let DDZ_COL="#393";
 const MAC_ICON_PURPLE="#8c4eb8";
 
-const DEF_CG_OP = 0.0;
+const DEF_CG_OP = 0;
 
 let ICON_DIM = 44,
 	TITLE_DIM = 16,
@@ -347,8 +390,9 @@ let folder_grid_start_x = 20,
 
 let	IGSX = 100, IGSY = 100;
 
-let DESK_GRID_W = Math.floor((winw()-desk_grid_start_x)/IGSX);
-let DESK_GRID_H = Math.floor((winh()-desk_grid_start_y)/IGSY);
+let DESK_GRID_W;
+let DESK_GRID_H;
+
 
 //»
 //Init Events & Values«
@@ -397,7 +441,7 @@ let overlay_timer;
 let MAX_OVERLAY_LENGTH = 42;
 const overlay=(()=>{
 	let fakediv = make('div');
-	fakediv.innerHTML = '<div style="opacity: '+OVERLAYOP+';border-radius: 15px; font-size: xx-large; padding: 0.2em 0.5em; position: absolute; -webkit-user-select: none; transition: opacity 180ms ease-in; color: rgb(16, 16, 16); background-color: rgb(240, 240, 240); font-family: monospace;"></div>';
+	fakediv.innerHTML = '<div style="opacity: '+OVERLAYOP+';border-radius: 15px; font-size: xx-large; padding: 0.2em 0.5em; position: fixed; -webkit-user-select: none; transition: opacity 180ms ease-in; color: rgb(16, 16, 16); background-color: rgb(240, 240, 240); font-family: monospace;"></div>';
 	return fakediv.childNodes[0];
 })();
 overlay.z=CGZ+1;
@@ -421,30 +465,33 @@ const toggle_fullscreen=()=>{
 
 //Desk«
 
+const get_desk_grid=()=>{
+	DESK_GRID_W = Math.floor((winw()-desk_grid_start_x)/IGSX);
+	DESK_GRID_H = Math.floor((winh()-desk_grid_start_y)/IGSY);
+};
 const DESK_CONTEXT_MENU=[//«
 
-	"\u{1f381}\xa0New",[
+	"\u{1f381}\xa0\xa0New",[
 		"Folder",
 		()=>{Desk.make_icon_cb(globals.desk_path, FOLDER_APP)},
 		"Text File",
 		()=>{Desk.make_icon_cb(globals.desk_path, "Text")}
 	],
 
-	"\u{1f4ca}\xa0About",()=>{make_popup({WIDE:true,STR: ABOUT_STR, TIT: "About"});},
+	"\u{1f4ca}\xa0\xa0About",()=>{make_popup({WIDE:true,STR: ABOUT_STR, TIT: "About"});},
 //	"\u{26a1}\xa0Help",()=>{open_app("doc.Help");},
 //	"\u{1f64b}\xa0Chat",()=>{open_app("net.Hello");},
 //	"\u{1f4ec}\xa0Mail",()=>{open_app("net.Mail");},
 //	"\u{1f5e3}\xa0Forum",()=>{open_app("net.Forum",null,null,{}, {forum:DEF_FORUM});},
-	"\u{1f5b3}\xa0Terminal",()=>{open_terminal()},
+	"\u{1f5b3}\u{2009}\xa0Terminal",()=>{open_terminal()},
 ];//»
 const toggle_taskbar=()=>{if(taskbar_hidden)taskbar.show();else taskbar.hide();};
 const toggle_cursor=()=>{if(cur_showing)CUR.off(true);else CUR.on(true);};
 const make_desktop = () => {//«
-
+	get_desk_grid();
 //DOM«
 	desk.name = desk_path.split("/").pop();
-	if (DSK) desk.id="lotw_desktop"
-	else desk.id = "desktop";
+	desk.id = "desktop";
 	Desk.desk = desk;
 	globals.desk_elem = desk;
 	desk._self = desk;
@@ -500,12 +547,14 @@ const make_desktop = () => {//«
 	CG.id = 'click_guard';
 	CG.dis = 'none';
 	Desk.CG = CG;
-	CG.pos = "absolute";
+	CG.pos = "fixed";
 	CG.loc(0, 0);
 	CG.z = CGZ;
 	CG.bgcol = "#000";
-	CG.w = winw();
-	CG.h = winh();
+//	CG.w = winw();
+//	CG.h = winh();
+	CG.w = "100%";
+	CG.h = "100%";
 	CG.op = DEF_CG_OP;
 	CG.on = useop => {
 		if (NUM(useop)) CG.op = useop;
@@ -528,8 +577,10 @@ const make_desktop = () => {//«
 	CG.oncontextmenu = focus_editing;
 	CG.onmousemove = nopropdef;
 	desk.add(CG);
+/*«
 	let area = make('textarea');
 	area.id="desk_textarea";
+
 	let adiv = make('div');
 	adiv.pos = "absolute";
 	adiv.loc(-1, -1);
@@ -540,7 +591,8 @@ const make_desktop = () => {//«
 	adiv.add(area);
 	area.w=1;
 	desk.add(adiv);
-//	desk.area = area;
+	desk.area = area;
+»*/
 	body.add(desk);
 	body.add(background_div);
 	body.add(desk_coldiv);
@@ -552,14 +604,15 @@ CUR.id="CUR";
 CUR.bor=`${CURBORWID}px solid #aaa`;
 CUR.w=IGSX;
 CUR.h=IGSY;
-CUR.z=2;
-CUR.op=0;
+CUR.dis="none";
+CUR.op=1;
 CUR.mart=-1.5;
 CUR.on=(is_tog)=>{
 	if (is_tog) cur_showing = true;
 	else if (!cur_showing) return;
 	CUR.op=1;
 	CUR.dis="";
+	CUR.scrollIntoViewIfNeeded();
 };
 CUR.off=(is_tog)=>{
 	if (is_tog) cur_showing = false;
@@ -640,7 +693,8 @@ CUR.right=(if_ctrl)=>{
 	let {x,y}=CUR.getpos();
 	if (if_ctrl) CUR.select(true);
 	if (CUR.isdesk()){
-		if (x+1 < DESK_GRID_W) x++;
+//		if (x+1 < DESK_GRID_W) x++;
+		if (desk_grid_start_x+(IGSX*(x+2)) < winw()) x++;
 		else {
 			if (CUR.yoff()+(IGSY*(y+2)) < winh()) {
 				y++;
@@ -747,7 +801,9 @@ CUR.down=if_ctrl=>{
 	let {x,y}=CUR.getpos();
 	if (if_ctrl) CUR.select(true);
 	if (CUR.isdesk()) {
-		if (desk_grid_start_y+(IGSY*(y+1)) < winh()) y++;
+		if (desk_grid_start_y+(IGSY*(y+1.5)) < winh()) {
+			y++;
+		}
 		else{
 			y=0;
 			x++;
@@ -794,6 +850,7 @@ CUR.move=(which, if_ctrl)=>{
 	if (!CUR.isdesk()) CUR.scrollIntoViewIfNeeded();
 };
 CUR.geticon=()=>{
+	if (!CUR.ison()) return null;
 	let r = CUR.getBoundingClientRect();
 	let elems = document.elementsFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);
 	let e0=elems[0];
@@ -831,7 +888,7 @@ CUR.select=(if_toggle,if_open)=>{
 		icon_dblclick(icn);
 	}
 	else if (!haveit){
-		if (ICONS.length&&(icn.parwin!==ICONS[0].parwin)) icon_array_off();
+		if (ICONS.length&&(icn.parwin!==ICONS[0].parwin)) icon_array_off(1);
 		ICONS.push(icn);
 		icon_on(icn);
 	}
@@ -865,6 +922,11 @@ CUR.select=(if_toggle,if_open)=>{
 	desk.onmousemove = e => {//«
 		ev = e;
 		if (CDL) {//«
+if (!ICONS[0]){
+CDICN = null;
+cldragimg();
+return;
+}
 			if (e.clientX+CDL.clientWidth+CDL_OFFSET-winx() > winw()){
 				CDL.x="";
 				CDL.r = winw()-e.clientX+winx();
@@ -1013,10 +1075,13 @@ drag_timeout = setTimeout(()=>{
 	select_icons_in_drag_box_desk(e);
 },0);
 		}//»
-
 		else if (WDIE) {//«
 			clearTimeout(drag_timeout);
 			let w = Desk.CWIN;
+if (!w){
+WDIE = null;
+return;
+}
 			let m = w.main;
 			let scrtopdiff = m.scrollTop - WDIE.scrtop;
 			let scrleftdiff = m.scrollLeft - WDIE.scrleft;
@@ -1105,27 +1170,27 @@ drag_timeout = setTimeout(()=>{
 			desk.style.cursor = "";
 			if (CDICN.parwin == desk) { /*Back where we started:just move icon*/
 				let proms = [];
+//				icon_array_off();
+				for(let i=0;i<ICONS.length;i++)icon_off(ICONS[i]);;
 				CG.on();
-				proms.push(place_in_icon_slot(CDICN, {
-					X: e.clientX-winx(),
-					Y: e.clientY-winy()
-				}));
+let pos = {
+X: e.clientX + desk.scrollLeft,
+Y: e.clientY + desk.scrollTop,
+};
+				proms.push(place_in_icon_slot(CDICN, pos));
 				CDICN.moved = true;
 				for (let i = 0; i < ICONS.length; i++) {
 					let icn = ICONS[i];
-					if (ICONS[i] != CDICN) proms.push(place_in_icon_slot(icn, {
-						X: e.clientX-winx(),
-						Y: e.clientY-winy()
-					}));
+					if (ICONS[i] != CDICN) proms.push(place_in_icon_slot(icn, pos));
 				}
 				await Promise.all(proms);
+				ICONS = [];
 				CG.off();
-
 			}
 			else if (CDICN.parwin.fullpath() == desk.fullpath()) no_move_all_icons();
 			else {
 				move_icons(desk_path, () => {
-					if (Desk.CWIN) window_off(Desk.CWIN);
+//					if (Desk.CWIN) window_off(Desk.CWIN);
 					CDICN = null;
 				}, e);
 				return;
@@ -1149,7 +1214,9 @@ drag_timeout = setTimeout(()=>{
 		if (Desk.CWIN) {
 			window_off(Desk.CWIN);
 			Desk.CWIN = null;
+			CUR.todesk();
 		}
+		icon_array_off(2);
 		if (e.button===0) DDIE = e;
 //		desk.area.focus();
 		CDICN = null;
@@ -1248,7 +1315,6 @@ return new Promise(async (y,n)=>{//«
 		});
 	};
 
-	if (lotw_mode) return y();
 /*
 	if (await fsapi.pathToNode(USER_BG_IMG_PATH)) {
 		await set_bg_img(USER_BG_IMG_PATH);
@@ -1396,9 +1462,13 @@ st.jsc="center";
 st.fs=16;
 st.innerText="\u{1f30e}\u{202f}Begin";
 st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;
-st.onmousedown=()=>{st.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;};
+st.onmousedown=(e)=>{
+	if (e.button!==0) return;
+	st.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;
+};
 st.onmouseup=()=>{st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;};
 st.onmouseout=()=>{st.bor=`${TASKBAR_BOR_WID} outset ${TASKBAR_BOR_COL}`;};
+st.oncontextmenu=nopropdef;
 st.onclick=(e)=>{
 	const doit=()=>{deskcontext({x:0,y:bar.clientHeight+5},{BREL:true});}
 	if (e.isTrusted) return doit();
@@ -1414,13 +1484,13 @@ let mwb = minwinbar;//«
 mwb.marr=mwb.marl=3;
 mwb.dis="flex";
 
-mwb.addwin=(w)=>{
+mwb.addwin=(w)=>{//«
 
 let max_wid = "300px";
 
 let r = w.gbcr();
 let t = mkdv();
-t.pos="absolute";
+t.pos="fixed";
 t.w=r.width;
 t.h=r.height;
 t.loc(r.left,r.top);
@@ -1476,6 +1546,7 @@ desk.add(t);
 //	tit.marr=5;
 	tit.w="100%";
 	tit.innerText=titstr;
+	w._mintitle = tit;
 	d.add(tit);
 	let fdv = mkdv();
 	fdv.pos="absolute";
@@ -1485,7 +1556,8 @@ desk.add(t);
 //	fdv.style.backgroundImage="linear-gradient(90deg, rgba(34,34,51,0) 90%, rgba(34,34,51,1) 97%)";
 	fdv.style.backgroundImage=MIN_WIN_LIN_GRAD;
 	d.add(fdv);
-	d.onmousedown=()=>{
+	d.onmousedown=(e)=>{
+		if (e&&e.button!==0) return;
 		d.is_active = true;
 		d.bor=`${TASKBAR_BOR_WID} inset ${TASKBAR_BOR_COL}`;
 	};
@@ -1505,6 +1577,9 @@ desk.add(t);
 			delete w.is_minimized;
 			delete w.unminimize;
 			if (w===Desk.CWIN) Desk.CWIN=null;
+			check_win_loc(w);
+			check_win_size(w);
+//			check_win_loc(w);
 			window_on(w);
 		}
 		if (if_instant) return done();
@@ -1512,7 +1587,7 @@ desk.add(t);
 w.op=0;
 
 let t = mkdv();
-t.pos="absolute";
+t.pos="fixed";
 t.w=r.width;
 t.h=r.height;
 t.loc(r.left,r.top);
@@ -1535,6 +1610,7 @@ requestAnimationFrame(()=>{
 });
 
 	};
+	d.oncontextmenu=nopropdef;
 	d.onclick=()=>{dounmin()};
 	w.unminimize=(if_instant)=>{
 		if (if_instant) return dounmin(true);
@@ -1548,7 +1624,8 @@ requestAnimationFrame(()=>{
 		top_win_on();
 	}
 
-};
+};//»
+
 bar.add(mwb);
 //»
 
@@ -1575,7 +1652,7 @@ const set_desk_path = (path) => {//«
 		}
 		await reloadIcons();
 		Y(true);
-		Core.set_local_storage("desk_path", desk_path, DSK);
+		Core.set_local_storage("desk_path", desk_path);
 		Desk.set_desktop_stats();
 	});
 };
@@ -1595,13 +1672,13 @@ const deskcontext = (loc, opts={}) => {//«
 		y: usey,
 		BREL:opts.BREL,
 		RREL:opts.RREL
-	}, "desk", null, DSK);
+	}, "desk");
 	let useitems = desk_ctx_items;
 	if (itemsarg) useitems = itemsarg;
 	for (let i = 0; i < useitems.length; i += 2) {
 		let item = Desk.desk_menu.add_item(useitems[i], useitems[i + 1]);
 	}
-	Desk.desk_menu.adjust_y(DSK);
+	Desk.desk_menu.adjust_y();
 };
 this.deskcontext=deskcontext;
 //»
@@ -1638,11 +1715,19 @@ const toggle_show_windows = (if_no_current) => {//«
 //	Desk.update_windows_showing();
 	return true;
 }//»
-const reload_desk_icons_cb=async()=>{CG.on();let nodes=Array.from(desk.childNodes);let arr=nodes.filter(n=>n.className==="icon");while(arr.length)arr.pop().del();await reloadIcons();CG.off();};
+const reload_desk_icons_cb = async () => {//«
+	CG.on();
+	let nodes = Array.from(desk.childNodes);
+	let arr = nodes.filter(n => n.className === "icon");
+	while (arr.length) arr.pop().del();
+	await reloadIcons();
+	CG.off();
+};//»
 
 //»
 //Folders«
 this.add_folder_listeners=(win)=>{//«
+
 let didleave;
 let main = win.main;
 
@@ -1665,6 +1750,7 @@ let off = () => {
 main.clear_drag = clear_drag;
 main.onmousedown=e=>{
 	e.stopPropagation();
+	icon_array_off(20);
 	if (e.clientX < win.offsetLeft + main.clientWidth + winx() && e.clientY < win.offsetTop + main.clientHeight + win.titlebar.h + winy()) {
 		window_on(win);
 		WDIE = e;
@@ -1703,7 +1789,7 @@ main.onmouseup=e=>{//«
 		move_icons(win.fullpath(), rv => {
 			off();
 			if (Desk.CWIN) window_off(Desk.CWIN);
-			window_on(win);
+//			window_on(win);
 			CDICN = null;
 			cldragimg();
 		}, e, win);
@@ -1771,36 +1857,13 @@ const reload_icons = (cb, is_refresh) => {//«
 				if (name == "." || name == "..") continue;
 				kid = kids[name];
 				if (kid.perm===false) continue;
-//				let obj = {
-//					PATH: fullpath,
-//					FOBJ: kid
-//				};
-/*
-				obj.ROOTTYPE = ret.root.TYPE;
-				if (kid.APP == FOLDER_APP) {
-					obj.NAME = name;
-					obj.DIR = true;
-				} 
-				else if (kid.APP == "Link") {
-					obj.NAME = name.replace(/\.lnk$/,"");
-					obj.APP="Link";
-					obj.EXT="lnk";
-					obj.LINK = kid.LINK;
-				} 
-				else {
-					let namearr = getNameExt(name);
-					obj.NAME = namearr[0];
-					obj.EXT = namearr[1];
-				}
-				arr.push(obj);
-*/
 				arr.push(kid);
 
 			}
 			reload_desk_icons(arr);
 			cb && cb();
 		};
-		if (!ret.done) fs.popdir(ret, doload,{DSK:DSK});
+		if (!ret.done) fs.popdir(ret, doload);
 		else doload();
 	});
 };//»
@@ -1810,20 +1873,7 @@ const open_folder_win = (name, path, iconarg, winargs) => {//«
 	let win = open_new_window(icon);
 	winon(win);
 }//»
-const deref_folder_links = (which) => {//«
-	let icons = get_icon_array(which, true);
-	let len = icons.length;
-	let iter = -1;
 
-	function doicon() {
-		iter++;
-		if (iter == len) return;
-		let icon = icons[iter];
-		if (!(icon && icon.link)) return doicon();
-		icon.deref_link(doicon);
-	}
-	doicon();
-}//»
 const set_folder_dims = (win) => {//«
 	let obj = get_newwin_obj();
 	if (!(NUM(win.x))) win.x = obj.X;
@@ -2079,7 +2129,8 @@ const reloadIcons = win => {//«
 }//»
 //*/
 const update_folder_statuses = usepath => {//«
-	for (let w of windows) {
+
+	for (let w of allwins()) {
 		if (w.app === FOLDER_APP) {
 			if (usepath) {
 				if (w.fullpath() === usepath) w.obj.update();
@@ -2132,6 +2183,12 @@ const make_window = (arg) => {//«
 	} else if (!(is_embedded||is_hidden)) windows.push(win);
 
 	let main = make("div");
+	const set_appvar = (k, v) =>{Core.set_appvar(win, k, v);};
+	const get_appvar = (k) =>{return Core.get_appvar(win, k);};
+	main.set_appvar = set_appvar;
+	main.get_appvar = get_appvar;
+	win.set_appvar = set_appvar;
+	win.get_appvar = get_appvar;
 	win.main = main;
 	main.top = win;
 	win.ondrop = e => {
@@ -2144,6 +2201,7 @@ const make_window = (arg) => {//«
 	win.onmouseout=noprop;
 	win.onmousedown=e=>{
 		e.stopPropagation();
+		icon_array_off(21);
 		window_on(win);
 	};
 	if (arg.DIALOG) win.dialog = arg.DIALOG;
@@ -2158,6 +2216,7 @@ const make_window = (arg) => {//«
 		else win.app = appobj.path.replace(/\x2f/g,".") + "."+app
 	}
 	else win.app = app;
+	win.dataset.app = win.app;
 	win.type = "window";
 //	if (!is_embedded) win.pos = "absolute";
 	if (!is_embedded) win.pos = "fixed";
@@ -2256,7 +2315,11 @@ const make_window = (arg) => {//«
 				return namespan.innerText.trim();
 			},
 			set: arg => {
-				namespan.innerText = arg.regstr().replace(/\x20/g, "\xa0");
+let s = arg.regstr().replace(/\x20/g, "\xa0");
+				namespan.innerText = s;
+if (win.is_minimized){
+win._mintitle.innerText = s
+}
 			}
 		});
 		win.title = arg.NAME;
@@ -2303,6 +2366,10 @@ const make_window = (arg) => {//«
 				if (win.obj&&win.obj.onfocus) win.obj.onfocus();
 			};
 		};
+
+		img_div.draggable=true;
+		img_div.ondragstart=nopropdef;
+
 		img_div.onclick = ()=>{win.context_menu_on()};
 		win.img_div = img_div;
 		title.add(img_div);
@@ -2356,7 +2423,7 @@ const make_window = (arg) => {//«
 		for (let i = 0; i < windows.length; i++) {
 			if (windows[i] == topwin) windows.splice(i, 1);
 		}
-		if (win.app==FOLDER_APP) icon_array_off();
+		if (win.app==FOLDER_APP) icon_array_off(3);
 		topwin.killed = true;
 		topwin.obj.killed = true;
 		topwin.del();
@@ -2519,6 +2586,11 @@ const make_window = (arg) => {//«
 		this.unhover();
 	};
 ///*
+	close.draggable=max.draggable=min.draggable=true;
+	close.ondragstart=max.ondragstart=min.ondragstart=(e)=>nopropdef;
+	close.onmousedown=max.onmousedown=min.onmousedown=(e)=>{
+		icon_array_off();
+	}
 	close.onmouseenter=onhover;
 	close.onmouseleave=onunhover;
 	max.onmouseenter=onhover;
@@ -2537,7 +2609,10 @@ const make_window = (arg) => {//«
 		footer.h=18;
 		let statdiv=make('div');
 		statdiv.id="stat_"+winid;
-		statdiv.onmousedown=noprop;
+		statdiv.onmousedown=e=>{
+			e.stopPropagation();
+			icon_array_off();
+		};
 		statdiv.onclick=noprop;
 		statdiv.oncontextmenu=noprop;
 		statdiv.tcol="#ddd";
@@ -2597,7 +2672,6 @@ this.make_window=make_window;
 const make_app_window = (arg) => {//«
 
 //Var«
-
 	let hashsum;
 	let have_cache = false;
 	let hold_current = Desk.CWIN;
@@ -2606,9 +2680,9 @@ const make_app_window = (arg) => {//«
 	let appobj = arg.APPOBJ || {};
 	appobj.Core = Core;
 	appobj.Main = mainwin;
+	appobj.Top = win;
 	appobj.NS = NS;
 	appobj.Desk = Desk;
-	let app_path = appobj.path;
 	let url;
 	let cb = arg.CB||(()=>{});
 	let scrpath;
@@ -2635,7 +2709,7 @@ const make_app_window = (arg) => {//«
 		set_win_defs(win);
 		icon.ready.state = "Awaiting application onload event";
 		await win.obj.onload();
-		if (arg.APPMODE) win.obj.onappinit();
+		if (arg.APPMODE) win.obj.onappinit(arg.APPARGS);
 		icon.ready.state = true;
 		cb(win);
 	};//»
@@ -2732,8 +2806,8 @@ const make_app_window = (arg) => {//«
 					icon.ready.error = "Could not install app:" + winapp;
 					poperr("Could not install app:" + winapp);
 				}
-			}, {}, DSK);
-		}, DSK);
+			}, {});
+		});
 	};//»
 	const doload = async () => {//«
 		icon.ready.state = "Seeking application file";
@@ -2762,7 +2836,7 @@ const make_app_window = (arg) => {//«
 				win.winon();
 			}
 			CDICN = null;
-			icon_array_off();
+			icon_array_off(4);
 			cldragimg();
 		}
 	};
@@ -2844,7 +2918,7 @@ const get_win_by_path = (path, extarg, if_all) => {//«
 	}
 	let ret = [];
 	path = path.regpath();
-	for (let w of windows) {
+	for (let w of allwins()) {
 		let ext = w.ext;
 		let gotname = (w.path + "/" + w.name).regpath();
 		if (gotname === path) {
@@ -2862,7 +2936,7 @@ this.get_win_by_path = get_win_by_path;
 const get_win_id=()=>{win_num++;return win_num+""}
 const winon=win=>{if(win===desk)return;window_on(win);win.zup();return;}
 const close_window=()=>{if(!(Desk.CWIN && Desk.CWIN.key_kill))return null;Desk.CWIN.key_kill();return true;}
-const fullscreen_window = () => {//«
+const fullscreen_window = (if_instant) => {//«
 	if (!Desk.CWIN) return null;
 	let w = Desk.CWIN;
 	if (w.is_transitioning) return;
@@ -2909,8 +2983,10 @@ const fullscreen_window = () => {//«
 		mn.h = winh(true);
 	}
 	w.is_transitioning = true;
-	if (!Desk.automate_mode) w.addEventListener('transitionend', transend);
-	else transend();
+
+	if (if_instant||Desk.automate_mode) transend();
+	else w.addEventListener('transitionend', transend);
+
 }//»
 const minimize_window=()=>{if(!Desk.CWIN)return null;Desk.CWIN.minimize_button.click();};
 const maximize_window=()=>{let w=Desk.CWIN;if(!w||w.is_fullscreen)return null;w.maximize_button.click();};
@@ -2945,7 +3021,7 @@ const toggle_window_tiling = () => {//«
 		}
 		return false;
 	};
-	for (let w of windows) {
+	for (let w of allwins()) {
 		if (!w.is_minimized) {
 			if (w.is_layout) toggle_win_layout(w);
 			let r = w.gbcr();
@@ -3399,8 +3475,8 @@ const check_win_size = (win) => {//«
 const check_all_wins = () => {//«
 	for (let i = 0; i < windows.length; i++) {
 		let win = windows[i];
-		check_win_loc(win);
 		check_win_size(win);
+		check_win_loc(win);
 	}
 }//»
 const check_move_rs_timer = (if_resize) => {//«
@@ -3626,7 +3702,6 @@ const make_icon = (kid, elem, observer) =>{//«
 	let nameext = capi.getNameExt(fullname);
 	let name = nameext[0];
 	let ext = nameext[1]||"";
-//	let fent = kid.entry;
 	let app;
 	let islink=false;
 	if (kid.KIDS){
@@ -3648,27 +3723,6 @@ const make_icon = (kid, elem, observer) =>{//«
 	else if (ext) app = capi.extToApp(ext);
 	if (!app) app = "util.BinView";
 
-/*«
-		let ext = kid.NAME.split(".").pop();
-		if (ext=="app"){
-			let path = kid.fullpath;
-			if (!path){
-console.warn("No kid.fullpath!");
-console.log(kid);
-			}
-			else{
-				let arr = await fs.readFile(path);
-				try{
-					app = JSON.parse(arr.join("\n")).app;
-				}catch(e){console.error(e)}
-			}
-		}
-		else if (ext) app = capi.extToApp(ext);
-»*/
-
-//	let s = "?";
-
-//	if (app) s = capi.getAppIcon(app,{html:true});
 	let s = capi.getAppIcon(app,{html:true});
 	d.innerHTML=`<span class="iconw"><span class="iconi">${s}</span></span><div class="iconl">${name}</div>`;
 	if (observer) {
@@ -3678,7 +3732,6 @@ console.log(kid);
 		};
 	}
 	d.z=1;
-//	d.parwin = topwin;
 	let wrapper = d.childNodes[0];
 	wrapper.icon=d;
 	d.wrapper = wrapper;
@@ -3695,7 +3748,6 @@ console.log(kid);
 	wrapper.childNodes[0].title = app;
 	if (!d.path) {
 		Object.defineProperty(d,"path",{get:function(){
-//log(this);
 			return this.parwin.fullpath();}
 		});
 		Object.defineProperty(d,"fullname",{get:function(){let name=this.name;if(this.ext)name=name+"."+this.ext;return name;}});
@@ -3777,6 +3829,12 @@ icon.move_cb = null;
 };
 //»
 const move_icons = async (destpath, cb, e, usewin, loc) => {//«
+if (!ICONS[0]){
+cwarn("THis is a rare event!");
+cldragimg(true);
+return;
+}
+
 if (globals.read_only){
 	for (let icn of ICONS) {
 		icn.shake();
@@ -3814,7 +3872,7 @@ if (globals.read_only){
 			}
 		}
 //		for (let fake of fakes) fake.del();
-		icon_array_off();
+		icon_array_off(5);
 		if (cb) cb(true);
 	};//»
 	let do_copy = false;
@@ -3823,6 +3881,26 @@ if (globals.read_only){
 	let fakes = [];
 	let proms = [];
 	if (e && destpath === desk_path) usewin = desk;
+	let destnode = await pathToNode(destpath);
+	if (destnode.root.TYPE !== "fs"){
+		for (let icn of ICONS) {
+			icn.shake();
+			icon_off(icn);
+		}
+		cb();
+		return;
+	}
+	let fromnode = await pathToNode(ICONS[0].fullpath(),{link:true});
+	if (fromnode.root.TYPE !== "fs"){
+		for (let icn of ICONS) {
+			icn.shake();
+			icon_off(icn);
+		}
+		cb();
+		return;
+	}
+
+//let fromnode = await pathToNode();
 	for (let icn of ICONS) {
 		icon_off(icn);
 		let usename = icn.name;
@@ -3855,7 +3933,6 @@ if (globals.read_only){
 	didnum = ICONS.length;
 
 	let shell_exports = {//«
-		dsk:DSK,
 		cbok: do_end,
 		serr: arg => {
 			cerr(arg);
@@ -3896,6 +3973,7 @@ if (globals.read_only){
 If this is from "local" and to "to", then it is a copy operation!
 */
 ///*TODO When things get working again, put this back in...
+//log(1);
 	let dest = await fsapi.pathToNode(destpath);
 	if (dest.root.TYPE=="fs"){
 		let orig = await fsapi.pathToNode(ICONS[0].fullpath());
@@ -3932,6 +4010,8 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 	let origwin = ICONS[0].parwin;
 	let real_locs = [];
 	let del_icons = [];
+	let scrl = desk.scrollLeft;
+	let scrt = desk.scrollTop;
 	for (let icn of ICONS) {
 		if (icn.move_cb) icn.move_cb();
 		icn.op=0.5;
@@ -3950,23 +4030,21 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 		}
 		if (loc) { /*Onto a folder icon's dropzone*/
 			vacate_icon_slot(icn);
-//log(scrdiff);
-			icn.loc(r.left, r.top+scrdiff);
+			icn.loc(r.left+desk.scrollLeft, r.top+scrdiff+desk.scrollTop);
 			desk.add(icn);
-			proms.push(move_icon(icn, loc.x-winx(), loc.y-winy(), {scale:0.25, fade:true, cb:()=>{
+			proms.push(move_icon(icn, loc.x+desk.scrollLeft, loc.y+desk.scrollTop, {scale:0.25, fade:true, cb:()=>{
 //				if (fake) fake.del();
 				icn.del();}
 			}));
 		} else if (usewin == desk) { /*Onto the desktop:get location from 'e',passed into the desktop's ondrop event handler*/
-			icn.loc(r.left, r.top+scrdiff);
+//			icn.loc(r.left, r.top+scrdiff);
+			icn.loc(r.left+scrl, r.top+scrdiff+scrt);
 			desk.add(icn);
-//icn.move_cb=()=>{
-//if (fake) fake.del();
-//};
-			proms.push(place_in_icon_slot(icn,{X:e.clientX-winx(),Y:e.clientY-winy()}));
+//			proms.push(place_in_icon_slot(icn,{X:e.clientX,Y:e.clientY}));
+			proms.push(place_in_icon_slot(icn,{X:e.clientX+scrl,Y:e.clientY+scrt}));
 		}
 		else { /*Onto a folder main window,from the desktop or another folder. The folder automatically places it*/
-			const movecb=()=>{
+			const movecb=()=>{//«
 //				if (fake) fake.del();
 				let name = icn.name;
 				let ext = icn.ext;
@@ -3985,27 +4063,31 @@ cwarn(`Skipping icn.app!='${FOLDER_APP}'`, icn.fullpath());
 				icn.style.transition = "";
 				icn.pos="";
 				usewin.icon_div.add(icn);
-			};
+			};//»
 			vacate_icon_slot(icn);
 			if (icn.parwin !== desk) {
-				icn.loc(r.left, r.top+scrdiff);
+//				icn.loc(r.left, r.top+scrdiff);
+				icn.loc(r.left+scrl, r.top+scrdiff+scrt);
 				desk.add(icn);
 			} /*Lesson learned:isFinite(null)==true but Number.isFinite(null)==false*/
 			let icons=Array.from(usewin.getElementsByClassName("icon"));
 			usewin.main.scrollTop = usewin.main.scrollHeight;
 			let last = icons.pop();
 			let wr;
+
 			if (last) {
 				wr = last.gbcr();
 				let fake = mkdv();fake.op=0;fake.dims(100,100);
 				usewin.icon_div.add(fake);
 				let r2 = fake.gbcr();
 				fake.del();
-				proms.push(move_icon(icn, r2.left, r2.top, {cb:movecb}));
+//				proms.push(move_icon(icn, r2.left, r2.top, {cb:movecb}));
+				proms.push(move_icon(icn, r2.left+scrl, r2.top+scrt, {cb:movecb}));
 			}
 			else {
 				wr = usewin.gbcr();
-				proms.push(move_icon(icn, wr.left, wr.top+usewin.titlebar.clientHeight, {cb:movecb}));
+//				proms.push(move_icon(icn, wr.left, wr.top+usewin.titlebar.clientHeight, {cb:movecb}));
+				proms.push(move_icon(icn, wr.left+scrl, wr.top+usewin.titlebar.clientHeight+scrt, {cb:movecb}));
 			}
 		}
 		if (nextsib){
@@ -4033,8 +4115,11 @@ origwin.obj.reload();
 const IGen=function(){//«
 	this.attach = (obj, cb)=>{
 		let appname = obj.APP.split(".").pop();
+//log(appname);
 		let got = capi.getAppIcon(appname);
+//log(got);
 		let par = obj.PAR;
+//log(par);
 		par.innerText = got;
 	}
 }
@@ -4049,7 +4134,8 @@ const icon_dblclick = (icon, e, win_cb) => {//«
 	icon.ready={};
 	icon.ready.state="Triggered";
 	if (!windows_showing) toggle_show_windows();
-	icon_off(icon, true);
+	icon_array_off(23);
+//	icon_off(icon, true);
 	let win;
 	let try_force_open = false;
 	if (e && e.ctrlKey) try_force_open = true;
@@ -4060,13 +4146,14 @@ const icon_dblclick = (icon, e, win_cb) => {//«
 			win = open_new_window(icon);
 			winon(win);
 		}
-		else if (app == "FIFO") WDG.popup("Sorry,you cannot open FIFO's!");
 		else {
 			let fullpath = (icon.path + "/" + icon.name).regpath();
 			let gotext = icon.ext;
 			let link = icon.link;
 			let doopen = () => {//«
-				path_to_obj(icon.path, async parobj => {
+//log(icon.ref);
+//				path_to_obj(icon.path, async parobj => {
+				path_to_obj((icon.ref&&icon.ref.path)||icon.path, async parobj => {
 					const noopen = (mess) => {
 						icon.ready.error = "File not found";
 						let str = "The file could not be opened:&nbsp;" + fullpath;
@@ -4084,10 +4171,11 @@ return;
 							if (!ret) return noopen(mess);
 							icon.ready.state = "File loaded";
 							open_icon_app(icon, ret, gotext, null, try_force_open);
-						},null,null,DSK);
+						});
 					}
 					else if (roottype == "www") {
-						let rv = await fetch(fullpath);
+//						let rv = await fetch(fullpath);
+						let rv = await fetch((icon.ref&&icon.ref.fullpath) || fullpath);
 						if (!rv.ok) return poperr("Could not fetch the data!");
 						icon.ready.state = "File loaded";
 						open_icon_app(icon, await rv.arrayBuffer(), gotext, null, try_force_open);
@@ -4166,12 +4254,19 @@ console.error(e);
 		}
 	}
 }//»
-const cldragimg=if_hard=>{if(if_hard){let arr=desk.getElementsByClassName("dragimg");for(let d of arr)d.del();}else CDL&&CDL.del();CDL=null;};
+const cldragimg = if_hard => {
+	if (if_hard) {
+		let arr = desk.getElementsByClassName("dragimg");
+		for (let d of arr) d.del();
+	} else CDL && CDL.del();
+	CDL = null;
+	desk.style.cursor = "";
+};
 const make_cur_drag_img = () => {//«
 	let d = mkdv();
 	d.className = "dragimg";
 	let s = mksp();
-	d.pos = "absolute";
+	d.pos = "fixed";
 	d.z = CGZ - 1;
 	ICONS = ICONS.uniq();
 	let numarg = ICONS.length || 1;
@@ -4352,7 +4447,7 @@ const delete_icons = async which => {//«
 	if (which) arr = [which.fullpath()];
 	else if (ICONS) {
 		for (let icon of ICONS) arr.push(icon.fullpath());
-		icon_array_off();
+		icon_array_off(6);
 	}
 	arr = arr.uniq();
 	if (arr.length) {
@@ -4360,7 +4455,7 @@ const delete_icons = async which => {//«
 		if (!ret) return;
 		let errprompt;
 		fs.do_fs_rm(arr, poperr, ret => {
-			icon_array_off();
+			icon_array_off(8);
 			if (usewin!==desk){
 				usewin.obj.reload();
 				if (CUR.main) delete CUR.main.lasticon;
@@ -4384,7 +4479,8 @@ const save_icon_editing = async() => {//«
 		let oldname = getNameExt(oldnamearg)[0];
 		let newval;
 		if (newvalarg) {
-			if (CEDICN.app == FOLDER_APP) newval = newvalarg;
+//			if (CEDICN.app == FOLDER_APP) newval = newvalarg;
+			if (!CEDICN.link && CEDICN.app == FOLDER_APP) newval = newvalarg;
 			else newval = getNameExt(newvalarg)[0];
 		}
 		if (newval) {
@@ -4441,7 +4537,7 @@ const save_icon_editing = async() => {//«
 								fs.get_or_make_dir(CEDICN.path, checkit, mkret => {
 									if (mkret) doend(holdname, checkit);
 									else abort("Could not create the new directory");
-								},null, null, DSK);
+								});
 							}
 						}
 						else {
@@ -4450,8 +4546,12 @@ const save_icon_editing = async() => {//«
 						}
 					});
 				} else {
-					let app = CEDICN.app;
-					if (app == "Link" || app == "FIFO") {
+//log(CEDICN.link);
+					let app = (CEDICN.link&&"Link")||CEDICN.app;
+
+
+/*
+					if (app == "Link") {
 						fs.move_kids(srcpath, destpath, ret => {
 							if (!ret) {
 								poperr("The icon could not be renamed.");
@@ -4459,28 +4559,37 @@ const save_icon_editing = async() => {//«
 								return;
 							}
 							doend(checkit);
-						}, false,null,DSK);
+						}, false);
 					} else {
-						fs.get_fs_ent_by_path(srcpath, ret1 => {
-							if (ret1) {
-								fs.mv_by_path(srcpath, destpath, app, ret2 => {
-									if (ret2) doend(holdname, checkit);
-									else {
-										cerr("fs.mv_by_path returned nothing");
-										doend(holdname);
-									}
-								});
-							} else {
-								fs.get_fs_ent_by_path(destpath, ret3 => {
-									if (ret3) doend(checkit);
-									else {
-										cerr("fs.get_fs_ent_by_path returned nothing");
-										doend(holdname);
-									}
-								}, app, true);
-							}
-						}, app);
-					}
+*/
+					fs.get_fs_ent_by_path(srcpath, ret1 => {
+/*
+log(ret1);
+log(srcpath, destpath, app);
+doend(holdname);
+return;
+
+*/
+						if (ret1) {
+							fs.mv_by_path(srcpath, destpath, app, ret2 => {
+								if (ret2) doend(holdname, checkit);
+								else {
+									cerr("fs.mv_by_path returned nothing");
+									doend(holdname);
+								}
+							});
+						} else {
+							fs.get_fs_ent_by_path(destpath, ret3 => {
+								if (ret3) doend(checkit);
+								else {
+									cerr("fs.get_fs_ent_by_path returned nothing");
+									doend(holdname);
+								}
+							}, app, true);
+						}
+					}, app);
+
+//					}
 				}
 			} 
 			else {
@@ -4617,9 +4726,14 @@ FATAL("WHAT APP IN make_icon_cb: "+app);
 	}
 };//»
 
-const desk_drag_off=()=>{DDIE=null;DDD.loc(-1,-1);DDD.w=0;DDD.h=0;}
+const desk_drag_off = () => {
+	DDIE = null;
+	DDD.loc(-1, -1);
+	DDD.w = 0;
+	DDD.h = 0;
+}
 const icon_array_add = icon => {
-	if (ICONS.length && ICONS[0].parentNode !== icon.parentNode) icon_array_off();
+	if (ICONS.length && ICONS[0].parentNode !== icon.parentNode) icon_array_off(7);
 	ICONS.push(icon);
 }
 const create_new_folder = () => {//«
@@ -4638,16 +4752,18 @@ const make_desk_folder = (fobj) => {
 	place_in_icon_slot(make_icon(fobj), null, true);
 };
 this.make_desk_folder = make_desk_folder;
-
+const allwins=()=>{
+	return Array.from(document.getElementsByClassName("topwin"));
+};
 const update_all_paths = (oldpath, newpath) => {//«
 	let app_has_ext = (app) => {
-		if (app === FOLDER_APP || app === "FIFO" || app === "Link") return false;
+		if (app === FOLDER_APP || app === "Link") return false;
 		return true;
 	};
 	oldpath = oldpath.regpath();
 	newpath = newpath.regpath();
 	let re = new RegExp("^" + oldpath + "/");
-	for (let w of windows) {
+	for (let w of allwins()) {
 		if (w.fullpath() === oldpath) {
 			let newarr = newpath.split("/");
 			let fname = newarr.pop();
@@ -4661,6 +4777,8 @@ const update_all_paths = (oldpath, newpath) => {//«
 			w.ext = ext;
 			w.title = fname;
 			w.path = newarr.join("/");
+//JEIOMPTY
+			if (w.app===FOLDER_APP) w.obj.reload(`${w.path}/${fname}`);
 		} else {
 			let gotpath = w.path;
 			if (gotpath == oldpath || re.exec(gotpath)) w.replacepath(oldpath, newpath);
@@ -4671,7 +4789,10 @@ this.update_all_paths = update_all_paths;
 //»
 
 
-const icon_array_off=()=>{for(let i=0;i<ICONS.length;i++)icon_off(ICONS[i]);ICONS=[];}
+const icon_array_off = (which) => {
+	for (let i = 0; i < ICONS.length; i++) icon_off(ICONS[i]);
+	ICONS = [];
+}
 const icon_off = (icon, do_vacate) => {//«
 	if (!(icon && icon.imgdiv)) return;
 	if (do_vacate && ICONS.includes(icon)) ICONS.splice(ICONS.indexOf(icon), 1);
@@ -4681,7 +4802,7 @@ const icon_off = (icon, do_vacate) => {//«
 const icon_on = (icon, do_add) => {//«
 	if (!(icon && icon.imgdiv)) return;
 	if (do_add && !ICONS.includes(icon)) {
-		if (ICONS.length && (icon.parwin !== ICONS[0].parwin)) icon_array_off();
+		if (ICONS.length && (icon.parwin !== ICONS[0].parwin)) icon_array_off(9);
 		ICONS.push(icon);
 	}
 	if (icon.parentNode === desk) {
@@ -4737,7 +4858,7 @@ throw "Who called?";
 	if (!win && winpath === desk_path) win = desk;
 	fs.add_new_kid(winpath, fname, ret => {
 		if (win) automake_icon(ext, name, win, {fent:fent}, appwinarg);
-	}, null, DSK);
+	});
 */
 };//»
 const add_icon_to_folder_win = (icon, win) => {//«
@@ -4751,13 +4872,12 @@ const add_icon_to_folder_win = (icon, win) => {//«
 };//»
 const automake_icon = (ext, name, wherearg, opts={}, appwinarg) => {//«
 	if (!opts) opts={};
-	let use_link, if_fifo, if_folder;
+	let use_link, if_folder;
 	if (opts.ICON) {
 		let icn = opts.ICON;
 		ext = icn.ext;
 		name = icn.name;
 		if (icn.app === "Link") use_link = icn.link;
-		if_fifo = icn.app === "FIFO";
 		if_folder = icn.app == FOLDER_APP;
 	}
 	else if (opts.fent && opts.fent._fileObj) {
@@ -4766,15 +4886,14 @@ const automake_icon = (ext, name, wherearg, opts={}, appwinarg) => {//«
 	}
 	else {
 		use_link = opts.LINK;
-		if_fifo = opts.FIFO;
 		if_folder = opts.FOLDER;
 	}
 	let where;
 	let usepath;
 	if (use_link){
-		ext="lnk";
+		ext=globals.LINK_EXT;
 	}
-	else if (if_fifo || if_folder) {
+	else if (if_folder) {
 	}
 	else if (!ext) {
 		let arr = getNameExt(name);
@@ -4799,13 +4918,20 @@ const automake_icon = (ext, name, wherearg, opts={}, appwinarg) => {//«
 		if (where == desk) usepath = desk_path;
 		else usepath = where.path + "/" + where.name;
 	}
-	let o={NAME:fullname};
-	if (if_folder) o.KIDS=true;
-	let icon = make_icon(o);
-	if (use_link) {
-		icon.link = use_link.regpath();
-		icon.ext="lnk";
+	let o;
+	if (opts.node) o = opts.node;
+	else {
+		o={NAME:fullname};
+		if (if_folder) o.KIDS=true;
+		if (use_link) {
+			o.LINK = use_link.regpath();
+console.error("HAVE LINK IN AUTOMAKE ICON, WITHOUT node IN OPTS???");
+//			o.ref = {APP: "sys.Terminal"};
+		}
 	}
+	let icon = make_icon(o);
+
+
 	let fullpath = `${usepath}/${name}`;
 	if (ext) fullpath+=`.${ext}`;
 
@@ -4813,7 +4939,6 @@ const automake_icon = (ext, name, wherearg, opts={}, appwinarg) => {//«
 	else add_icon_to_folder_win(icon, where);
 	
 	if (ext && ext_to_app(ext) == "Application") icon.deref_appicon();
-	if (use_link) icon.deref_link();
 	icon_off(icon);
 	if (appwinarg) {
 		icon.win = appwinarg;
@@ -4829,7 +4954,7 @@ const save_hook = (path,fent) => {//«
 			fs.get_file_len_and_hash_by_path(path, (lenret, sha1ret, bytes) => {
 				if (check_open_files(path, null, lenret, sha1ret, bytes)) return;
 				make_icon_if_new(obj,null,fent);
-			}, DSK);
+			});
 		} else make_icon_by_path(path,null,fent);
 	});
 };
@@ -4838,13 +4963,17 @@ this.save_hook = save_hook;
 
 
 const select_icons_in_drag_box_win = (e, win, scrld, scrtd) => {//«
-	if (!WDIE) return icon_array_off();
+	if (!WDIE) {
+cwarn("NO WDIE");
+//		return icon_array_off(10);
+		return;
+	}
 	let icons = win.main.getElementsByClassName("icon");
 	let hix = null,
 		lox;
 	let hiy = null,
 		loy;
-	let r = win.getBoundingClientRect();
+	let r = win.main.getBoundingClientRect();
 	let wl = r.left;
 	let wt = r.top;
 	let mn = win.main;
@@ -4875,7 +5004,8 @@ const select_icons_in_drag_box_win = (e, win, scrld, scrtd) => {//«
 	loy-=winy();
 	let OK=[];
 	for (let icn of icons) {
-		let wrap = icn;
+		let wrap = icn.wrapper;
+		if (!wrap) continue;
 		let left = wrap.offsetLeft;
 		let right = left+wrap.offsetWidth;
 		let top = wrap.offsetTop;
@@ -4889,7 +5019,11 @@ const select_icons_in_drag_box_win = (e, win, scrld, scrtd) => {//«
 	ICONS = OK;
 }//»
 const select_icons_in_drag_box_desk = (e) => {//«
-	if (!DDIE) return icon_array_off();
+	if (!DDIE) {
+cwarn("NO DDIE");
+//		return icon_array_off(11);
+		return;
+	}
 	let icons = get_icon_array(desk);
 	let hix = null,
 		lox;
@@ -4958,7 +5092,7 @@ const select_icons_in_drag_box_desk = (e) => {//«
 }//»
 this.get_fullpath_icons_by_path = (patharg, is_regular_file, icon) => {//«
 	if (icon && icon.app) {
-		if (icon.app == "FIFO" || icon.app == FOLDER_APP || icon.app == "Link") is_regular_file = false;
+		if (icon.app == FOLDER_APP || icon.app == "Link") is_regular_file = false;
 		else is_regular_file = true;
 	}
 	if (!is_regular_file) return get_icons_by_path(patharg);
@@ -4969,18 +5103,15 @@ this.get_fullpath_icons_by_path = (patharg, is_regular_file, icon) => {//«
 //»
 //File opening/App Loading«
 
-const open_app = (appname, cb, force_open, winargs, appobj, if_reload, icon) => {//«
+const open_app = (appname, cb, force_open, winargs, appargs, if_reload, icon) => {//«
 	const win_is_active = (win) => {
 		let sty = win.style;
 		if (sty.display != "none" && sty.opacity != 0 && sty.zIndex > 0) return true;
 		return false;
 	};
 	if (!winargs) winargs={};
-	if (lotw_mode&&appname=="sys.LOTW"){
-		return poperr("There is such a thing as too much inception!");
-	}
 	if (!force_open){
-		for (let w of windows){
+		for (let w of allwins()){
 			if (w.app==appname){
 				if (w.is_minimized) w.unminimize();
 				w.on();
@@ -5051,7 +5182,7 @@ const open_app = (appname, cb, force_open, winargs, appobj, if_reload, icon) => 
 		NAME: wintitle,
 		APP: appname,
 		CB: cb,
-		APPOBJ: appobj,
+		APPARGS: appargs,
 		APPMODE: true
 	});
 	if (!win) return;
@@ -5059,7 +5190,8 @@ const open_app = (appname, cb, force_open, winargs, appobj, if_reload, icon) => 
 		useicon.win = win;
 		win.icon = useicon;
 	}
-	win.appobj = appobj;
+//	win.appobj = appobj;
+	win.appobj = {};
 	win.zup();
 	window_on(win);
 	return win;
@@ -5088,7 +5220,7 @@ const open_icon_app = async(icon, bytes, ext, useapp, force_open) => {//«
 		let obj;
 		try {
 			obj = JSON.parse(await Core.api.toStr(bytes));
-			if (icon.service_obj) obj.SERVICE_OBJ = icon.service_obj;
+//			if (icon.service_obj) obj.SERVICE_OBJ = icon.service_obj;
 			icon.appobj = obj;
 		} catch (e) {
 			icon.ready.error = "Error parsing app icon JSON";
@@ -5163,7 +5295,7 @@ const open_file_by_path = (patharg, cb, opt={}) => {//«
 			} else {
 				cwarn("got nothing:" + fullpath);
 			}
-		}, DSK);
+		});
 	});
 }
 this.open_file_by_path=open_file_by_path;
@@ -5172,7 +5304,10 @@ const open_file = (bytes, icon) => {//«
 	open_new_window(icon, win => {
 		if (win) {
 			if (icon.ext) win.ext = icon.ext;
-			if (bytes) win.obj.onloadfile(bytes, icon.name, icon.ext);
+			if (bytes) {
+				if (icon.link) win.obj.onloadfile(bytes, icon.linkname, icon.linkext);
+				else win.obj.onloadfile(bytes, icon.name, icon.ext);
+			}
 			else win.obj.onloadfile();
 		}
 	});
@@ -5198,26 +5333,15 @@ const open_new_window = (icon, cb, opts={}) => {//«
 		useext = arr[1];
 		usepath = ref.par.fullpath;
 	}
-	let appobj = {
-		PATH: icon.path
-	};
-	if (icon.service_obj) {
-		appobj.SERVICE_OBJ = icon.service_obj;
-		delete icon.service_obj
-	}
+//	let appobj = {
+//		PATH: icon.path
+//	};
+//	if (icon.service_obj) {
+//		appobj.SERVICE_OBJ = icon.service_obj;
+//		delete icon.service_obj
+//	}
 	let winargs = icon.winargs||{};
-//	if (app!==FOLDER_APP) defwinargs = get_newwin_obj();
 	let defwinargs = get_newwin_obj();
-
-//	let geomstr;//«
-/*
-	if (winargs && isnum(winargs.X) && isnum(winargs.Y) && isnum(winargs.WID) && isnum(winargs.HGT)) {
-		objarg.X = winargs.X;
-		objarg.Y = winargs.Y;
-		objarg.WID = winargs.WID;
-		objarg.HGT = winargs.HGT;
-	} else get_newwin_obj(objarg);
-//»*/
 
 	let usex, usey, usez, usew, useh;
 	if (NUM(winargs.X)) usex = winargs.X;
@@ -5235,11 +5359,9 @@ const open_new_window = (icon, cb, opts={}) => {//«
 	if (NUM(winargs.HGT)) useh = winargs.HGT;
 	else if (winargs.HGT === "100%") useh = winh();
 	else useh = defwinargs.HGT;
-//log(usex,usey,usew,useh);
 	if (!usepath) usepath="";
 	let fullpath = `${usepath}/${usename}`;
 	if (useext) fullpath+=`.${useext}`;
-//log("FULL",fullpath);
 	let win = make_window({
 		FULLPATH: fullpath,
 		HIDDEN: opts.hidden,
@@ -5252,7 +5374,8 @@ const open_new_window = (icon, cb, opts={}) => {//«
 		NAME: usename,
 		APP: app,
 		ROOTTYPE: icon.roottype,
-		APPOBJ: appobj,
+//		APPOBJ: appobj,
+		ICONPATH: icon.path,
 		CB: cb,
 		TYPE: "window"
 	});
@@ -5260,7 +5383,6 @@ const open_new_window = (icon, cb, opts={}) => {//«
 	win.name = usename;
 	win.path = usepath;
 	win.ext = useext;
-//	if (app == "Folder") reload_icons(win);
 	icon.win = win;
 	win.icon = icon;
 	return win;
@@ -5275,6 +5397,7 @@ const win_reload = (usewin) => { /* if(!dev_mode){cwarn("Please enable dev mode 
 //cwarn("RELOAD!!!");
 	if (usewin || oldcur) {
 		let win = usewin || oldcur;
+		if (oldcur && oldcur.is_fullscreen)fullscreen_window(true);
 		winargs = {
 			ICON: win.icon,
 			ALIAS: win._alias,
@@ -5674,8 +5797,10 @@ const dokeydown = function(e, usecode) {//«
 //log(e.key);
 	kstr = chr + "_" + mod_str;
 	e._sym = kstr;
-	if (debug_keydown) log(kstr);
-
+	if (debug_keydown) {
+		log(e, e.keyCode, e.code);
+//		log(kstr);
+	}
 if (keydiv){
 	if (code===16) keydiv.shiftOn();
 	else if (code===17) keydiv.ctrlOn();
@@ -5697,13 +5822,15 @@ These are the keycodes that are used by the browser to do various things that we
 a crap about in LOTW, so we stop that thing from happening here. (I mean, who needs Ctrl+p to 
 open a print dialog if you never print anything or even have a printer!)
 */
-	let prevent = {
+	const prevent = {
 //n_C:1,
 //		"l_C": 1,
+		"LEFT_A":1,
+		"RIGHT_A":1,
 		"s_CA": 1,
 		"e_C": 1,
-		"=_C": 1,
-		"-_C": 1,
+//		"=_C": 1,
+//		"-_C": 1,
 		"f_C": 1,
 		"s_C": 1,
 		"c_CS": 1,
@@ -5748,8 +5875,22 @@ up everything (even plain Escapes).
 	if (cpr) return check_prompt(cpr);
 
 	if (CEDICN) {/*We have an icon with a <textarea> whose name is being created or updated*/
-		if (kstr == 'ENTER_' || kstr == 'ESC_') {
-			if (kstr == "ESC_") CEDICN.area.value = CEDICN.name;
+		if (kstr == "ESC_"){
+
+if (CEDICN._nodelete) {
+	CEDICN._nodelete = undefined;
+	CEDICN.area.value = CEDICN.name;
+	save_icon_editing();
+}
+else {
+	CEDICN.del();
+	CEDICN = null;
+}
+CG.off();
+
+		}
+		else if (kstr == 'ENTER_') {
+//			if (kstr == "ESC_") CEDICN.area.value = CEDICN.name;
 			save_icon_editing();
 		}
 		else if (kstr=="TAB_")e.preventDefault();
@@ -5785,7 +5926,7 @@ up everything (even plain Escapes).
 		}
 		if (!cwin.is_minimized && cobj && cobj.onescape && cobj.onescape()) return;
 		if (cwin.app==FOLDER_APP && ICONS.length){
-			icon_array_off();
+			icon_array_off(12);
 			return;
 		}
 		if (cwin.is_fullscreen) return fullscreen_window();
@@ -5825,19 +5966,22 @@ up everything (even plain Escapes).
 
 	/*Open context menu of selected icon, desktop or current window*/
 	if (kstr == "c_A") {
-		if (ICONS.length){
-			if (ICONS.length==1){
-				let icn = ICONS[0];
+		let goticn = CUR.geticon();
+		if (ICONS.length||goticn){
+			if (ICONS.length==1||goticn){
+				let icn = ICONS[0]||goticn;
 				if (!desk.contains(icn)){
 cwarn("There was an unattached icon in ICONS!");
-					icon_array_off();
+					icon_array_off(13);
 					return;
 				}
 				let r = icn.gbcr();
 				icn.wrapper.oncontextmenu({clientX: r.x, clientY: r.y, isFake: true});
 			}
 		}
+		
 		else if (!cwin) {
+
 			deskcontext({x:0,y:(taskbar_hidden?0:taskbar.clientHeight)},{BREL:true});
 			return;
 		}
@@ -5915,12 +6059,14 @@ return;
 			else if (kstr=="ENTER_A") return CUR.select(null,true);/*Force open and deselect*/
 			else if (kstr=="SPACE_") {
 //				if (cwin) e.preventDefault();
+//if (cwin && cwin.app == FOLDER_APP) e.preventDefault();
+				e.preventDefault();
 				return CUR.select(true);/*Toggles the selection status*/
 			}
 		}
 		else if (kstr=="BACK_C"&&ICONS.length)return delete_icons();
 		else if (kstr=="a_C"){/*Select all icons*/
-			icon_array_off();
+			icon_array_off(14);
 			let icons;
 			if (!cwin) icons = Array.from(desk.children).filter(el=>el.className==="icon");
 			else icons = Array.from(cwin.icon_div.childNodes);
@@ -5938,16 +6084,17 @@ return;
 }
 //			if (CUR.ison()) {
 			if (kstr=="m_C"){//«/*Move icons*/
-const move_icon_array = ()=>{
+const move_icon_array = ()=>{//«
 	let r;
-	const move_to_win_or_desk=()=>{
+	const move_to_win_or_desk=()=>{//«
 		if (!cwin) {
 			let par = ICONS[0].parwin;
-			let	x=((r.left+r.right)/2)-winx();
-			let	y=((r.top+r.bottom)/2)-winy();
+			let	x=((r.left+r.right)/2);
+			let	y=((r.top+r.bottom)/2);
 			if (par===desk) {
-				for (let icn of ICONS) place_in_icon_slot(icn, {X:x,Y:y});
-				icon_array_off();
+//				for (let icn of ICONS) place_in_icon_slot(icn, {X:x,Y:y});
+				for (let icn of ICONS) place_in_icon_slot(icn, {X:x+desk.scrollLeft,Y:y+desk.scrollTop});
+				icon_array_off(15);
 			}
 			else {
 if (!CUR.ison()){
@@ -5960,12 +6107,9 @@ x=0;y=0;
 		}
 		else {
 			move_icons(cwin.fullpath(),(rv)=>{
-//							cwin.obj.reload();
-//							cwin.obj.update();
 			},null,cwin);
 		}
-	};
-
+	};//»
 	if (!ICONS.length) return;
 	if (!CUR.ison()){
 		r=ICONS[0].gbcr();
@@ -5974,19 +6118,11 @@ x=0;y=0;
 	}
 	let goticn = CUR.geticon();
 	r=CUR.gbcr();
-	if (goticn){
+	if (goticn){//«
 		remove_icon_from_icons(goticn);
 		if (!ICONS.length) return;
 		if (goticn.app !== FOLDER_APP){
 			poperr("Cannot move to a non-folder!");
-/*						if (goticn.parwin===desk) {
-				cwin=null;
-				move_to_win_or_desk();
-				return 
-			}
-			cwin = goticn.parwin;
-			move_to_win_or_desk();
-*/
 			return;
 		}
 		let r = goticn.gbcr();
@@ -5996,17 +6132,17 @@ x=0;y=0;
 			}
 			if (Desk.CWIN) window_off(Desk.CWIN);
 			if (goticn.parwin&&goticn.parwin !== desk) window_on(goticn.parwin);
-			icon_array_off();
+			icon_array_off(16);
 			if (goticn.win) goticn.win.obj.reload();
 		}, null, null, {
 			x: r.left,
 			y: r.top
 		});
 		return;
-	}
+	}//»
 	move_to_win_or_desk();
 	return;
-};
+};//»
 if (!windows_showing){
 toggle_show_windows(true);
 setTimeout(move_icon_array, 10);
@@ -6025,8 +6161,8 @@ else move_icon_array();
 	if (kstr=="t_CAS") return keysym_funcs.open_app("util.Titles");
 	if (kstr=="r_CAS") return reload_desk_icons_cb();
 	if (kstr=="k_CAS") {
-//		return (debug_keydown = !debug_keydown);
-		toggle_key_viewer();
+		return (debug_keydown = !debug_keydown);
+//		toggle_key_viewer();
 		return;
 	}
 	if (kstr == "d_CAS") {
@@ -6240,7 +6376,7 @@ const handle_ESC = (if_alt) => {//«
 	IA = [];
 	CG.off();
 	if (layout_mode) return toggle_win_layout_mode();
-	if (ICONS.length) return icon_array_off();
+	if (ICONS.length) return icon_array_off(17);
 	if (windows_showing) toggle_show_windows();
 };//»
 
@@ -6313,7 +6449,7 @@ const clear_system_cache = cb => {//«
 				delete syskids[k];
 			}
 			cb && cb();
-		}, true, true, DSK);
+		}, true, true);
 		popok("Cache cleared");
 	});
 	return true;
@@ -6369,7 +6505,7 @@ let icon = this;
 let wrapper = icon.childNodes[0];
 
 icon.shake = () => {
-	icon.style.animation = "shake 0.82s cubic-bezier(.36,.07,.19,.97)\x20both";
+	icon.style.animation = "shake 0.5s cubic-bezier(.36,.07,.19,.97)\x20both";
 	icon.addEventListener("animationend", () => {
 		icon.style.animation = "";
 	});
@@ -6430,7 +6566,7 @@ wrapper.onmousedown = e => {//«
 	else window_on(par);
 	if (e.ctrlKey&&ICONS.includes(icon)) icon_off(icon,true);
 	else if (!ICONS.includes(icon)) {
-		if (!e.ctrlKey) icon_array_off();
+		if (!e.ctrlKey) icon_array_off(18);
 		icon_on(icon,true);
 	}
 };//»
@@ -6446,6 +6582,8 @@ wrapper.oncontextmenu = e => {//«
 	}, {
 		items: ["Rename", () => {
 			setTimeout(() => {
+//				if (icon.link)return poperr("Cannot rename links yet!");
+				icon._nodelete = true;
 				init_icon_editing(icon);
 			}, 25);
 		}, "Delete", () => {
@@ -6468,6 +6606,7 @@ if (icon.app == FOLDER_APP) {//«
 		wrapper.style.cursor = "copy";
 		if (!CDL) return;
 		CDL.into(icon.name); /*icon.style.boxShadow="0px 0px 20px 7px #5f5";*/
+		icon.imgdiv.innerHTML = '\u{2009}\u{1f4c2}';
 	};//»
 	let off = () => {//«
 		if (in_transit) return;
@@ -6477,6 +6616,7 @@ if (icon.app == FOLDER_APP) {//«
 		wrapper.style.cursor="";
 		if (!CDL) return;
 		CDL.reset();
+		icon.imgdiv.innerHTML = '\u{1f4c1}';
 	};//»
 	wrapper.onmouseover = e => {//«
 		e.stopPropagation();
@@ -6534,6 +6674,7 @@ if (icon.win) icon.win.obj.reload();
 			return;
 		}
 		if (DDIE) {
+log("CL DDIE");
 			DDIE = null;
 			DDD.loc(-1, -1);
 			DDD.w = 0;
@@ -6555,134 +6696,13 @@ P.fullpath = function(if_use_link_path) {
 	if (cl == "icon" && _this.link && if_use_link_path) path = _this.link;
 	else {
 		if (!_this.name) return null;
-//		if (!_this.path) cerr("WHO IS CALLING THIS?");
-//		if (!_this.path) return null;
 		path = (_this.path ? _this.path : "/") + "/" + _this.name;
-//log(path);
 		if (_this.ext) path = path + "." + _this.ext;
 	}
 	return path.regpath();
 }
 P.replacepath=function(oldpath, newpath){if(this.type!=="window")return cwarn("Got replacepath() call for type="+this.type);let patharr=this._path.split("/");let oldarr=oldpath.split("/");for(let i=0;i<oldarr.length;i++)patharr.shift();this._path=(newpath+"/"+patharr.join("/")).regpath();}
 if (!P.scrollIntoViewIfNeeded) P.scrollIntoViewIfNeeded = P.scrollIntoView;
-P.deref_link = function(cb) {//«
-	if (!cb) cb = () => {};
-	let getnameext = (s) => {
-		let name = s.replace(/^.+\x2f/, "");
-		let marr;
-		if (marr = name.match(/^(.+)\.([a-z][a-z0-9]*)$/i)) {
-
-			if (marr && marr[2] && all_extensions.includes(marr[2])) return [marr[1], marr[2]];
-		}
-
-		return [name];
-	};
-	let icon = this;
-	if (!icon.link) return cb();
-//log("LINK", this);
-	let realname_arr = getnameext(icon.name);
-	let realname = realname_arr[0];
-	let realext = realname_arr[1];
-	let realnameext = realname;
-	if (realext) realnameext = realname + "." + realext;
-	let realapp;
-	if (realext) realapp = ext_to_app(realext);
-	else realapp = DEF_BIN_OPENER;
-	let parts = icon.link.split("/");
-	if (!parts[parts.length - 1]) parts.pop();
-	let fname = parts.pop();
-	let parpath = parts.join("/");
-	if (!parpath) parpath = "/";
-	path_to_obj(parpath, ret => {
-		let broken = false;
-		let kids;
-
-		const doit=()=>{
-			let app;
-			let name;
-			let ext;
-			const attach=(objarg)=>{
-				if (!objarg) broken = true;
-				else {
-					if (objarg.APP == FOLDER_APP) {
-						app = FOLDER_APP;
-						name = fname;
-					} else {
-						let ret = getnameext(fname);
-						if (!(ret && ret[1])) {
-							app = DEF_BIN_OPENER;
-							name = fname;
-						} else {
-							name = ret[0];
-							ext = ret[1];
-							set_icon_name(icon, realnameext, true);
-							app = ext_to_app(ext);
-						}
-					}
-				}
-				if (broken) {
-					app = "BrokenLink";
-					name = fname;
-				}
-				if (app == "Application") icon.deref_appicon(parpath, name, true);
-				else {
-					let imdiv = icon.imgdiv;
-					icon.wrapper.childNodes[0].del();
-					igen.attach({
-						PAR: imdiv,
-						TYPE: "appicon",
-						APP: app
-					}, () => {
-						icon.add_link(broken);
-					});
-				}
-				icon.linkname = name;
-				icon.linkext = ext;
-				icon.linkpath = parpath;
-				icon.linkapp = app;
-				let tit;
-				if (broken) tit = "Broken Link->" + icon.link;
-				else tit = "Link to " + app + "\xa0->\xa0" + icon.link;
-				icon.title = tit;
-				cb();
-			};
-			if (!broken) {
-				let obj = kids[fname];
-				if (!obj) {
-					broken = true;
-					attach();
-				} else {
-					if (obj.APP == "Link") path_to_obj(obj.LINK, ret => {
-						attach(ret);
-					});
-					else attach(obj);
-				}
-			} else attach();
-		};
-		if (!ret) {
-			broken = true;
-			return doit();
-		}
-		if (!ret.done) {
-			let rtype = ret.root.TYPE;
-			let func;
-			if (rtype == "fs") func = populate_fs_dirobj;
-			else {
-				broken = true;
-				doit();
-				return;
-			}
-			func(parpath, ret2 => {
-				kids = ret2;
-				if (!kids) broken = true;
-				doit();
-			}, ret);
-		} else {
-			kids = ret.KIDS;
-			doit();
-		}
-	});
-}//»
 P.deref_appicon = async function(patharg, namearg, if_link) {//«
 	let icon = this;
 	if (!icon.imgdiv) return;
@@ -6755,12 +6775,12 @@ this.init = async (init_str, cb) => {
 			});
 		});
 	};
-	let home_path = (DSK&&DSK.home_path) || globals.home_path;
+	let home_path = globals.home_path;
 	let initstep = NS.initstep;
 	let initlog = NS.initlog;
 	let step;
 	let stepmode = NS.stepmode;
-	desk_path = (DSK&&DSK.desk_path)||globals.desk_path;
+	desk_path = globals.desk_path;
 	step=await initstep("Finding 'keysym.json'");
 	let keysym_str = await Core.api.getInitStr("config/desk/keysym.json",{def:DEF_KEYSYM_STR});
 	if (keysym_str) step.ok();
@@ -6778,6 +6798,7 @@ this.init = async (init_str, cb) => {
 		console.log(std_keysym_map);
 	}
 	const doresize = (e, warg, harg)=>{
+//log(e);
 		let _h = winh(true);
 		desk.w = warg||winw();
 		desk.h = harg||_h;
@@ -6793,10 +6814,14 @@ this.init = async (init_str, cb) => {
 		desk_imgdiv.style.backgroundSize = warg||winw() + " " + harg||_h;
 		CG.w = warg||winw();
 		CG.h = harg||_h;
+//		setTimeout(get_desk_grid, 10);
+		get_desk_grid();
+//		setTimeout(check_all_wins, 250);
+		check_all_wins();
+//		reload_desk_icons_cb();
 //		desk.onresize();
 	};
-	if (lotw_mode) Desk.resize = doresize;
-	else window.onresize = doresize;
+	window.onresize = doresize;
 
 	window.onfocus=(e)=>{
 		try_clock_update();
@@ -6813,8 +6838,8 @@ this.init = async (init_str, cb) => {
 	step.ok();
 	desk.add(CUR);
 	CUR.set();
-	CUR.on();
-
+	if (init_with_cur_showing) CUR.on(true);
+//	CUR.off();
 	if (init_str){
 		step = await initstep(`Running the system intialization script...`);
 		await run_init();
@@ -6839,8 +6864,6 @@ this.init = async (init_str, cb) => {
 		taskbar.style.transition = "bottom 0.33s ease 0s";
 	},0);
 
-//	if (lotw_mode){}
-//	else if (!globals.noevents) {
 	document.onkeypress = dokeypress;
 	document.onkeydown = dokeydown;
 	document.onkeyup = dokeyup;

@@ -1,6 +1,5 @@
 export const app = function(arg) {
 
-
 //Imports«
 
 const {Core, Main, NS}=arg;
@@ -113,7 +112,6 @@ Main.tcol="#e9e9e9";
 }//»
 
 //»
-
 
 }
 

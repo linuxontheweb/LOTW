@@ -1,5 +1,11 @@
+export const app = function(arg) {
+
+
 //Imports«
-const {log,cwarn,cerr}=Core;
+
+const {Core, Main, NS}=arg;
+
+const {log,cwarn,cerr,globals}=Core;
 const {util}=globals;
 const {isstr,isarr,mkdv,mksp,mk}=util;
 
@@ -646,3 +652,4 @@ setTimeout(()=>{
 
 
 
+}

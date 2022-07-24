@@ -81,8 +81,9 @@ let observer;
 
 //Funcs«
 
-const reload = ()=>{//«
+const reload = (newpath)=>{//«
 	if (is_loading) return;
+	if (newpath) path = newpath;
 	is_loading = true;
 	Main.scrollTop=0;
 	icondv.innerHTML="";
@@ -135,7 +136,13 @@ observer = new IntersectionObserver((ents)=>{
 for (let kid of icondv.children) {
 
 	kid.show = ()=>{
-		let icn = makeIcon(kids[kid.dataset.name], kid, observer);
+		let got = kids[kid.dataset.name];
+if (!got){
+cwarn("Not found in kids: "+ kid.dataset.name);
+kid.del();
+return;
+}
+		let icn = makeIcon(got, kid, observer);
 		icn.parwin = topwin;
 		kid.showing = true;
 	};
@@ -186,7 +193,7 @@ else cwarn("Opening in 'app mode'");
 this.reload=reload;
 
 this.onkeydown = function(e,s) {//«
-if (s=="r_")reload();
+if (s=="r_")reload(path);
 else if (s=="0_"){
 	if (topwin.CURSOR) {
 		topwin.CURSOR.zero();
@@ -214,7 +221,7 @@ cur.loc(icn.offsetLeft+2, icn.offsetTop+2);
 this.onfocus=()=>{Main.focus();};
 this.onblur=()=>{Main.blur();};
 this.onload=()=>{init();};
-this.update=()=>{stat(`${dir.KIDS._keys.length-2}entries`);};
+this.update=()=>{stat(`${dir.KIDS._keys.length-2} entries`);};
 this.add_icon=(icn)=>{Main.scrollTop=0;};
 this.stat=stat;
 

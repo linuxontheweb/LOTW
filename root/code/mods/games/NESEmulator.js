@@ -1,3 +1,6 @@
+
+//YTEOPNBSKB <--dr_mario.nes Causes this error!
+
 export const mod = function(Core) {
 
 
@@ -7012,7 +7015,15 @@ JSNES.prototype = {//«
         var cpu = this.cpu;
         var ppu = this.ppu;
         var papu = this.papu;
-        FRAMELOOP: for (;;) {
+let outer = 0;
+        FRAMELOOP: for (;;) {//«
+outer++;
+if (outer > 20000) {
+//YTEOPNBSKB
+//dr_mario.nes Causes this error!
+log(cycles);
+	throw new Error("OUTER!!!");
+}
             if (cpu.cyclesToHalt === 0) {
                 // Execute a CPU instruction
                 cycles = cpu.emulate();
@@ -7037,8 +7048,13 @@ JSNES.prototype = {//«
                     cpu.cyclesToHalt = 0;
                 }
             }
-            
-            for (; cycles > 0; cycles--) {
+let inner = 0;
+            for (; cycles > 0; cycles--) {//«
+if (outer==0 && inner==0){
+log("YOAD!!!");
+}
+inner++;
+if (inner > 200000) throw new Error("INNER!!!");
                 if(ppu.curX === ppu.spr0HitX &&
                         ppu.f_spVisibility === 1 &&
                         ppu.scanline - 21 === ppu.spr0HitY) {
@@ -7060,8 +7076,9 @@ JSNES.prototype = {//«
                     ppu.curX = 0;
                     ppu.endScanline();
                 }
-            }
-        }
+            }//»
+        }//»
+//log(outer);//This is usually around 7000 - 10000
         this.fpsFrameCount++;
     },//»
 /*

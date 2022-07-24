@@ -1,3 +1,12 @@
+
+
+/*XXX FIXED ERROR @WONTYDJPO??? XXX
+Could not move links because mv_by_path calls get_fs_ent_by_path, which calls get_fs_by_path,
+with ENT: true. But this calls path_to_obj, which will automatically deref a link UNLESS IT
+IS INSTRUCTED NOT TO VIA THE 'GETLINK' flag passed in as an option..
+
+*/
+
 /*If there is a desktop or shell already open, we can open in readonly mode, which means than the
 fs calls will fail:
 
@@ -22,7 +31,7 @@ export const mod = function(Core, root) {
 //const root = arg;
 const fsobj = this;
 const{api:capi,fs_url,mod_url,loc_url,xget,xgetobj,sys_url,log,cwarn,cerr,NS,globals}=Core;
-const{FSLET, FSBRANCH, FSPREF,fs_root,lst,util,FOLDER_APP}=globals;
+const{FSLET, FSBRANCH, FSPREF,fs_root,lst,util,FOLDER_APP, LINK_RE, LINK_EXT}=globals;
 const{strnum,isid,isarr,isobj,isfunc,isnum,isnull,isint,isstr}=util;
 const{isEOF,isArr,isStr,xgetText}=capi;
 const ispos = arg=>{return isnum(arg,true);}
@@ -83,7 +92,6 @@ const allow_sys_perms = () => {return true;};
 const read_file = (fname, cb, opts = {}, killcb_cb) => {//«
 	let _;
 	if (!opts) opts = {};
-	const dsk = opts.DSK;
 	const noop = () => {
 		return "";
 	};
@@ -102,7 +110,7 @@ const read_file = (fname, cb, opts = {}, killcb_cb) => {//«
 	const text_mime = Core.text_mime;
 	const ptw = (str, cb, if_getlink) => {
 		if (!str.match(/^\x2f/)) str = (cur_dir + "/" + str).regpath();
-		path_to_obj(str, cb, is_root, if_getlink, dsk);
+		path_to_obj(str, cb, is_root, if_getlink);
 	};
 	const _get_fullpath = (path, if_no_resolve, no_deref_link) => {
 		return get_fullpath(path, if_no_resolve, cur_dir, no_deref_link);
@@ -138,8 +146,7 @@ const read_file = (fname, cb, opts = {}, killcb_cb) => {//«
 				start: opts.start,
 				end: opts.end,
 				BLOB: true,
-				ROOT: is_root,
-				DSK: dsk
+				ROOT: is_root
 			});
 		} else if (type == "local") {
 			let fullpath = _get_fullpath(path);
@@ -175,14 +182,14 @@ const read_file = (fname, cb, opts = {}, killcb_cb) => {//«
 			cb(EOF);
 			cwarn("read_file():Skipping type:" + type);
 		}
-	}, null, null, dsk);
+	});
 };
 this.read_file=read_file;
 //»
 const getkeys=(obj)=>{var arr=Object.keys(obj);var ret=[];for(var i=0;i<arr.length;i++){if(obj.hasOwnProperty(arr[i]))ret.push(arr[i]);}return ret;}
 const path_to_data=(fullpath)=>{return new Promise((res,rej)=>{path_to_contents(fullpath,ret=>{if(ret)return res(ret);rej("Not found:\x20"+fullpath);},true);})}
 this.paths_to_data=(path_arr,cb)=>{var proms=[];for(let path of path_arr)proms.push(path_to_data(path));Promise.all(proms).then(cb).catch(err=>{cb(null,err);});}
-const path_to_contents = (fullpath, cb, if_dat, stream_cb, dsk) => {//«
+const path_to_contents = (fullpath, cb, if_dat, stream_cb) => {//«
 	if (if_dat || stream_cb) {} else cwarn("path_to_contents():" + fullpath);
 	path_to_obj(fullpath, ret => {
 		if (!ret) return cb();
@@ -197,15 +204,15 @@ const path_to_contents = (fullpath, cb, if_dat, stream_cb, dsk) => {//«
 			cerr("path_to_contents:WHAT TYPE? " + ret.root.TYPE);
 			cb()
 		}
-	}, null, null, dsk);
+	});
 }
 
 this.path_to_contents=path_to_contents;
-this.getbin = (fullpath, cb, dsk) => {
-	path_to_contents(fullpath, cb, true, null, dsk);
+this.getbin = (fullpath, cb) => {
+	path_to_contents(fullpath, cb, true);
 }
 //»
-const path_to_obj = (str, allcb, if_root, if_get_link, dsk, alliter) => {//«
+const path_to_obj = (str, allcb, if_root, if_get_link, noarg, alliter) => {//«
 	if (!allcb) allcb = () => {};
 	if (!(str && str.match(/^\x2f/))) {
 		return allcb();
@@ -214,10 +221,6 @@ const path_to_obj = (str, allcb, if_root, if_get_link, dsk, alliter) => {//«
 	let iter = -1;
 	let rootarg;
 	let fsarg;
-	if (dsk) {
-		rootarg = dsk.root;
-		fsarg = dsk.fs_root;
-	}
 	const deref_link=(link, cb, if_dir_only)=>{
 		path_to_obj(link, (ret, lastdir, usepath) => {
 			if (!ret) cb(null, lastdir, usepath);
@@ -227,7 +230,7 @@ const path_to_obj = (str, allcb, if_root, if_get_link, dsk, alliter) => {//«
 				if (if_dir_only) cb(null, lastdir, usepath);
 				else cb(ret);
 			}
-		}, if_root, if_get_link, dsk, ++alliter);
+		}, if_root, if_get_link, null, ++alliter);
 	};
 	let lastdir;
 	let normpath = normalize_path(str);
@@ -259,8 +262,7 @@ const path_to_obj = (str, allcb, if_root, if_get_link, dsk, alliter) => {//«
 					if (gotdir) trydir();
 					else allcb(null, lastdir, normpath);
 				}, {
-					DIRNAME: name,
-					DSK: dsk
+					DIRNAME: name
 				});
 			} else cb();
 		}
@@ -307,8 +309,7 @@ const path_to_obj = (str, allcb, if_root, if_get_link, dsk, alliter) => {//«
 						if (kidret) allcb(kidret[fname], lastdir, normpath);
 						else allcb(null, lastdir, normpath);
 					}, {
-						PATH: str,
-						DSK: dsk
+						PATH: str
 					});
 				} 
 				else {
@@ -553,7 +554,7 @@ const write_fs_file = (fent, blob, cb, if_append, if_trunc) => {//«
 				if (!parobj) throw new Error("parobj not found!");
 				if (!parobj.KIDS) throw new Error("parobj does not have KIDS!");
 				let obj={NAME: fname, par: parobj, root: parobj.root, fullpath:`${parpath}/${fname}`, entry:fent, file: await getFsFileFromEntry(fent)};
-				if (fname.match(/\.lnk$/)){
+				if (LINK_RE.test(fname)){
 					let ln = blob.__value;
 					obj.APP="Link";
 					obj.LINK = ln;
@@ -612,8 +613,8 @@ console.error("Unknown obj.perm field:", obj);
 };
 this.check_fs_dir_perm=check_fs_dir_perm;
 //»
-const delete_fobjs = (arr, cb, is_root, dsk) => {//«
-	let _Desk = (dsk&&dsk.Desk) || Desk;
+const delete_fobjs = (arr, cb, is_root) => {//«
+	let _Desk = Desk;
 	let roots = {};
 	let iter = -1;
 	let keys;
@@ -653,7 +654,7 @@ const delete_fobjs = (arr, cb, is_root, dsk) => {//«
 console.error("Could not remove:" + path + ":" + errmess);
 				}
 				dodel();
-			}, is_folder, is_root, dsk)
+			}, is_folder, is_root)
 		}
 		else {
 			console.error("delete_fobjs:DELETE TYPE:" + root.TYPE + "!?!?!?!?!?");
@@ -745,13 +746,13 @@ const do_fs_rm = (args, errcb, cb, opts={}) => {//«
 
 this.do_fs_rm=do_fs_rm;
 //»
-const mkdir_by_path = (path, cb, dsk) => {//«
+const mkdir_by_path = (path, cb) => {//«
 	path = path.regpath();
 	if (path=="/") return cb(true);
 	let arr = path.split("/");
 	if (!arr[0]) arr.shift();
 	let rootname = arr.shift();
-	get_or_make_dir(rootname, arr.join("/"), cb, null, null, dsk);
+	get_or_make_dir(rootname, arr.join("/"), cb);
 }
 //»
 const check_unique_path=(path,is_root)=>{return new Promise((res,rej)=>{let arr=path.replace(/\/$/,"").split("/");let name=arr.pop();let parpath=arr.join("/");path_to_obj(parpath,fobj=>{if(!fobj)return rej("No parent path:\x20"+parpath);if(fobj.APP!=FOLDER_APP)return rej("Parent is not a Folder,(got"+fobj.APP+")");if(fobj.KIDS[name])return res("The name already exists:\x20"+name);res([fobj.fullpath+"/"+name,fobj.fullpath,name]);},is_root);});};
@@ -805,13 +806,13 @@ this.mk_fs_dir = (parpatharg, fname, cur_dir, cb, winarg, is_root, opts={}) => {
 						cbok();
 					} else cbok();
 				} else cberr();
-			},null,null,opts.DSK);
+			});
 		}
 		else {
 			cberr("not supporting type:\x20" + type);
 			return;
 		}
-	}, is_root, null, opts.DSK);
+	}, is_root);
 }//»
 //GET_OR_MAKE_DIR
 const get_or_make_dir = (rootname, path, cb, getonly, if_mkdir) => {//«
@@ -932,7 +933,7 @@ return;
 }
 this.get_or_make_dir = get_or_make_dir;
 //»
-const move_kids = (srcpath, destpath, cb, if_copy, if_root, dsk) => {//«
+const move_kids = (srcpath, destpath, cb, if_copy, if_root) => {//«
 	let srcarr = srcpath.split("/");
 	let srcname = srcarr.pop();
 	let srcparpath = srcarr.join("/");
@@ -976,7 +977,6 @@ const move_kids = (srcpath, destpath, cb, if_copy, if_root, dsk) => {//«
 						cb();
 					}
 				}, if_root);
-//				}, if_root, false, dsk);
 			} else {
 				cwarn("THERE WAS NO KIDS FILE NAMED:" + srcname + " IN SOURCE DIR:" + srcparpath);
 				cb();
@@ -986,12 +986,12 @@ const move_kids = (srcpath, destpath, cb, if_copy, if_root, dsk) => {//«
 			cb();
 		}
 	}, if_root);
-//	}, if_root, true, dsk);
+//	}, if_root, true);
 }
 this.move_kids = move_kids;
 //»
 //MV_BY_PATH
-const mv_by_path = (srcpath, destpath, apparg, cb, if_copy, if_root, dsk) => {//«
+const mv_by_path = (srcpath, destpath, apparg, cb, if_copy, if_root) => {//«
 if (globals.read_only){
 READONLY();
 cb();
@@ -1008,30 +1008,33 @@ return;
 				try {
 					if (if_copy) {
 						fent.copyTo(dirent, newname, function() {
-							move_kids(srcpath, destpath, cb, true, if_root, dsk)
+							move_kids(srcpath, destpath, cb, true, if_root)
 						}, function(e) {
 							cb();
 						});
-					} else fent.moveTo(dirent, newname, function() {
-						move_kids(srcpath, destpath, cb, false, if_root, dsk)
-					}, function(e) {
-						cb();
-					});
+					} 
+					else {
+						fent.moveTo(dirent, newname, function() {
+							move_kids(srcpath, destpath, cb, false, if_root)
+						}, function(e) {
+							cb();
+						});
+					}
 				} catch (e) {
 					cerr(e);
 					cb();
 				}
-			}, true, false, true, dsk);
+			}, true, false, true);
 		} else {
 			console.error("ERROR No fent returned from srcpath:" + srcpath);
 			cb();
 		}
-	}, if_dir, false, true, dsk);
+	}, if_dir, false, true);
 }
 this.mv_by_path=mv_by_path;
 //»
 //RM_FS_FILE
-const rm_fs_file = (path, cb, ifdir, if_root, dsk) => {//«
+const rm_fs_file = (path, cb, ifdir, if_root) => {//«
 if (globals.read_only){
 READONLY();
 cb();
@@ -1046,7 +1049,7 @@ return;
 					cb();
 				});
 			} else cb(null, errmess);
-		}, true, false, if_root, dsk);
+		}, true, false, if_root);
 	} else {
 		get_fs_by_path(path, fent => {
 			if (fent) {
@@ -1059,14 +1062,13 @@ return;
 		}, {
 			GETLINK:true,
 			ENT: true,
-			ROOT: if_root,
-			DSK:dsk
+			ROOT: if_root
 		});
 	}
 }
 this.rm_fs_file = rm_fs_file;
 //»
-const touch_fs_file = (patharg, cb, useval, if_root, dsk) => {//«
+const touch_fs_file = (patharg, cb, useval, if_root) => {//«
 	if (!useval) useval = "";
 	let arr = patharg.split("/");
 	arr.shift();
@@ -1083,28 +1085,29 @@ const touch_fs_file = (patharg, cb, useval, if_root, dsk) => {//«
 						console.error("ERR TOUCH_FS_FILE #1");
 						cb();
 					}
-				}, {DSK:dsk});
-			}, true, false,dsk);
+				} );
+			}, true);
 		}
 		else cb(ret1);
 	}, {
-		ENT: true,
-		DSK:dsk
+		ENT: true
 	});
 };
 this.touch_fs_file=touch_fs_file;
 //»
-const get_fs_ent_by_path = (patharg, cb, if_dir, if_make, if_root, dsk) => {//«
+
+
+const get_fs_ent_by_path = (patharg, cb, if_dir, if_make, if_root) => {//«
 	if (typeof if_dir == "string") {
 		if (if_dir != FOLDER_APP) if_dir = false;
 		else if_dir = true;
 	}
 	get_fs_by_path(patharg, cb, {
+		GETLINK: LINK_RE.test(patharg),//WONTYDJPO
 		ENT: true,
 		DIR: if_dir,
 		MAKE: if_make,
-		ROOT: if_root,
-		DSK: dsk
+		ROOT: if_root
 	});
 }
 this.get_fs_ent_by_path = get_fs_ent_by_path;
@@ -1211,9 +1214,7 @@ const check_fs_by_path = async(fullpath, cb) => {//«
 }
 this.check_fs_by_path=check_fs_by_path;
 //»
-const get_fs_data = (path, cb, noarg, if_root, dsk) => {//«
-//const get_fs_data=(path,cb,nbytes,if_root,dsk)=>{get_fs_by_path(path,cb,{BLOB:true,NBYTES:nbytes,ROOT:if_root,DSK:dsk});}
-//cwarn("get_fs_data is deprecated!");
+const get_fs_data = (path, cb, noarg, if_root) => {//«
 if (noarg){
 console.error("nbytes was given??? (looks like 'noarg to me!')");
 }
@@ -1221,14 +1222,14 @@ console.error("nbytes was given??? (looks like 'noarg to me!')");
 		BLOB: true,
 //		NBYTES: nbytes,
 		ROOT: if_root,
-		DSK: dsk
 	});
 }
 this.get_fs_data=get_fs_data;
 //»
 this.get_fs_bytes=(path,nbytes)=>{return new Promise((res,rej)=>{get_fs_data(path,(ret,err)=>{if(!ret){rej(err);return;}res(ret);},nbytes);});}
-this.get_json_file=(path,cb,dsk)=>{get_fs_by_path(path,ret=>{if(!ret)return cb();var obj;try{obj=JSON.parse(ret);}catch(e){return cb(null,e);}cb(obj);},{DSK:dsk});}
+this.get_json_file=(path,cb)=>{get_fs_by_path(path,ret=>{if(!ret)return cb();var obj;try{obj=JSON.parse(ret);}catch(e){return cb(null,e);}cb(obj);},{});}
 const get_fs_by_path = (patharg, cb, opts = {}) => {//«
+
 	let if_blob = opts.BLOB;
 	let if_ent = opts.ENT;
 	let if_dir = opts.DIR;
@@ -1241,7 +1242,6 @@ const get_fs_by_path = (patharg, cb, opts = {}) => {//«
 	arr.shift();
 	let rootname = arr.shift();
 	let fsarg;
-	if (opts.DSK) fsarg = opts.DSK.fs_root;
 	if (!arr.length) {
 		get_fs_file((fsarg || fs_root), rootname, cb, if_blob, null, if_ent, if_dir, if_make, start, end);
 		return;
@@ -1272,8 +1272,8 @@ const get_fs_by_path = (patharg, cb, opts = {}) => {//«
 				return;
 			}
 			get_fs_file(dirret, fname, cb, if_blob, null, if_ent, if_dir, if_make, start, end);
-		}, true, null, opts.DSK);
-	}, if_root, opts.GETLINK, opts.DSK);
+		}, true);
+	}, if_root, opts.GETLINK);
 }
 this.get_fs_by_path = get_fs_by_path;
 this.getfile = get_fs_by_path;
@@ -1287,7 +1287,6 @@ const save_fs_by_path = (patharg, val, cb, opts) => {//«
 	let winid = opts.WINID;
 	let if_root = opts.ROOT;
 	let if_mkdir = opts.MKDIR;
-	let dsk = opts.DSK;
 	let err = null;
 	let arr = patharg.split("/");
 	arr.shift();
@@ -1319,12 +1318,10 @@ const save_fs_by_path = (patharg, val, cb, opts) => {//«
 			APPEND: if_append,
 			WINID: winid,
 			ROOT: if_root,
-			DSK: dsk,
 			OK_LNK: opts.OK_LNK
 		});
 	};
 	if (rootname == "/") {
-		if (dsk) return dosave(dsk.fs_root, dsk.root);
 		return dosave(fs_root, root);
 	}
 	get_or_make_dir(rootname, path, (objret, dirret) => {
@@ -1333,7 +1330,7 @@ const save_fs_by_path = (patharg, val, cb, opts) => {//«
 			return;
 		}
 		dosave(dirret, objret);
-	}, false, if_mkdir, dsk);
+	}, false, if_mkdir);
 }
 this.save_fs_by_path = save_fs_by_path;
 this.savefile = save_fs_by_path;
@@ -1357,7 +1354,6 @@ console.error("dir.getFile",e);
 	let if_root = opts.ROOT;
 	let winid = opts.WINID;
 	let blob;
-	let dsk = opts.DSK;
 	if (val instanceof Blob) blob = val;
 	else if (val instanceof ArrayBuffer) blob = new Blob([val], {
 		type: "blob"
@@ -1368,7 +1364,7 @@ console.error("dir.getFile",e);
 		});
 		blob.__value = val;
 	}
-	if (fname.match(/\.lnk/) && !opts.OK_LNK){
+	if (LINK_RE.test(fname) && !opts.OK_LNK){
 		cerr("opts.OK_LNK not specified!!");
 		cb();
 		return;
@@ -1391,9 +1387,8 @@ console.error("dir.getFile",e);
 							Core.Desk.check_open_files(fullpath, winid, lenret, sha1, byteret);
 						}
 					}
-//					cb(fent, lenret);
 					cb(ret, lenret);
-				}, if_root, fname.match(/\.lnk$/), dsk);
+				}, if_root, LINK_RE.test(fname));
 			} else cb();
 		}, if_append, (val && val.length == 1 && val.charCodeAt() == 0));
 	}, err);
@@ -1401,7 +1396,14 @@ console.error("dir.getFile",e);
 this.save_fs_file = save_fs_file;
 //»
 
-this.get_file_len_and_hash_by_path=(path,cb,dsk)=>{get_fs_by_path(path,async ret=>{if(ret)cb(ret.length,(await Core.api.sha1(ret)),ret);else cb();},{BLOB:true},{DSK:dsk});}
+this.get_file_len_and_hash_by_path = (path, cb) => {
+	get_fs_by_path(path, async ret => {
+		if (ret) cb(ret.length, (await Core.api.sha1(ret)), ret);
+		else cb();
+	}, {
+		BLOB: true
+	}, {});
+}
 
 //»
 
@@ -1649,8 +1651,7 @@ this.com_mv = (shell_exports, args, if_cp, dom_objects) => {//«
 	let wclerr = shell_exports.wclerr;
 	if (!wclerr) wclerr=NOOP;
 	let {
-		path_to_obj,
-		dsk
+		path_to_obj
 	} = shell_exports;
 	if (!path_to_obj) {
 		path_to_obj = fsobj.path_to_obj;
@@ -1755,6 +1756,21 @@ console.warn("NOT PASSING IN path_to_obj!!!");
 					domv();
 					return;
 				}
+
+if (!dom_objects) {
+if (LINK_RE.test(gotfrom)){
+	gotfail=true;
+	werr(`${gotfrom}: cannot ${verb} links`);
+	domv();
+	return;
+}
+if (LINK_RE.test(gotto)){
+	gotfail=true;
+	werr(`${gotto}: '${LINK_EXT}' is an invalid extension`);
+	domv();
+	return;
+}
+}
 				path_to_obj(savedirpath, async savedir => {//«
 					if (!savedir) {
 						werr(savedirpath + ":no such directory");
@@ -1772,20 +1788,16 @@ console.warn("NOT PASSING IN path_to_obj!!!");
 						return;
 					} else {
 if (type == "www") {
-//log(frompath);
-let rv = await fetch(frompath);
-if (!rv.ok){
-werr("Could not fetch the file");
-domv();
-return;
-}
-
-await writeHtml5File(`${savedirpath}/${savename}`, await rv.blob());
-
-
-//	werr("Not (yet) supporting " + verb + " from www");
+	let rv = await fetch(frompath);
+	if (!rv.ok){
+		werr("Could not fetch the file");
+		domv();
+		return;
+	}
+	await writeHtml5File(`${savedirpath}/${savename}`, await rv.blob());
+	mv_desk_icon(gotfrom, gotto, app);
 	domv();
-return;
+	return;
 }
 						if (type == "local") {//«
 							let saver = new FileSaver();
@@ -1839,8 +1851,7 @@ return;
 										if (Desk) {
 											icons = mv_desk_icon(null, gotto, app, {
 												ICON: fromicon,
-												WIN: towin,
-												DSK:dsk
+												WIN: towin
 											});
 											if (icons) {
 												for (let icn of icons) {
@@ -1886,21 +1897,21 @@ return;
 							});
 						}//»
 						else {
-							mv_by_path(gotfrom, gotto, app, parobj => {
+							mv_by_path(gotfrom, gotto, app, (parobj, kidobj) => {
 								if (!parobj) werr("Could not " + verb + " from " + frompath + " to " + topath+"!");
 								else {
 									if (if_cp) gotfrom = null;
 									mv_desk_icon(gotfrom, gotto, app, {
+										node: kidobj,
 										ICON: fromicon,
-										WIN: towin,
-										DSK: dsk
+										WIN: towin
 									});
 								}
 								domv();
-							}, if_cp, is_root, dsk);
+							}, if_cp, is_root);
 						}
 					}
-				},0,0,dsk);//»
+				});//»
 			}
 		};
 		const getobj = () => {
@@ -1936,7 +1947,7 @@ return;
 					else mvarr.push([fname, srcret]);
 				}
 				getobj();
-			}, true,0,dsk);//»
+			}, true);//»
 		};
 		getobj();
 	};
@@ -1956,7 +1967,7 @@ return;
 			}
 		}
 		start_moving(destret);
-	},0,0,dsk);//»
+	});//»
 }//»
 
 
@@ -2005,6 +2016,7 @@ const make_bin = ()=>{
 		let kids = par.KIDS;
 		let rv = await fetch("/_getbin");
 		let arr = await rv.json();
+//let arr = [];
 		for (let name of arr){
 			let kid = {
 				NAME: name,
@@ -2127,15 +2139,12 @@ const mkdirkid = (par, name, is_dir, sz, mod_time, path, hashsum, file, ent) => 
 		root: par.root
 	};
 	if (is_dir) {
-//		kid.APP = FOLDER_APP;
 		kid.APP = FOLDER_APP;
 		if (par.par.treeroot == true) {
 			if (par.NAME == "home") {
 				kid.perm = name;
 			}
 			else if (par.NAME == "var" && name == "cache") {
-//				kid.perm = false;
-//				kid.rootonly = true;
 				kid.readonly = true;
 			}
 		}
@@ -2145,11 +2154,11 @@ const mkdirkid = (par, name, is_dir, sz, mod_time, path, hashsum, file, ent) => 
 		kidsobj['.'] = kid;
 		kid.KIDS = kidsobj;
 	}
-	else if (name.match(/\.lnk$/)){
+	else if (LINK_RE.test(name)){
 		kid.APP="Link";
 	}
 	else {
-		kid.APP = "";
+		kid.APP = capi.extToApp(name);
 	}
 	if (mod_time) {
 		kid.MT = mod_time;
@@ -2162,14 +2171,13 @@ const mkdirkid = (par, name, is_dir, sz, mod_time, path, hashsum, file, ent) => 
 	if (hashsum) kid.hashsum = hashsum;
 	return kid;
 }//»
-const populate_dirobj_by_path = (patharg, cb, if_root, dsk, opts={}) => {//«
+const populate_dirobj_by_path = (patharg, cb, if_root, noarg, opts={}) => {//«
 	if (!patharg.match(/^\x2f/)) throw new Error("need absolute path in populate_dirobj_by_path: ("+patharg+")");
 	path_to_obj(patharg, obj => {
 		if (!obj) return cb(null, "Not found:\x20" + patharg);
 		if (obj.APP !== FOLDER_APP) return cb(null, "Not a directory:\x20" + patharg);
-//		populate_dirobj(obj, cb,{DSK:dsk});
 		populate_dirobj(obj, cb, opts);
-	}, if_root,false, dsk);
+	}, if_root,false);
 };
 this.populate_dirobj_by_path=populate_dirobj_by_path;//»
 
@@ -2260,7 +2268,7 @@ for (let ent of ents){//«
 	kid.ext = narr[1];
 	if (!kid.ext) kid.fullname = kid.name;
 	else kid.fullname = name;;
-	if (name.match(/\.lnk$/)){
+	if (LINK_RE.test(name)){
 		let val = await getDataFromFsFile(file, "text");
 		kid.LINK = val;
 		links.push(kid);
@@ -2553,33 +2561,35 @@ this.get_obj_listing = (kids, w, lscb, opts = {}) => {//«
 	let keys = getkeys(kids);
 	let iter = -1;
 	const dokids = () => {
-		const doret = () => {
+		const doret = () => {//«
+//			let name = key.replace(/\._lnk$/,"");
+			let name = key;
 			if (kid.KIDS) {
 				if (opts.islong) {
-					key = key + "/";
-					if (kid.MT && isint(kid.SZ)) ret.push([key, kid.SZ, kid.MT]);
-					else ret.push([key, "-", FAKE_TIME]);
+					name = name + "/";
+					if (kid.MT && isint(kid.SZ)) ret.push([name, kid.SZ, kid.MT]);
+					else ret.push([name, "-", FAKE_TIME]);
 				} else {
-					if (add_slashes) key += "/";
-					ret.push(key);
+					if (add_slashes) name += "/";
+					ret.push(name);
 				}
 			} else {
 				if (opts.islong) {
 					let arr;
 					if (kid.LINK) {
 						if (isjson) arr = [
-							[key, kid.LINK], kid.LINK.length, FAKE_TIME
+							[name, kid.LINK], kid.LINK.length, FAKE_TIME
 						];
-						else arr = [key + "\x20->\x20" + kid.LINK, kid.LINK.length, FAKE_TIME];
-					} else if (kid.BUFFER) arr = [key, 0, FAKE_TIME];
-					else if (util.isnum(kid.SZ)) arr = [key, kid.SZ, kid.MT];
-					else arr = [key, 0, FAKE_TIME];
+						else arr = [name + "\x20->\x20" + kid.LINK, kid.LINK.length, FAKE_TIME];
+					} else if (kid.BUFFER) arr = [name, 0, FAKE_TIME];
+					else if (util.isnum(kid.SZ)) arr = [name, kid.SZ, kid.MT];
+					else arr = [name, 0, FAKE_TIME];
 					if (if_hash) arr.push(kid.hashsum);
 					ret.push(arr);
-				} else ret.push(key);
+				} else ret.push(name);
 			}
 			dokids();
-		};
+		};//»
 		iter++;
 		if (iter == keys.length) return lsout();
 		let key = keys[iter];
@@ -2598,7 +2608,7 @@ this.get_obj_listing = (kids, w, lscb, opts = {}) => {//«
 					if (ret) types.push("Link");
 					else types.push("BadLink");
 					doret();
-				}, opts.isroot, false, opts.DSK);
+				}, opts.isroot, false);
 			}
 		} else {
 			types.push(kid.APP || "File");
@@ -2612,7 +2622,6 @@ this.get_term_fobj = function(termobj, cur_dir, fname, flags, cb, is_root, funcs
 
 
 let EOF = termobj.EOF;
-let dsk = termobj.DSK;
 const chomp_eof = (arr) => {
 	const isarr = (arg) => {
 		return (arg && typeof arg === "object" && typeof arg.length !== "undefined");
@@ -2726,16 +2735,12 @@ console.warn("Got no fent or err_or_size from save_fs_by_path!!!");
 			return;
 		}
 
-		if (dsk) dsk.Desk.save_hook(path);
-		else{
-			if (Core.Desk) Core.Desk.save_hook(path, fent);
-			else Core.save_hook(path);
-		}
+		if (Core.Desk) Core.Desk.save_hook(path, fent);
+		else Core.save_hook(path);
 		cb(fent);
 	}, {
 		APPEND: flags.append,
-		ROOT: is_root,
-		DSK:dsk
+		ROOT: is_root
 	});
 }
 else {
@@ -2893,7 +2898,7 @@ path_to_obj(get_fullpath(fname, true, cur_dir), winid => {//«
 			cerr("WHAT ROOT TYPE:" + root.TYPE);
 		}
 	}
-}, is_root, null, dsk);//»
+}, is_root);//»
 
 }//End FileObj
 
@@ -3068,9 +3073,9 @@ this.drop_event_to_bytes=(e,cb)=>{let file=event_to_files(e)[0];if(!file)return 
 //»
 //Desktop/Icons/Children«
 
-this.add_new_kid = (parpath, name, cb, app, dsk) => {
+this.add_new_kid = (parpath, name, cb, app) => {
 
-	if (name.match(/\.lnk$/)) app="Link";
+	if (LINK_RE.test(name)) app="Link";
 	const doadd = (par) => {
 		if (!(par && par.KIDS)) {
 			if (cb) cb();
@@ -3105,13 +3110,13 @@ this.add_new_kid = (parpath, name, cb, app, dsk) => {
 	else {
 		path_to_obj(parpath, parret => {
 			doadd(parret);
-		}, null, null, dsk);
+		});
 	}
 }
 const mk_desk_icon=(path,opts)=>{mv_desk_icon(null,path,null,opts);}
 this.mk_desk_icon=mk_desk_icon;
 const mv_desk_icon = (frompath, topath, app, opts = {}) => {
-	let _Desk = (opts.DSK && opts.DSK.Desk) || Desk;
+	let _Desk = Desk;
 	if (!_Desk) return;
 	let use_link;
 	let ret = [];
@@ -3168,10 +3173,8 @@ const mv_desk_icon = (frompath, topath, app, opts = {}) => {
 				continue;
 			}
 			let newicon = _Desk.automake_icon(ext, toname, w, opts);
-			if (newicon) {
-				newicon.deref_link();
-				ret.push(newicon);
-			}
+			if (newicon) ret.push(newicon);
+			
 		}
 	}
 	if (frompath && topath) _Desk.update_all_paths(frompath, topath);
@@ -3194,7 +3197,7 @@ const populateDirObjByPath=(patharg, opts={})=>{//«
 			}
 			Y(rv);
 		};
-		populate_dirobj_by_path(patharg, cb, opts.root, opts.dsk, opts);
+		populate_dirobj_by_path(patharg, cb, opts.root, null, opts);
 	});
 };//»
 const populateFsDirObjByPath=(patharg, opts={})=>{//«
@@ -3209,7 +3212,6 @@ const populateFsDirObjByPath=(patharg, opts={})=>{//«
 			Y(rv);
 		};
 		populate_fs_dirobj_by_path(patharg, cb, opts);
-//		populate_fs_dirobj_by_path(patharg, cb, opts.par, opts.long, opts.dsk);
 	});
 };//»
 const popDir=(dirobj,opts={})=>{return new Promise((y,n)=>{populate_dirobj(dirobj,y,opts);});};
@@ -3225,16 +3227,23 @@ const loadMod=(which,opts={})=>{return new Promise((Y,N)=>{getmod(which,rv=>{if(
 const pathToNode = (path, opts = {}) => {//«
 	let if_root = opts.ROOT || opts.root || opts.isRoot;
 	let if_link = opts.GETLINK || opts.link;
-	let use_dsk = opts.DSK||opts.dsk;
 	return new Promise((res, rej) => {
 		path_to_obj(path, ret => {
 			if (ret) return res(ret);
 			if (opts.reject) rej(path + ":\x20not found");
 			else res(false);
-		}, if_root, if_link, use_dsk);
+		}, if_root, if_link);
 	})
 };//»
-const touchDirProm=(path,opts={})=>{return new Promise((res,rej)=>{mkdir_by_path(path,rv=>{if(rv)return res(true);if(opts.reject)rej(path+":\x20could not create the directory");else res(false);},opts.DSK);})};
+const touchDirProm = (path, opts = {}) => {
+	return new Promise((res, rej) => {
+		mkdir_by_path(path, rv => {
+			if (rv) return res(true);
+			if (opts.reject) rej(path + ":\x20could not create the directory");
+			else res(false);
+		});
+	})
+};
 const writeHtml5File=(path,val,opts={})=>{return new Promise(async(res,_rej)=>{const rej=(str)=>{if(opts.reject)_rej(str);else res(false);};let arr=path.split("/");arr.pop();let parpath=arr.join("/");let parobj=await pathToNode(parpath);if(!parobj){rej(parpath+":\x20not found");return;}if(!check_fs_dir_perm(parobj,opts.ROOT||opts.root||opts.isRoot,opts.SYS||opts.sys||opts.isSys)){rej(parpath+":\x20permission denied");return;}save_fs_by_path(path,val,ret=>{if(ret)return res(ret);rej(path+":\x20not found");},opts);})};
 const touchHtml5File=(path)=>{return new Promise((y,n)=>{touch_fs_file(path,y);});};
 const readFile = (path, opts = {}) => {//«

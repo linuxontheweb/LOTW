@@ -47,6 +47,7 @@ and the configuration files can likewise be arbitrarily complex.
 */
 export const app = function (arg) {
 const {Core, Main, NS}=arg;
+const win = Main.top;
 const{api:capi,KC,kc,log,cwarn,cerr,globals,Desk}=Core;
 
 const KNOBVALS=(globals.AppVars["Synth-KNOBVALS"]||[0,0,0,0,0,0,0,0,0]);
@@ -59,39 +60,53 @@ const KV = KNOBVALS;
 //const cerr=err;
 const wrn = cwarn;
 const err = cerr;
+let n;
 
-const n = arg.NODE || Core.get_appvar(Main.top, "NODE");//Node
-
-const volup = n._winobj.volume_up;
-const voldn = n._winobj.volume_dn;
-const togmute = n._winobj.toggle_mute;
-const setvol = n._winobj.set_volume;
-
-const type = n._type;
-const name = n._name;
-const win = Main.top;
+//const n = arg.NODE || Core.get_appvar(Main.top, "NODE");//Node
 
 const OSC_DETUNE_FAC = 0.1;
 
+let volup;
+let voldn;
+let togmute;
+let setvol;
+let type;
+let name;
 let t;
 let base_det;
 let osc_detune;
-if (type=="Osc") {
-	t = 1;
-	base_det = n.frequency.value/OSC_DETUNE_FAC;
-cwarn("BASEDET", base_det);
-	osc_detune = n.detune;
-}
 
-//log(osc_detune);
-Main.innerHTML = type;
-Main.bgcol="#000";
-Main.tcol="#AAA";
-n._window = win;
-win.title = `${type}\x20(${name})`;
+const init=()=>{//«
+
+	volup = n._winobj.volume_up;
+	voldn = n._winobj.volume_dn;
+	togmute = n._winobj.toggle_mute;
+	setvol = n._winobj.set_volume;
+
+	type = n._type;
+	name = n._name;
+
+	if (type=="Osc") {
+		t = 1;
+		base_det = n.frequency.value/OSC_DETUNE_FAC;
+	cwarn("BASEDET", base_det);
+		osc_detune = n.detune;
+	}
+
+	Main.innerHTML = type;
+	Main.bgcol="#000";
+	Main.tcol="#AAA";
+	n._window = win;
+	win.title = `${type}\x20(${name})`;
+
+};//»
+
 
 this.onkill = ()=>{
+
+	Core.set_appvar(Main.top, "NODE", n);//Node
 	delete n._window;
+
 };
 
 this.onkeydown=(e,s)=>{
@@ -133,6 +148,13 @@ osc_detune.value = base_det*(KV[1]+5*KV[2]+25*KV[3]-(KV[5]+5*KV[6]+25*KV[7]));
 }
 
 }
+this.onappinit=(arg)=>{
+
+n = arg.NODE || Core.get_appvar(Main.top, "NODE");//Node
+init();
+//log(n);
+
+};
 this.onmidikeydown=e=>{
 //    let f = MIDIKEYDOWNS[e.key+""];
 //    f&&f();

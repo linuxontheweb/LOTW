@@ -35,15 +35,15 @@ DESCRIPTION
 		let par;
 		let lnname;
 		let lnpath;
-
+		let target_node;
 		const makeit=()=>{//«
 			let kids = par.KIDS;
-			if (kids[lnname+".lnk"]) return exists(fs.get_path_of_obj(par)+"/"+lnname);
-//			kids[lnname] = {NAME: lnname, APP: "Link", LINK: target, par: par, root: par.root};
-//			localStorage[_FSPREF+"LN_"+lnpath] = target;
-			fs.save_fs_by_path(`${lnpath}.lnk`, target, (rv)=>{
+			let ln_ext = globals.LINK_EXT;
+			if (kids[lnname+ln_ext]) return exists(fs.get_path_of_obj(par)+"/"+lnname);
+			fs.save_fs_by_path(`${lnpath}.${ln_ext}`, target, (rv)=>{
 				if (!rv) return cberr("The link could not be created");
-				fs.mk_desk_icon(lnpath, {LINK:target});
+				rv.ref = target_node;
+				fs.mk_desk_icon(lnpath, {LINK:target, node: rv});
 				cbok(lnpath + " -> " + target);
 			}, {OK_LNK: true});
 		};//»
@@ -60,7 +60,8 @@ DESCRIPTION
 		if (!target.match(/^\x2f/)) return cberr("currently only supporting absolute path names as targets");
 
 if (!opts.force){
-if (!await pathToNode(target)) return cberr(`The target '${target}' does not exist`);
+target_node = await pathToNode(target);
+if (!target_node) return cberr(`The target '${target}' does not exist`);
 }
 		
 		let arr = target.split("/");
@@ -81,7 +82,8 @@ if (!await pathToNode(target)) return cberr(`The target '${target}' does not exi
 		arr = namearg.split("/");
 		if (!arr[arr.length-1]) arr.pop();
 		lnname = arr.pop(); 
-		if (lnname.match(/\.lnk$/)){
+//		if (lnname.match(/\.__LINK__$/)){
+		if (globals.LINK_RE.test(lnname)){
 			cberr("Invalid extension!");
 			return;
 		}
@@ -517,7 +519,7 @@ return;
 					wout(ent.filename)
 					refresh();
 					doent();
-				},null,null,{DSK:dsk});
+				});
 			}
 			else {
 				if (await fsapi.pathToNode(fullpath+"/"+fname)){
@@ -690,7 +692,7 @@ let begin=()=>{//«
 						}
 						start(await capi.toStr(rv));
 					}
-				}, {ROOT:is_root, FORCETEXT: !!sws.t, DSK:dsk});
+				}, {ROOT:is_root, FORCETEXT: !!sws.t});
 			}
 		});
 	};//»
@@ -1116,7 +1118,7 @@ log(val);
 									fobjs.push(ret2);
 								}
 								getfobj();
-							},null,null,is_root,dsk);
+							},null,null,is_root);
 						}
 					}
 					else {
@@ -1129,7 +1131,7 @@ log(val);
 						if (ret2) fobjs.push(ret2);
 						else err(path+": could not create the file");
 						getfobj();
-					},null, is_root, dsk);
+					},null, is_root);
 				}//»
 			});//»
 		}//»
@@ -1148,8 +1150,7 @@ log(val);
 		const dotouch=()=>{//«
 			if (!args.length) {
 				cbok();
-				if (dsk) dsk.Desk.update_folder_statuses();
-				else Desk&&Desk.update_folder_statuses();
+				Desk&&Desk.update_folder_statuses();
 				return;
 			}
 			let fullpath = normpath(args.shift());
@@ -1181,7 +1182,7 @@ log(obj);
 //							if (Core.Desk) Core.Desk.make_icon_if_new(fullpath);
 							if (Core.Desk) Core.Desk.make_icon_if_new(ret);
 							dotouch();
-						},null, is_root, dsk)
+						},null, is_root)
 					});
 				}//»
 			});//»
@@ -1294,8 +1295,7 @@ pipe_arr
 
 //»
 //Var«
-const dsk = termobj&&termobj.DSK;
-const _FSPREF = dsk?dsk.fspref:FSPREF;
+const _FSPREF = FSPREF;
 //»
 
 //Funcs«
@@ -1608,7 +1608,7 @@ DESCRIPTION
 		const makeit=()=>{//«
 			let kids = par.KIDS;
 			if (kids[lnname]) return exists(fs.get_path_of_obj(par)+"/"+lnname);
-			fs.mk_desk_icon(lnpath, {LINK:target, DSK:dsk});
+			fs.mk_desk_icon(lnpath, {LINK:target});
 			kids[lnname] = {NAME: lnname, APP: "Link", LINK: target, par: par, root: par.root};
 			localStorage[_FSPREF+"LN_"+lnpath] = target;
 			cbok(lnpath + " -> " + target);
